@@ -27,13 +27,12 @@
         
         .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
         .admin-card { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.2); border-radius: 12px; padding: 20px; box-shadow: 0 0 15px rgba(0,243,255,0.05); }
-        .admin-card h3 { font-size: 16px; color: var(--neon-pink); margin-bottom: 15px; border-bottom: 1px solid #374151; padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .admin-card h3 { font-size: 16px; color: var(--neon-pink); margin-bottom: 15px; border-bottom: 1px solid #374151; padding-bottom: 8px; }
         
         .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; font-size: 14px; }
         .form-control:focus { border-color: var(--neon-cyan); outline: none; }
         
-        .admin-btn { width: 100%; padding: 10px; background: var(--neon-cyan); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .admin-btn:hover { box-shadow: 0 0 10px var(--neon-cyan); }
+        .admin-btn { width: 100%; padding: 10px; background: var(--neon-cyan); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
         
         .list-container { max-height: 250px; overflow-y: auto; margin-top: 10px; }
         .list-item { background: #1f2937; padding: 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; border-left: 3px solid var(--neon-cyan); display: flex; justify-content: space-between; align-items: center; }
@@ -48,7 +47,7 @@
             <h2>Admin Login</h2>
             <input type="text" id="adminUser" class="form-control" placeholder="Admin ID">
             <input type="password" id="adminPass" class="form-control" placeholder="Password">
-            <button class="admin-btn" onclick="checkAdminLogin()">Login to Panel</button>
+            <button class="admin-btn" onclick="checkAdminLogin()">Login</button>
         </div>
     </div>
 
@@ -67,29 +66,23 @@
                 <input type="text" id="mFirstPrize" class="form-control" placeholder="First Prize">
                 <input type="text" id="mSecondPrize" class="form-control" placeholder="Second Prize">
                 <input type="datetime-local" id="mTime" class="form-control">
-                <input type="number" id="mSlots" class="form-control" placeholder="Total Slots">
+                <input type="number" id="mSlots" class="form-control" placeholder="Total Slots (e.g. 48)">
                 <button class="admin-btn" onclick="addNewMatchToDB()">Create Match</button>
             </div>
 
             <div class="admin-card">
                 <h3>💳 Add Balance Requests</h3>
-                <div class="list-container" id="addBalanceRequestsList">
-                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Loading...</p>
-                </div>
+                <div class="list-container" id="addBalanceRequestsList"><p style="color: var(--text-muted); text-align: center;">Loading...</p></div>
             </div>
 
             <div class="admin-card">
                 <h3>💸 Withdraw Requests</h3>
-                <div class="list-container" id="withdrawRequestsList">
-                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Loading...</p>
-                </div>
+                <div class="list-container" id="withdrawRequestsList"><p style="color: var(--text-muted); text-align: center;">Loading...</p></div>
             </div>
 
             <div class="admin-card">
                 <h3>🔑 Room ID & Match Control</h3>
-                <div class="list-container" id="adminMatchList">
-                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Loading...</p>
-                </div>
+                <div class="list-container" id="adminMatchList"><p style="color: var(--text-muted); text-align: center;">Loading...</p></div>
             </div>
         </div>
     </div>
@@ -120,84 +113,51 @@
         }
 
         window.checkAdminLogin = function() {
-            const userInput = document.getElementById("adminUser").value.trim();
-            const passInput = document.getElementById("adminPass").value.trim();
-
-            if(userInput === "9133" && passInput === "909090") {
+            if(document.getElementById("adminUser").value.trim() === "9133" && document.getElementById("adminPass").value.trim() === "909090") {
                 sessionStorage.setItem("isAdminLoggedIn", "true");
                 document.getElementById("loginContainer").style.display = "none";
                 document.getElementById("adminDashboard").style.display = "block";
                 loadAdminData();
-            } else {
-                alert("Vul ID ba Password!");
-            }
+            } else { alert("Vul ID ba Password!"); }
         }
 
-        window.logoutAdmin = function() {
-            sessionStorage.removeItem("isAdminLoggedIn");
-            location.reload();
-        }
+        window.logoutAdmin = function() { sessionStorage.removeItem("isAdminLoggedIn"); location.reload(); }
 
         window.addNewMatchToDB = async function() {
             const code = document.getElementById("mCode").value.trim();
             const name = document.getElementById("mName").value.trim();
-            const fee = document.getElementById("mFee").value.trim();
-            const firstPrize = document.getElementById("mFirstPrize").value.trim();
-            const secondPrize = document.getElementById("mSecondPrize").value.trim();
-            const time = document.getElementById("mTime").value;
-            const slots = document.getElementById("mSlots").value.trim();
+            const fee = Number(document.getElementById("mFee").value);
+            const slots = Number(document.getElementById("mSlots").value);
 
-            if(!code || !name || !fee) {
-                alert("Doya kore Code, Name ebong Entry Fee din.");
-                return;
-            }
+            if(!code || !name) { alert("Code ebong Name din."); return; }
 
             try {
                 await setDoc(doc(db, "matches", code), {
                     matchCode: code, matchName: name, entryFee: fee,
-                    firstPrize: firstPrize, secondPrize: secondPrize,
-                    matchTime: time, totalSlots: slots, roomId: "", roomPass: ""
+                    firstPrize: document.getElementById("mFirstPrize").value.trim(),
+                    secondPrize: document.getElementById("mSecondPrize").value.trim(),
+                    matchTime: document.getElementById("mTime").value,
+                    totalSlots: slots, joinedCount: 0, roomId: "", roomPass: ""
                 });
-                alert("Match successfully create hoyeche!");
+                alert("Match created successfully!");
                 location.reload();
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // Accept Add Balance and Add money to User Account
         window.approveAddBalance = async function(reqId, userId, amount) {
             try {
                 const userRef = doc(db, "users", userId);
                 const userSnap = await getDoc(userRef);
-                
-                let currentBal = 0;
-                if(userSnap.exists()) {
-                    currentBal = Number(userSnap.data().balance || 0);
-                }
-
-                // Update user balance
-                await updateDoc(userRef, {
-                    balance: currentBal + Number(amount)
-                });
-
-                // Delete request so it disappears
+                let currentBal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
+                await updateDoc(userRef, { balance: currentBal + Number(amount) });
                 await deleteDoc(doc(db, "addBalanceRequests", reqId));
-
-                alert("Balance successfully added to user account!");
+                alert("Balance added!");
                 loadAdminData();
-            } catch(e) {
-                alert("Error: " + e.message);
-            }
+            } catch(e) { alert("Error: " + e.message); }
         }
 
-        // Approve Withdraw
         window.approveWithdraw = async function(reqId) {
-            try {
-                await deleteDoc(doc(db, "withdrawRequests", reqId));
-                alert("Withdraw request approved and removed!");
-                loadAdminData();
-            } catch(e) {
-                alert("Error: " + e.message);
-            }
+            try { await deleteDoc(doc(db, "withdrawRequests", reqId)); alert("Withdraw approved!"); loadAdminData(); } catch(e) {}
         }
 
         window.setRoomCreds = async function(matchId) {
@@ -205,81 +165,47 @@
             const rPass = document.getElementById(`rpass_${matchId}`).value.trim();
             try {
                 await updateDoc(doc(db, "matches", matchId), { roomId: rId, roomPass: rPass });
-                alert("Room ID & Password updated!");
+                alert("Room ID & Password saved!");
             } catch(e) { alert("Error: " + e.message); }
         }
 
         window.deleteMatch = async function(matchId) {
-            if(confirm("Delete match?")) {
-                try {
-                    await deleteDoc(doc(db, "matches", matchId));
-                    loadAdminData();
-                } catch(e) { alert("Error: " + e.message); }
-            }
+            if(confirm("Delete match?")) { await deleteDoc(doc(db, "matches", matchId)); loadAdminData(); }
         }
 
         async function loadAdminData() {
-            // Add Balance Requests
             const addBalContainer = document.getElementById("addBalanceRequestsList");
-            try {
-                const snap = await getDocs(collection(db, "addBalanceRequests"));
-                if(snap.empty) {
-                    addBalContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono request nei.</p>`;
-                } else {
-                    addBalContainer.innerHTML = "";
-                    snap.forEach((d) => {
-                        const data = d.data();
-                        addBalContainer.innerHTML += `
-                            <div class="list-item">
-                                <span>Trx: ${data.trxId} | ৳${data.amount}</span>
-                                <button class="btn-approve" onclick="approveAddBalance('${d.id}', '${data.userId}', ${data.amount})">Accept</button>
-                            </div>`;
-                    });
-                }
-            } catch(e) {}
+            const snapBal = await getDocs(collection(db, "addBalanceRequests"));
+            addBalContainer.innerHTML = snapBal.empty ? `<p style="color:var(--text-muted); text-align:center;">Kono request nei.</p>` : "";
+            snapBal.forEach(d => {
+                const data = d.data();
+                addBalContainer.innerHTML += `<div class="list-item"><span>Trx: ${data.trxId} | ৳${data.amount}</span><button class="btn-approve" onclick="approveAddBalance('${d.id}', '${data.userId}', ${data.amount})">Accept</button></div>`;
+            });
 
-            // Withdraw Requests
             const withdrawContainer = document.getElementById("withdrawRequestsList");
-            try {
-                const snap = await getDocs(collection(db, "withdrawRequests"));
-                if(snap.empty) {
-                    withdrawContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono request nei.</p>`;
-                } else {
-                    withdrawContainer.innerHTML = "";
-                    snap.forEach((d) => {
-                        const data = d.data();
-                        withdrawContainer.innerHTML += `
-                            <div class="list-item">
-                                <span>${data.number} | ৳${data.amount}</span>
-                                <button class="btn-approve" onclick="approveWithdraw('${d.id}')">Approve</button>
-                            </div>`;
-                    });
-                }
-            } catch(e) {}
+            const snapWith = await getDocs(collection(db, "withdrawRequests"));
+            withdrawContainer.innerHTML = snapWith.empty ? `<p style="color:var(--text-muted); text-align:center;">Kono request nei.</p>` : "";
+            snapWith.forEach(d => {
+                const data = d.data();
+                withdrawContainer.innerHTML += `<div class="list-item"><span>${data.number} | ৳${data.amount}</span><button class="btn-approve" onclick="approveWithdraw('${d.id}')">Approve</button></div>`;
+            });
 
-            // Match List
             const matchListContainer = document.getElementById("adminMatchList");
-            try {
-                const snap = await getDocs(collection(db, "matches"));
-                if(snap.empty) {
-                    matchListContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono match nei.</p>`;
-                } else {
-                    matchListContainer.innerHTML = "";
-                    snap.forEach((d) => {
-                        const m = d.data();
-                        matchListContainer.innerHTML += `
-                            <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
-                                <strong style="color: var(--neon-cyan);">${m.matchName} (${m.matchCode})</strong>
-                                <input type="text" id="rid_${m.matchCode}" class="form-control" placeholder="Room ID" value="${m.roomId || ''}" style="margin: 2px 0; padding: 6px;">
-                                <input type="text" id="rpass_${m.matchCode}" class="form-control" placeholder="Password" value="${m.roomPass || ''}" style="margin: 2px 0; padding: 6px;">
-                                <div style="display: flex; gap: 5px; width: 100%; margin-top: 5px;">
-                                    <button class="btn-approve" style="flex: 1;" onclick="setRoomCreds('${m.matchCode}')">Save</button>
-                                    <button class="btn-fail" onclick="deleteMatch('${m.matchCode}')">Delete</button>
-                                </div>
-                            </div>`;
-                    });
-                }
-            } catch(e) {}
+            const snapMatch = await getDocs(collection(db, "matches"));
+            matchListContainer.innerHTML = snapMatch.empty ? `<p style="color:var(--text-muted); text-align:center;">Kono match nei.</p>` : "";
+            snapMatch.forEach(d => {
+                const m = d.data();
+                matchListContainer.innerHTML += `
+                    <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                        <strong style="color: var(--neon-cyan);">${m.matchName} (${m.matchCode}) - Slots: ${m.joinedCount || 0}/${m.totalSlots}</strong>
+                        <input type="text" id="rid_${m.matchCode}" class="form-control" placeholder="Room ID" value="${m.roomId || ''}" style="margin:2px 0; padding:6px;">
+                        <input type="text" id="rpass_${m.matchCode}" class="form-control" placeholder="Password" value="${m.roomPass || ''}" style="margin:2px 0; padding:6px;">
+                        <div style="display: flex; gap: 5px; width: 100%; margin-top: 5px;">
+                            <button class="btn-approve" style="flex:1;" onclick="setRoomCreds('${m.matchCode}')">Save</button>
+                            <button class="btn-fail" onclick="deleteMatch('${m.matchCode}')">Delete</button>
+                        </div>
+                    </div>`;
+            });
         }
     </script>
 </body>
