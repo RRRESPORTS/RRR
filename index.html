@@ -41,45 +41,47 @@
             background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .nav-links { display: flex; gap: 30px; list-style: none; }
-        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 600; transition: 0.3s; }
+        .nav-links { display: flex; gap: 20px; list-style: none; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 600; transition: 0.3s; font-size: 14px; }
         .nav-links a:hover { color: var(--neon-cyan); }
 
-        .hero { text-align: center; padding: 100px 20px; max-width: 900px; margin: 0 auto; }
-        .hero h1 { font-family: 'Orbitron', sans-serif; font-size: 48px; font-weight: 900; margin-bottom: 20px; line-height: 1.2; }
+        .hero { text-align: center; padding: 80px 20px; max-width: 900px; margin: 0 auto; }
+        .hero h1 { font-family: 'Orbitron', sans-serif; font-size: 38px; font-weight: 900; margin-bottom: 20px; line-height: 1.2; }
         .hero h1 span { background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero p { color: var(--text-muted); font-size: 18px; margin-bottom: 40px; }
+        .hero p { color: var(--text-muted); font-size: 16px; margin-bottom: 30px; }
 
         .btn-glow {
-            display: inline-block; padding: 14px 35px;
+            display: inline-block; padding: 10px 25px;
             font-family: 'Orbitron', sans-serif; font-weight: 700; text-decoration: none; color: #fff;
             background: linear-gradient(45deg, var(--neon-purple), var(--neon-cyan));
-            border-radius: 30px; box-shadow: 0 0 20px rgba(147, 51, 234, 0.4); transition: 0.3s;
+            border-radius: 30px; box-shadow: 0 0 20px rgba(147, 51, 234, 0.4); transition: 0.3s; cursor: pointer; border: none;
         }
         .btn-glow:hover { transform: translateY(-3px); box-shadow: 0 0 30px rgba(6, 182, 212, 0.7); }
 
         .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
-        .section-title { font-family: 'Orbitron', sans-serif; font-size: 28px; margin-bottom: 30px; border-left: 4px solid var(--neon-cyan); padding-left: 15px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+        .section-title { font-family: 'Orbitron', sans-serif; font-size: 24px; margin-bottom: 30px; border-left: 4px solid var(--neon-cyan); padding-left: 15px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
         
         .card {
             background: var(--card-bg); border: 1px solid var(--border-glow);
             border-radius: 16px; padding: 25px; backdrop-filter: blur(12px); transition: 0.3s;
         }
         .card:hover { border-color: var(--neon-cyan); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .card h3 { font-family: 'Orbitron', sans-serif; font-size: 20px; margin-bottom: 15px; }
+        .card h3 { font-family: 'Orbitron', sans-serif; font-size: 18px; margin-bottom: 15px; }
         .card-info { display: flex; justify-content: space-between; color: var(--text-muted); margin-bottom: 20px; font-size: 14px; }
         .card-info span i { color: var(--neon-cyan); margin-right: 5px; }
         
         .card-btn {
             display: block; text-align: center; background: transparent;
             border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
-            padding: 10px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.3s;
+            padding: 10px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.3s; cursor: pointer; width: 100%;
         }
         .card-btn:hover { background: var(--neon-cyan); color: #0b0f19; box-shadow: 0 0 15px rgba(6, 182, 212, 0.5); }
 
+        #auth-section { background: rgba(18, 24, 38, 0.95); border: 1px solid var(--neon-purple); padding: 20px; border-radius: 12px; max-width: 350px; margin: 20px auto; display: none; text-align: center; }
+        #auth-section input { width: 100%; padding: 10px; margin: 10px 0; background: #0b0f19; border: 1px solid var(--text-muted); color: #fff; border-radius: 6px; }
+
         footer { text-align: center; padding: 40px; color: var(--text-muted); border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: 60px; font-size: 14px; }
-        @media (max-width: 768px) { .hero h1 { font-size: 32px; } .nav-links { display: none; } }
     </style>
 </head>
 <body>
@@ -88,37 +90,28 @@
         <div class="logo">ZEG-G</div>
         <ul class="nav-links">
             <li><a href="index.html">Home</a></li>
-            <li><a href="#">Tournaments</a></li>
             <li><a href="admin.html" style="color: var(--neon-cyan);">Admin Panel</a></li>
+            <li><span id="user-display" style="color: var(--neon-cyan); font-size: 13px;"></span></li>
+            <li><button id="login-toggle-btn" class="btn-glow" style="padding: 5px 12px; font-size: 11px;" onclick="toggleAuth()">Login</button></li>
         </ul>
-        <a href="#" class="btn-glow" style="padding: 8px 20px; font-size: 14px;">Login</a>
     </nav>
+
+    <div id="auth-section">
+        <h3 style="font-family:'Orbitron'; margin-bottom: 10px; font-size: 16px;">Player Login / Signup</h3>
+        <input type="email" id="email" placeholder="Enter Email">
+        <input type="password" id="password" placeholder="Enter Password">
+        <button class="btn-glow" style="width: 100%; padding: 8px; margin-top: 5px; font-size: 12px;" onclick="loginUser()">Submit</button>
+    </div>
 
     <section class="hero">
         <h1>CONQUER THE ARENA WITH <span>ZEG-G TOURNAMENT</span></h1>
-        <p>Register your squad, compete in high-stakes esports matches, and claim your ultimate cash prizes.</p>
-        <a href="#" class="btn-glow">Explore Tournaments</a>
+        <p>Register your squad, compete in live matches, and win real cash rewards.</p>
     </section>
 
     <div class="container">
-        <h2 class="section-title">Active Tournaments</h2>
-        <div class="grid">
-            <div class="card">
-                <h3>Free Fire Squad Championship</h3>
-                <div class="card-info">
-                    <span><i class="fa-solid fa-trophy"></i> ৳10,000 Prize</span>
-                    <span><i class="fa-solid fa-users"></i> 12/24 Slots</span>
-                </div>
-                <a href="#" class="card-btn">Register Now</a>
-            </div>
-            <div class="card">
-                <h3>PUBG / BGMI Battle Royale</h3>
-                <div class="card-info">
-                    <span><i class="fa-solid fa-trophy"></i> ৳15,000 Prize</span>
-                    <span><i class="fa-solid fa-users"></i> 18/20 Slots</span>
-                </div>
-                <a href="#" class="card-btn">Register Now</a>
-            </div>
+        <h2 class="section-title">Live Tournaments</h2>
+        <div class="grid" id="tournament-grid">
+            <p style="color: var(--text-muted);">Loading tournaments from Firebase...</p>
         </div>
     </div>
 
@@ -126,5 +119,88 @@
         <p>&copy; 2026 ZEG-G TOURNAMENT. All rights reserved.</p>
     </footer>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Tomar original Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
+            authDomain: "zeg-g-tournament.firebaseapp.com",
+            projectId: "zeg-g-tournament",
+            storageBucket: "zeg-g-tournament.firebasestorage.app",
+            messagingSenderId: "907178832675",
+            appId: "1:907178832675:web:414bc01f1b3a4695455296",
+            measurementId: "G-PLN2DEP794"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.toggleAuth = function() {
+            const box = document.getElementById('auth-section');
+            box.style.display = box.style.display === 'block' ? 'none' : 'block';
+        }
+
+        window.loginUser = async function() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                alert("Login Successful!");
+                document.getElementById('auth-section').style.display = 'none';
+            } catch (error) {
+                try {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    alert("Account Created & Logged In Successfully!");
+                    document.getElementById('auth-section').style.display = 'none';
+                } catch (err) {
+                    alert("Error: " + err.message);
+                }
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('user-display').innerText = user.email.split('@')[0];
+                document.getElementById('login-toggle-btn').innerText = "Logout";
+                document.getElementById('login-toggle-btn').onclick = () => signOut(auth).then(() => alert("Logged out"));
+            } else {
+                document.getElementById('user-display').innerText = "";
+                document.getElementById('login-toggle-btn').innerText = "Login";
+                document.getElementById('login-toggle-btn').onclick = toggleAuth;
+            }
+        });
+
+        async function loadTournaments() {
+            const grid = document.getElementById('tournament-grid');
+            grid.innerHTML = "";
+            try {
+                const querySnapshot = await getDocs(collection(db, "tournaments"));
+                if(querySnapshot.empty) {
+                    grid.innerHTML = "<p style='color:var(--text-muted);'>No tournaments live right now. Go to Admin Panel to add one!</p>";
+                    return;
+                }
+                querySnapshot.forEach((doc) => {
+                    const t = doc.data();
+                    grid.innerHTML += `
+                        <div class="card">
+                            <h3>${t.name}</h3>
+                            <div class="card-info">
+                                <span><i class="fa-solid fa-trophy"></i> ৳${t.prize}</span>
+                                <span><i class="fa-solid fa-gamepad"></i> ${t.game}</span>
+                            </div>
+                            <button class="card-btn" onclick="alert('Squad registered for ${t.name}!')">Register Squad</button>
+                        </div>
+                    `;
+                });
+            } catch (e) {
+                grid.innerHTML = "<p style='color:var(--text-muted);'>Please create 'tournaments' collection in Firestore database first.</p>";
+            }
+        }
+        loadTournaments();
+    </script>
 </body>
 </html>
