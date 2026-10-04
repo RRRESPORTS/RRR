@@ -1,171 +1,201 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AG-TOURNAMENT - Admin Panel</title>
+    <title>Zex-G Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>body { background-color: #030712; color: #fff; font-family: sans-serif; }</style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 pb-20">
+<body class="p-4 max-w-4xl mx-auto space-y-6">
+    <h1 class="text-xl font-bold text-[#00ff66]">⚙ Zex-G Tournament Admin Panel</h1>
+    
+    <div class="flex gap-2 flex-wrap">
+        <button onclick="switchAdminTab('users')" class="bg-gray-800 px-3 py-2 rounded text-xs font-bold">Users</button>
+        <button onclick="switchAdminTab('addmatch')" class="bg-gray-800 px-3 py-2 rounded text-xs font-bold">Add Match</button>
+        <button onclick="switchAdminTab('matches')" class="bg-gray-800 px-3 py-2 rounded text-xs font-bold">Manage Matches & Room ID</button>
+        <button onclick="switchAdminTab('withdraws')" class="bg-gray-800 px-3 py-2 rounded text-xs font-bold">Withdraw Requests</button>
+    </div>
 
-    <div class="max-w-md mx-auto space-y-4">
-        <!-- Top Nav -->
-        <div class="flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700">
-            <h1 class="text-base font-bold text-emerald-400"><i class="fa-solid fa-shield-halved mr-1"></i> Admin Panel</h1>
-            <a href="index.html" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-xs font-semibold">Home</a>
-        </div>
+    <!-- USERS TAB -->
+    <div id="adm-users" class="space-y-3 bg-[#111827] p-4 rounded-xl border border-gray-800">
+        <h2 class="text-sm font-bold text-amber-400">User Management</h2>
+        <input id="search-box" oninput="searchUsers()" placeholder="Search by TJ-ID, Mail, or Number..." class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-xs text-white" />
+        <div id="users-list-container" class="space-y-2 text-xs">Loading users...</div>
+    </div>
 
-        <!-- Admin Control Center -->
-        <div id="adminContent" class="hidden space-y-4">
-            <!-- Notice Update Box -->
-            <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 space-y-2">
-                <h3 class="text-sm font-bold text-slate-200">Update Notice</h3>
-                <input type="text" id="noticeInput" placeholder="Write new notice..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                <button onclick="updateNotice()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-lg text-sm transition">Save Notice</button>
-            </div>
+    <!-- ADD MATCH TAB -->
+    <div id="adm-addmatch" class="hidden space-y-3 bg-[#111827] p-4 rounded-xl border border-gray-800 text-xs">
+        <h2 class="text-sm font-bold text-[#00ff66]">Add New Match</h2>
+        <input id="m-title" placeholder="Match Title (e.g., Free Fire Solo)" class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-white" />
+        <input id="m-id" placeholder="Match ID (e.g., FF-101)" class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-white" />
+        <input id="m-time" placeholder="Time (e.g., 8:00 PM)" class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-white" />
+        <input id="m-entry" type="number" placeholder="Entry Fee (৳)" class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-white" />
+        <input id="m-prize" type="number" placeholder="Win Prize (৳)" class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-white" />
+        <button onclick="addNewMatch()" class="w-full bg-[#00ff66] text-black font-bold py-2 rounded uppercase">Publish Match</button>
+    </div>
 
-            <!-- Add Match Box -->
-            <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 space-y-3">
-                <h3 class="text-sm font-bold text-slate-200">Create New Match</h3>
-                <input type="text" id="matchTitle" placeholder="Match Title (e.g., Free Fire Solo)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="number" id="matchEntry" placeholder="Entry Fee (৳)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                    <input type="number" id="matchPrize" placeholder="Prize Pool (৳)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="number" id="maxSlots" placeholder="Max Slots (e.g. 50)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                    <input type="datetime-local" id="matchTime" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 text-slate-300">
-                </div>
-                <button onclick="addNewMatch()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-slate-900 font-bold py-2 rounded-lg text-sm transition">Create Match</button>
-            </div>
+    <!-- MATCHES LIST & ROOM ID TAB -->
+    <div id="adm-matches" class="hidden space-y-3 bg-[#111827] p-4 rounded-xl border border-gray-800 text-xs">
+        <h2 class="text-sm font-bold text-blue-400">Match Room ID & Pass Setup</h2>
+        <div id="admin-match-list" class="space-y-3">Loading matches...</div>
+    </div>
 
-            <!-- Manage / Delete Existing Matches -->
-            <div class="space-y-2">
-                <h3 class="text-sm font-bold text-slate-200">Manage Matches (Delete)</h3>
-                <div id="adminMatchesList" class="space-y-3">
-                    <!-- Dynamic Match Cards with Delete -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Access Denied Message -->
-        <div id="accessDenied" class="bg-slate-800 border border-red-500/30 rounded-xl p-6 text-center space-y-3">
-            <h2 class="text-lg font-bold text-red-400">Access Denied</h2>
-            <p class="text-xs text-slate-400">Please login with the authorized admin account (`abujar2578@gmail.com`) to view this panel.</p>
-            <button onclick="googleLogin()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-semibold transition">Login with Google</button>
-        </div>
+    <!-- WITHDRAW REQUESTS TAB -->
+    <div id="adm-withdraws" class="hidden space-y-3 bg-[#111827] p-4 rounded-xl border border-gray-800 text-xs">
+        <h2 class="text-sm font-bold text-purple-400">Withdraw Requests</h2>
+        <div id="admin-wd-list" class="space-y-2">Loading requests...</div>
     </div>
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyDummyKeyForAGTournament",
-            authDomain: "ag-tournament-999.firebaseapp.com",
-            projectId: "ag-tournament-999",
-            storageBucket: "ag-tournament-999.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123:web:abc"
+          apiKey: "AIzaSyAbW9RUriAT60Cx3l-PymDflcAKsKTnSi",
+          authDomain: "ag-tournament-eb4b4.firebaseapp.com",
+          databaseURL: "https://ag-tournament-999-default-rtdb.firebaseio.com",
+          projectId: "ag-tournament-eb4b4"
         };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.database();
 
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
-        const adminEmail = "abujar2578@gmail.com";
+        function switchAdminTab(tab) {
+            ['users', 'addmatch', 'matches', 'withdraws'].forEach(t => {
+                document.getElementById('adm-' + t).classList.add('hidden');
+            });
+            document.getElementById('adm-' + tab).classList.remove('hidden');
+        }
 
-        auth.onAuthStateChanged((user) => {
-            if (user && user.email === adminEmail) {
-                document.getElementById('adminContent').classList.remove('hidden');
-                document.getElementById('accessDenied').classList.add('hidden');
-                loadAdminMatches();
-            } else {
-                document.getElementById('adminContent').classList.add('hidden');
-                document.getElementById('accessDenied').classList.remove('hidden');
-            }
+        let allUsersData = {};
+        db.ref('users').on('value', snap => {
+            allUsersData = snap.val() || {};
+            renderUsers(allUsersData);
         });
 
-        function googleLogin() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch((error) => alert("Login Failed: " + error.message));
-        }
+        function renderUsers(users) {
+            let container = document.getElementById('users-list-container');
+            container.innerHTML = "";
+            let keys = Object.keys(users);
+            if(keys.length === 0) { container.innerHTML = "No users found."; return; }
 
-        function updateNotice() {
-            const newNotice = document.getElementById('noticeInput').value;
-            if (!newNotice) return alert("Please write a notice!");
-
-            db.collection("settings").doc("notice").set({ text: newNotice }).then(() => {
-                alert("Notice updated successfully!");
-                document.getElementById('noticeInput').value = "";
-            }).catch((error) => alert("Error: " + error.message));
-        }
-
-        function addNewMatch() {
-            const title = document.getElementById('matchTitle').value;
-            const entry = document.getElementById('matchEntry').value;
-            const prize = document.getElementById('matchPrize').value;
-            const maxSlots = parseInt(document.getElementById('maxSlots').value);
-            const matchTime = document.getElementById('matchTime').value;
-
-            if (!title || !entry || !prize || !maxSlots || !matchTime) {
-                alert("Please fill in all fields!");
-                return;
-            }
-
-            db.collection("tournaments").add({
-                title: title,
-                entryFee: entry,
-                prizePool: prize,
-                maxSlots: maxSlots,
-                matchTime: matchTime,
-                joinedUsers: [],
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                alert("Match added successfully!");
-                document.getElementById('matchTitle').value = '';
-                document.getElementById('matchEntry').value = '';
-                document.getElementById('matchPrize').value = '';
-                document.getElementById('maxSlots').value = '';
-                document.getElementById('matchTime').value = '';
-            }).catch((error) => alert("Error: " + error.message));
-        }
-
-        function loadAdminMatches() {
-            db.collection("tournaments").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
-                const container = document.getElementById('adminMatchesList');
-                container.innerHTML = "";
-
-                if (snapshot.empty) {
-                    container.innerHTML = `<p class="text-xs text-slate-500 text-center">No matches found.</p>`;
-                    return;
-                }
-
-                snapshot.forEach((doc) => {
-                    const match = doc.data();
-                    const matchId = doc.id;
-                    const joinedCount = match.joinedUsers ? match.joinedUsers.length : 0;
-
-                    container.innerHTML += `
-                        <div class="bg-slate-800 border border-slate-700 rounded-xl p-3 flex justify-between items-center text-xs">
-                            <div>
-                                <span class="font-bold text-slate-100">${match.title}</span>
-                                <div class="text-slate-400 mt-0.5">Joined: ${joinedCount} / ${match.maxSlots}</div>
-                            </div>
-                            <button onclick="deleteMatch('${matchId}')" class="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-lg transition font-semibold">Delete</button>
+            keys.forEach(k => {
+                let u = users[k];
+                container.innerHTML += `
+                    <div class="bg-gray-900 p-3 rounded border border-gray-800 space-y-2">
+                        <div><b>Email:</b> ${u.email} | <b>TJ-ID:</b> <span class="text-[#00ff66]">${u.tjId}</span> | <b>Balance:</b> ৳${u.balance || 0}</div>
+                        <div><b>Phone:</b> ${u.phone || 'N/A'}</div>
+                        <div class="flex gap-2 items-center">
+                            <input id="bal-${k}" type="number" placeholder="Add/Set Bal" class="bg-gray-800 p-1 rounded text-white w-24" />
+                            <button onclick="updateUserBal('${k}')" class="bg-green-600 text-white px-2 py-1 rounded">Update Bal</button>
+                            <button onclick="toggleBan('${k}', ${u.isBanned})" class="bg-${u.isBanned ? 'green' : 'red'}-600 text-white px-2 py-1 rounded">${u.isBanned ? 'Unban' : 'Ban'}</button>
                         </div>
-                    `;
-                });
+                    </div>
+                `;
             });
         }
 
-        function deleteMatch(matchId) {
-            if (confirm("Are you sure you want to delete this match?")) {
-                db.collection("tournaments").doc(matchId).delete().then(() => {
-                    alert("Match deleted successfully!");
-                }).catch((error) => alert("Error: " + error.message));
-            }
+        function searchUsers() {
+            let query = document.getElementById('search-box').value.toLowerCase();
+            let filtered = {};
+            Object.keys(allUsersData).forEach(k => {
+                let u = allUsersData[k];
+                if((u.email && u.email.toLowerCase().includes(query)) || (u.tjId && u.tjId.toLowerCase().includes(query)) || (u.phone && u.phone.includes(query))) {
+                    filtered[k] = u;
+                }
+            });
+            renderUsers(filtered);
+        }
+
+        function updateUserBal(k) {
+            let val = Number(document.getElementById('bal-' + k).value);
+            db.ref('users/' + k).update({ balance: val }, () => alert('Balance updated!'));
+        }
+
+        function toggleBan(k, currentStatus) {
+            db.ref('users/' + k).update({ isBanned: !currentStatus }, () => alert('Status updated!'));
+        }
+
+        function addNewMatch() {
+            let title = document.getElementById('m-title').value.trim();
+            let matchId = document.getElementById('m-id').value.trim();
+            let time = document.getElementById('m-time').value.trim();
+            let entry = Number(document.getElementById('m-entry').value);
+            let prize = Number(document.getElementById('m-prize').value);
+            if(!title || !matchId) return alert('Fill required fields!');
+
+            db.ref('matches').push({ title, matchId, time, entry, prize, roomId: "", roomPass: "" }, () => {
+                alert('Match published successfully!');
+                document.getElementById('m-title').value = '';
+                document.getElementById('m-id').value = '';
+            });
+        }
+
+        db.ref('matches').on('value', snap => {
+            let container = document.getElementById('admin-match-list');
+            container.innerHTML = "";
+            if(!snap.exists()) { container.innerHTML = "No matches."; return; }
+
+            snap.forEach(mSnap => {
+                let mKey = mSnap.key, m = mSnap.val();
+                container.innerHTML += `
+                    <div class="bg-gray-900 p-3 rounded border border-gray-800 space-y-2">
+                        <div><b>${m.title}</b> (${m.matchId}) - Entry: ৳${m.entry}</div>
+                        <div class="flex gap-2">
+                            <input id="r-id-${mKey}" value="${m.roomId || ''}" placeholder="Room ID" class="bg-gray-800 p-1 rounded text-white w-1/2" />
+                            <input id="r-pass-${mKey}" value="${m.roomPass || ''}" placeholder="Password" class="bg-gray-800 p-1 rounded text-white w-1/2" />
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="saveRoomDetails('${mKey}')" class="bg-blue-600 text-white px-3 py-1 rounded">Save Room ID & Pass</button>
+                            <button onclick="deleteMatch('${mKey}')" class="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+        function saveRoomDetails(mKey) {
+            let roomId = document.getElementById('r-id-' + mKey).value.trim();
+            let roomPass = document.getElementById('r-pass-' + mKey).value.trim();
+            db.ref('matches/' + mKey).update({ roomId, roomPass }, () => alert('Room details updated!'));
+        }
+
+        function deleteMatch(mKey) {
+            if(confirm('Delete this match?')) db.ref('matches/' + mKey).remove();
+        }
+
+        db.ref('allWithdrawRequests').on('value', snap => {
+            let container = document.getElementById('admin-wd-list');
+            container.innerHTML = "";
+            if(!snap.exists()) { container.innerHTML = "No requests."; return; }
+
+            snap.forEach(wSnap => {
+                let wKey = wSnap.key, w = wSnap.val();
+                let col = w.status === 'Approved' ? 'text-green-400' : (w.status === 'Failed' ? 'text-red-400' : 'text-amber-400');
+                container.innerHTML += `
+                    <div class="bg-gray-900 p-3 rounded border border-gray-800 flex justify-between items-center">
+                        <div>
+                            <div><b>Email:</b> ${w.email}</div>
+                            <div><b>Bkash:</b> ${w.number} | <b>Amount:</b> ৳${w.amount}</div>
+                            <div>Status: <span class="${col}">${w.status}</span></div>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <button onclick="updateWdStatus('${wKey}', '${w.userKey}', 'Approved')" class="bg-green-600 px-2 py-1 rounded text-white">Approve</button>
+                            <button onclick="updateWdStatus('${wKey}', '${w.userKey}', 'Failed')" class="bg-red-600 px-2 py-1 rounded text-white">Failed</button>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+        function updateWdStatus(wKey, userKey, status) {
+            db.ref('allWithdrawRequests/' + wKey).update({ status });
+            db.ref('withdraws/' + userKey).orderByChild('status').once('value', s => {
+                s.forEach(child => {
+                    db.ref('withdraws/' + userKey + '/' + child.key).update({ status });
+                });
+            });
+            alert('Withdraw status updated to ' + status);
         }
     </script>
 </body>
