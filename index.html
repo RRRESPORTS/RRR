@@ -41,6 +41,12 @@
         /* Notice Box */
         .notice-box { background: rgba(0,243,255,0.05); border-left: 4px solid var(--neon-cyan); padding: 10px; margin: 15px; font-size: 14px; border-radius: 0 6px 6px 0; }
 
+        /* Match Card Style */
+        .match-card { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(0,243,255,0.05); }
+        .match-card h4 { color: var(--neon-cyan); font-size: 16px; margin-bottom: 5px; }
+        .match-details { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .join-btn { background: var(--neon-green); color: #000; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; }
+
         /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100; }
         .nav-item { text-align: center; color: var(--text-muted); font-size: 12px; cursor: pointer; }
@@ -98,7 +104,7 @@
         <div id="matchSection" class="section active">
             <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">Live & Upcoming Matches</h3>
             <div id="matchListContainer">
-                <p style="color: var(--text-muted);">No matches available right now. Check back soon!</p>
+                <p style="color: var(--text-muted);">Loading matches...</p>
             </div>
         </div>
 
@@ -133,7 +139,7 @@
         </div>
     </div>
 
-    <!-- Auth Modal (Login / Signup) -->
+    <!-- Auth Modal -->
     <div class="modal-overlay" id="authModal">
         <div class="modal-card">
             <h3 id="modalTitle">Login to ZEG-G</h3>
@@ -177,10 +183,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
           apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
           authDomain: "zeg-g-tournament.firebaseapp.com",
@@ -191,7 +196,6 @@
           measurementId: "G-PLN2DEP794"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const auth = getAuth(app);
@@ -203,7 +207,7 @@
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
             
-            if(tabId === 'matchSection') { document.getElementById('matchSection').classList.add('active'); event.currentTarget?.classList?.add('active'); }
+            if(tabId === 'matchSection') { document.getElementById('matchSection').classList.add('active'); }
             if(tabId === 'myMatchSection') document.getElementById('myMatchSection').classList.add('active');
             if(tabId === 'addBalance') document.getElementById('addBalanceSection').classList.add('active');
             if(tabId === 'withdraw') document.getElementById('withdrawSection').classList.add('active');
@@ -284,6 +288,40 @@
                 document.getElementById('userBalance').innerText = "৳0.00";
             }
         });
+
+        // Load Matches on Web Homepage from Firestore
+        async function loadWebMatches() {
+            const container = document.getElementById('matchListContainer');
+            try {
+                const querySnapshot = await getDocs(collection(db, "matches"));
+                if(querySnapshot.empty) {
+                    container.innerHTML = `<p style="color: var(--text-muted);">No matches available right now. Check back soon!</p>`;
+                } else {
+                    container.innerHTML = "";
+                    querySnapshot.forEach((docSnap) => {
+                        const m = docSnap.data();
+                        container.innerHTML += `
+                            <div class="match-card">
+                                <h4>${m.matchName} (Code: ${m.matchCode})</h4>
+                                <div class="match-details">
+                                    <span>Entry Fee: ৳${m.entryFee}</span>
+                                    <span>Prize: ৳${m.firstPrize}</span>
+                                </div>
+                                <div class="match-details">
+                                    <span>Slots: ${m.totalSlots}</span>
+                                    <span style="color: var(--neon-cyan);">Room ID: ${m.roomId ? m.roomId : 'Yet to be given'}</span>
+                                </div>
+                                <button class="join-btn" onclick="alert('Joining feature ready for Match: ${m.matchCode}')">Join Match</button>
+                            </div>`;
+                    });
+                }
+            } catch(e) {
+                container.innerHTML = `<p style="color: var(--neon-pink);">Error loading matches.</p>`;
+            }
+        }
+
+        // Run match load on startup
+        loadWebMatches();
 
         window.submitAddBalance = function() {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
