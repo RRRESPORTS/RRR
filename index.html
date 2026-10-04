@@ -7,12 +7,14 @@
 
 <style>
 *{box-sizing:border-box}
+
 body{
     margin:0;
     font-family:Arial,sans-serif;
     background:#080b12;
     color:#fff;
 }
+
 header{
     position:sticky;
     top:0;
@@ -21,6 +23,7 @@ header{
     border-bottom:1px solid #252d3d;
     padding:14px 20px;
 }
+
 .nav{
     max-width:1100px;
     margin:auto;
@@ -29,17 +32,20 @@ header{
     justify-content:space-between;
     gap:15px;
 }
+
 .logo{
     font-size:22px;
     font-weight:900;
     color:#00e5ff;
 }
+
 nav a{
     color:#ddd;
     text-decoration:none;
     margin:0 8px;
     font-size:13px;
 }
+
 button{
     border:0;
     border-radius:8px;
@@ -47,19 +53,23 @@ button{
     cursor:pointer;
     font-weight:bold;
 }
+
 .primary{
     background:#00e5ff;
     color:#001014;
 }
+
 .darkbtn{
     background:#20293a;
     color:white;
 }
+
 .container{
     max-width:1100px;
     margin:auto;
     padding:20px;
 }
+
 .notice{
     background:#121a28;
     border:1px solid #273348;
@@ -67,6 +77,7 @@ button{
     border-radius:10px;
     margin-bottom:20px;
 }
+
 .hero{
     min-height:220px;
     border-radius:16px;
@@ -76,56 +87,68 @@ button{
     background:linear-gradient(135deg,#111827,#003542);
     overflow:hidden;
 }
+
 .hero h1{
     font-size:42px;
     margin:0 0 10px;
 }
+
 .hero p{
     color:#b9c4d6;
 }
+
 .section-title{
     margin-top:35px;
     border-left:4px solid #00e5ff;
     padding-left:10px;
 }
+
 .grid{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
     gap:15px;
 }
+
 .card{
     background:#111722;
     border:1px solid #273044;
     border-radius:14px;
     overflow:hidden;
 }
+
 .card img{
     width:100%;
     height:150px;
     object-fit:cover;
     background:#171d29;
 }
+
 .card-body{
     padding:15px;
 }
+
 .card h3{
     margin-top:0;
 }
+
 .meta{
     color:#9eabc0;
     font-size:13px;
     margin:8px 0;
 }
+
 .fee{
     color:#00e5ff;
     font-weight:bold;
 }
+
 .empty{
     padding:25px;
     background:#101621;
     border-radius:10px;
     color:#9da8ba;
 }
+
 iframe{
     width:100%;
     height:420px;
@@ -133,6 +156,7 @@ iframe{
     border-radius:14px;
     background:#111;
 }
+
 .rules{
     white-space:pre-wrap;
     background:#111722;
@@ -140,6 +164,7 @@ iframe{
     border-radius:12px;
     line-height:1.7;
 }
+
 footer{
     margin-top:50px;
     padding:30px;
@@ -147,6 +172,12 @@ footer{
     background:#0d111a;
     color:#8f9aad;
 }
+
+footer a{
+    color:#00e5ff;
+    text-decoration:none;
+}
+
 .modal{
     position:fixed;
     inset:0;
@@ -157,6 +188,7 @@ footer{
     z-index:500;
     padding:20px;
 }
+
 .modal-box{
     width:100%;
     max-width:420px;
@@ -165,6 +197,7 @@ footer{
     border-radius:15px;
     padding:20px;
 }
+
 input{
     width:100%;
     padding:12px;
@@ -174,11 +207,13 @@ input{
     border:1px solid #2b3548;
     border-radius:8px;
 }
+
 .close{
     float:right;
     background:#252d3b;
     color:#fff;
 }
+
 .profile{
     display:none;
     margin-top:20px;
@@ -187,14 +222,32 @@ input{
     border-radius:12px;
     padding:18px;
 }
+
 .balance{
     font-size:28px;
     color:#00e5ff;
     font-weight:bold;
 }
+
+.message{
+    margin-top:10px;
+    color:#ffb4b4;
+    font-size:14px;
+}
+
+.match-btn{
+    width:100%;
+    margin-top:10px;
+}
+
 @media(max-width:700px){
-    nav{display:none}
-    .hero h1{font-size:30px}
+    nav{
+        display:none;
+    }
+
+    .hero h1{
+        font-size:30px;
+    }
 }
 </style>
 </head>
@@ -203,6 +256,7 @@ input{
 
 <header>
 <div class="nav">
+
     <div class="logo">ZEG-G TOURNAMENT</div>
 
     <nav>
@@ -216,8 +270,10 @@ input{
     <div>
         <button class="darkbtn" onclick="openLogin()">Login</button>
     </div>
+
 </div>
 </header>
+
 
 <main class="container">
 
@@ -225,257 +281,990 @@ input{
     Welcome to ZEG-G Tournament
 </div>
 
+
 <section class="hero" id="hero">
+
     <div>
         <h1 id="heroTitle">ZEG-G Tournament</h1>
-        <p id="heroText">Join Free Fire tournaments and compete with players.</p>
+
+        <p id="heroText">
+            Join Free Fire tournaments and compete with players.
+        </p>
     </div>
+
 </section>
+
 
 <div class="profile" id="profileBox">
-    <button class="close" onclick="logout()">Logout</button>
+
+    <button class="close" onclick="logout()">
+        Logout
+    </button>
+
     <h2>My Profile</h2>
+
     <p id="profileEmail"></p>
+
     <p>Balance</p>
-    <div class="balance">৳<span id="balance">0</span></div>
-    <p>Earn Balance: ৳<span id="earnBalance">0</span></p>
+
+    <div class="balance">
+        ৳<span id="balance">0</span>
+    </div>
+
+    <p>
+        Earn Balance:
+        ৳<span id="earnBalance">0</span>
+    </p>
+
     <p id="verified"></p>
+
 </div>
+
 
 <section id="matches">
-<h2 class="section-title">FREE FIRE MATCHES</h2>
-<div class="grid" id="normalMatches"></div>
+
+<h2 class="section-title">
+    FREE FIRE MATCHES
+</h2>
+
+<div class="grid" id="normalMatches">
+    <div class="empty">
+        Loading matches...
+    </div>
+</div>
+
 </section>
+
 
 <section id="onevone">
-<h2 class="section-title">FREE FIRE MATCH 1 VS 1</h2>
-<div class="grid" id="oneMatches"></div>
+
+<h2 class="section-title">
+    FREE FIRE MATCH 1 VS 1
+</h2>
+
+<div class="grid" id="oneMatches">
+    <div class="empty">
+        Loading matches...
+    </div>
+</div>
+
 </section>
+
 
 <section id="headshot">
-<h2 class="section-title">ONLY HEADSHOT</h2>
-<div class="grid" id="headshotMatches"></div>
+
+<h2 class="section-title">
+    ONLY HEADSHOT
+</h2>
+
+<div class="grid" id="headshotMatches">
+    <div class="empty">
+        Loading matches...
+    </div>
+</div>
+
 </section>
+
 
 <section id="live">
-<h2 class="section-title">LIVE MATCH</h2>
-<iframe id="liveFrame" src="" allowfullscreen></iframe>
+
+<h2 class="section-title">
+    LIVE MATCH
+</h2>
+
+<iframe
+    id="liveFrame"
+    src=""
+    allowfullscreen>
+</iframe>
+
 </section>
 
+
 <section id="rules">
-<h2 class="section-title">RULES & CONDITIONS</h2>
+
+<h2 class="section-title">
+    RULES & CONDITIONS
+</h2>
+
 <div class="rules" id="rulesText">
-Loading rules...
+    Loading rules...
 </div>
+
 </section>
 
 </main>
 
+
 <footer>
-    <p>ZEG-G Tournament © 2026</p>
+
     <p>
-        <a id="appLink" href="#" target="_blank">App</a> |
-        <a id="telegramLink" href="#" target="_blank">Telegram</a>
+        ZEG-G Tournament © 2026
     </p>
+
+    <p>
+        <a id="appLink" href="#" target="_blank">
+            App
+        </a>
+
+        |
+
+        <a id="telegramLink" href="#" target="_blank">
+            Telegram
+        </a>
+    </p>
+
 </footer>
 
 
 <!-- LOGIN MODAL -->
+
 <div class="modal" id="loginModal">
+
 <div class="modal-box">
 
-<button class="close" onclick="closeLogin()">X</button>
+<button class="close" onclick="closeLogin()">
+    X
+</button>
 
 <h2>Login / Create Account</h2>
 
-<input id="email" type="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
+<input
+    id="email"
+    type="email"
+    placeholder="Email"
+    autocomplete="email">
 
-<button class="primary" onclick="login()">Login</button>
-<button class="darkbtn" onclick="register()">Create Account</button>
+<input
+    id="password"
+    type="password"
+    placeholder="Password"
+    autocomplete="current-password">
 
-<p id="authMessage"></p>
+<button
+    class="primary"
+    style="width:100%;margin-top:8px"
+    onclick="login()">
+
+    Login
+
+</button>
+
+<button
+    class="darkbtn"
+    style="width:100%;margin-top:8px"
+    onclick="register()">
+
+    Create Account
+
+</button>
+
+<p id="authMessage" class="message"></p>
 
 </div>
+
 </div>
 
 
 <script type="module">
 
-import {initializeApp}
+/* =====================================
+   FIREBASE IMPORTS
+===================================== */
+
+import { initializeApp }
 from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 
 import {
-getAuth,
-signInWithEmailAndPassword,
-createUserWithEmailAndPassword,
-onAuthStateChanged,
-signOut
+    getAuth,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
 }
 from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 import {
-getFirestore,
-doc,
-getDoc,
-setDoc,
-collection,
-getDocs,
-addDoc,
-query,
-where,
-serverTimestamp
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    collection,
+    getDocs,
+    addDoc,
+    serverTimestamp
 }
 from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 
-/* ==============================
+/* =====================================
    FIREBASE CONFIG
-============================== */
+===================================== */
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDpOp2wyMj-7-5n4Vifpl6Ev2IB_hNg2TU",
-  authDomain: "ag-tournament-999.firebaseapp.com",
-  databaseURL: "https://ag-tournament-999-default-rtdb.firebaseio.com",
-  projectId: "ag-tournament-999",
-  storageBucket: "ag-tournament-999.firebasestorage.app",
-  messagingSenderId: "761085533810",
-  appId: "1:761085533810:web:c79e01d5ccca07f6416ceb",
-  measurementId: "G-7M23XV9VS4"
+
+    apiKey:
+        "AIzaSyDpOp2wyMj-7-5n4Vifpl6Ev2IB_hNg2TU",
+
+    authDomain:
+        "ag-tournament-999.firebaseapp.com",
+
+    databaseURL:
+        "https://ag-tournament-999-default-rtdb.firebaseio.com",
+
+    projectId:
+        "ag-tournament-999",
+
+    storageBucket:
+        "ag-tournament-999.firebasestorage.app",
+
+    messagingSenderId:
+        "761085533810",
+
+    appId:
+        "1:761085533810:web:c79e01d5ccca07f6416ceb",
+
+    measurementId:
+        "G-7M23XV9VS4"
 };
+
+
+/* =====================================
+   START FIREBASE
+===================================== */
 
 const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
+
 const db = getFirestore(app);
 
 
-/* ==============================
+/* =====================================
+   LOGIN MODAL
+===================================== */
+
+window.openLogin = function(){
+
+    document.getElementById("loginModal").style.display = "flex";
+
+};
+
+
+window.closeLogin = function(){
+
+    document.getElementById("loginModal").style.display = "none";
+
+};
+
+
+/* =====================================
    LOGIN
-============================== */
+===================================== */
 
-window.openLogin=()=>{
-    document.getElementById("loginModal").style.display="flex";
-};
+window.login = async function(){
 
-window.closeLogin=()=>{
-    document.getElementById("loginModal").style.display="none";
-};
+    const email =
+        document.getElementById("email").value.trim();
 
+    const password =
+        document.getElementById("password").value;
 
-window.login=async()=>{
-
-    const email=document.getElementById("email").value.trim();
-    const password=document.getElementById("password").value;
-
-    try{
-
-        await signInWithEmailAndPassword(auth,email,password);
-
-        document.getElementById("authMessage").innerText="Login successful!";
-        closeLogin();
-
-    }catch(error){
-
-        document.getElementById("authMessage").innerText=error.message;
-
-    }
-};
+    const message =
+        document.getElementById("authMessage");
 
 
-window.register=async()=>{
+    if(!email || !password){
 
-    const email=document.getElementById("email").value.trim();
-    const password=document.getElementById("password").value;
+        message.innerText =
+            "Email and password are required.";
 
-    if(password.length<6){
-        document.getElementById("authMessage").innerText=
-        "Password must be at least 6 characters.";
         return;
     }
 
+
+    message.innerText = "Logging in...";
+
+
     try{
 
-        const result=await createUserWithEmailAndPassword(
+        await signInWithEmailAndPassword(
             auth,
             email,
             password
         );
 
-        await setDoc(
-            doc(db,"users",result.user.uid),
-            {
-                email:email,
-                balance:0,
-                earnBalance:0,
-                verified:false,
-                createdAt:serverTimestamp()
-            }
-        );
+        message.innerText =
+            "Login successful!";
 
         closeLogin();
 
+
     }catch(error){
 
-        document.getElementById("authMessage").innerText=error.message;
+        console.error("LOGIN ERROR:", error);
+
+        message.innerText =
+            "Login failed: " + error.message;
 
     }
+
 };
 
 
-window.logout=async()=>{
-    await signOut(auth);
-};
+/* =====================================
+   CREATE ACCOUNT
+===================================== */
+
+window.register = async function(){
+
+    const email =
+        document.getElementById("email").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    const message =
+        document.getElementById("authMessage");
 
 
-/* ==============================
-   AUTH STATE
-============================== */
+    if(!email || !password){
 
-onAuthStateChanged(auth,async(user)=>{
+        message.innerText =
+            "Email and password are required.";
 
-    if(!user){
-
-        document.getElementById("profileBox").style.display="none";
         return;
+    }
+
+
+    if(password.length < 6){
+
+        message.innerText =
+            "Password must be at least 6 characters.";
+
+        return;
+    }
+
+
+    message.innerText =
+        "Creating account...";
+
+
+    try{
+
+        const result =
+            await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
+
+
+        await setDoc(
+            doc(db, "users", result.user.uid),
+            {
+
+                email: email,
+
+                balance: 0,
+
+                earnBalance: 0,
+
+                verified: false,
+
+                createdAt: serverTimestamp()
+
+            }
+        );
+
+
+        message.innerText =
+            "Account created successfully!";
+
+        closeLogin();
+
+
+    }catch(error){
+
+        console.error("REGISTER ERROR:", error);
+
+        message.innerText =
+            "Registration failed: " +
+            error.message;
 
     }
 
-    document.getElementById("profileBox").style.display="block";
-    document.getElementById("profileEmail").innerText=user.email;
+};
 
-    const snap=await getDoc(doc(db,"users",user.uid));
 
-    if(snap.exists()){
+/* =====================================
+   LOGOUT
+===================================== */
 
-        const data=snap.data();
+window.logout = async function(){
 
-        document.getElementById("balance").innerText=data.balance||0;
-        document.getElementById("earnBalance").innerText=data.earnBalance||0;
+    try{
 
-        document.getElementById("verified").innerText=
-        data.verified ? "✓ Verified User" : "Not Verified";
+        await signOut(auth);
+
+    }catch(error){
+
+        console.error(error);
 
     }
 
-});
+};
 
 
-/* ==============================
-   SETTINGS
-============================== */
+/* =====================================
+   AUTH STATE
+===================================== */
+
+onAuthStateChanged(
+    auth,
+    async function(user){
+
+        if(!user){
+
+            document.getElementById(
+                "profileBox"
+            ).style.display = "none";
+
+            return;
+        }
+
+
+        document.getElementById(
+            "profileBox"
+        ).style.display = "block";
+
+
+        document.getElementById(
+            "profileEmail"
+        ).innerText = user.email || "";
+
+
+        try{
+
+            const snap =
+                await getDoc(
+                    doc(db, "users", user.uid)
+                );
+
+
+            if(snap.exists()){
+
+                const data = snap.data();
+
+
+                document.getElementById(
+                    "balance"
+                ).innerText =
+                    data.balance || 0;
+
+
+                document.getElementById(
+                    "earnBalance"
+                ).innerText =
+                    data.earnBalance || 0;
+
+
+                document.getElementById(
+                    "verified"
+                ).innerText =
+                    data.verified
+                    ? "✓ Verified User"
+                    : "Not Verified";
+
+            }
+
+        }catch(error){
+
+            console.error(
+                "USER DATA ERROR:",
+                error
+            );
+
+        }
+
+    }
+);
+
+
+/* =====================================
+   LOAD WEBSITE SETTINGS
+===================================== */
 
 async function loadSettings(){
 
     try{
 
-        const snap=await getDoc(doc(db,"site","settings"));
+        const snap =
+            await getDoc(
+                doc(db, "site", "settings")
+            );
 
-        if(!snap.exists()) return;
 
-        const data=snap.data();
+        if(!snap.exists()){
 
-        document.getElementById("notice").innerText=
-        data.notice||"Welcome to ZEG-G Tournament";
+            document.getElementById(
+                "rulesText"
+            ).innerText =
+                "Rules have not been added yet.";
 
-        document.get
+            return;
+        }
+
+
+        const data = snap.data();
+
+
+        document.getElementById(
+            "notice"
+        ).innerText =
+            data.notice ||
+            "Welcome to ZEG-G Tournament";
+
+
+        document.getElementById(
+            "heroTitle"
+        ).innerText =
+            data.heroTitle ||
+            "ZEG-G Tournament";
+
+
+        document.getElementById(
+            "heroText"
+        ).innerText =
+            data.heroText ||
+            "Join Free Fire tournaments and compete with players.";
+
+
+        document.getElementById(
+            "rulesText"
+        ).innerText =
+            data.rules ||
+            "Rules have not been added yet.";
+
+
+        const liveFrame =
+            document.getElementById(
+                "liveFrame"
+            );
+
+
+        if(data.liveUrl){
+
+            liveFrame.src =
+                data.liveUrl;
+
+        }else{
+
+            liveFrame.style.display =
+                "none";
+
+        }
+
+
+        const appLink =
+            document.getElementById(
+                "appLink"
+            );
+
+
+        if(data.appUrl){
+
+            appLink.href =
+                data.appUrl;
+
+        }else{
+
+            appLink.style.display =
+                "none";
+
+        }
+
+
+        const telegramLink =
+            document.getElementById(
+                "telegramLink"
+            );
+
+
+        if(data.telegramUrl){
+
+            telegramLink.href =
+                data.telegramUrl;
+
+        }else{
+
+            telegramLink.style.display =
+                "none";
+
+        }
+
+
+        if(data.heroImage){
+
+            document.getElementById(
+                "hero"
+            ).style.backgroundImage =
+                `linear-gradient(
+                    135deg,
+                    rgba(17,24,39,.75),
+                    rgba(0,53,66,.75)
+                ), url("${data.heroImage}")`;
+
+            document.getElementById(
+                "hero"
+            ).style.backgroundSize =
+                "cover";
+
+            document.getElementById(
+                "hero"
+            ).style.backgroundPosition =
+                "center";
+
+        }
+
+
+    }catch(error){
+
+        console.error(
+            "SETTINGS ERROR:",
+            error
+        );
+
+        document.getElementById(
+            "rulesText"
+        ).innerText =
+            "Could not load rules.";
+
+    }
+
+}
+
+
+/* =====================================
+   LOAD MATCHES
+===================================== */
+
+async function loadMatches(){
+
+    const normal =
+        document.getElementById(
+            "normalMatches"
+        );
+
+    const one =
+        document.getElementById(
+            "oneMatches"
+        );
+
+    const headshot =
+        document.getElementById(
+            "headshotMatches"
+        );
+
+
+    normal.innerHTML = "";
+
+    one.innerHTML = "";
+
+    headshot.innerHTML = "";
+
+
+    try{
+
+        const snapshot =
+            await getDocs(
+                collection(db, "matches")
+            );
+
+
+        if(snapshot.empty){
+
+            normal.innerHTML =
+                `<div class="empty">
+                    No matches available.
+                </div>`;
+
+            one.innerHTML =
+                `<div class="empty">
+                    No 1 VS 1 matches available.
+                </div>`;
+
+            headshot.innerHTML =
+                `<div class="empty">
+                    No Headshot matches available.
+                </div>`;
+
+            return;
+        }
+
+
+        snapshot.forEach(function(docSnap){
+
+            const match =
+                docSnap.data();
+
+
+            const type =
+                String(
+                    match.type || "normal"
+                ).toLowerCase();
+
+
+            const title =
+                match.title ||
+                "Free Fire Match";
+
+
+            const image =
+                match.image ||
+                "https://via.placeholder.com/600x300?text=ZEG-G+Tournament";
+
+
+            const date =
+                match.date ||
+                "Date not set";
+
+
+            const time =
+                match.time ||
+                "Time not set";
+
+
+            const fee =
+                match.fee ??
+                0;
+
+
+            const prize =
+                match.prize ??
+                0;
+
+
+            const slots =
+                match.slots ??
+                0;
+
+
+            const card =
+                document.createElement("div");
+
+
+            card.className =
+                "card";
+
+
+            card.innerHTML = `
+
+                <img
+                    src="${image}"
+                    alt="${title}"
+                    onerror="this.src='https://via.placeholder.com/600x300?text=ZEG-G+Tournament'"
+                >
+
+                <div class="card-body">
+
+                    <h3>
+                        ${title}
+                    </h3>
+
+                    <div class="meta">
+                        📅 ${date}
+                    </div>
+
+                    <div class="meta">
+                        ⏰ ${time}
+                    </div>
+
+                    <div class="meta">
+                        💰 Prize: ৳${prize}
+                    </div>
+
+                    <div class="meta">
+                        👥 Slots: ${slots}
+                    </div>
+
+                    <div class="fee">
+                        Entry Fee: ৳${fee}
+                    </div>
+
+                    <button
+                        class="primary match-btn"
+                        onclick="joinMatch('${docSnap.id}')">
+
+                        JOIN MATCH
+
+                    </button>
+
+                </div>
+            `;
+
+
+            if(
+                type === "1v1" ||
+                type === "one" ||
+                type === "onevone"
+            ){
+
+                one.appendChild(card);
+
+            }else if(
+                type === "headshot" ||
+                type === "only headshot"
+            ){
+
+                headshot.appendChild(card);
+
+            }else{
+
+                normal.appendChild(card);
+
+            }
+
+        });
+
+
+        if(!normal.children.length){
+
+            normal.innerHTML =
+                `<div class="empty">
+                    No normal matches available.
+                </div>`;
+
+        }
+
+
+        if(!one.children.length){
+
+            one.innerHTML =
+                `<div class="empty">
+                    No 1 VS 1 matches available.
+                </div>`;
+
+        }
+
+
+        if(!headshot.children.length){
+
+            headshot.innerHTML =
+                `<div class="empty">
+                    No Headshot matches available.
+                </div>`;
+
+        }
+
+
+    }catch(error){
+
+        console.error(
+            "MATCH ERROR:",
+            error
+        );
+
+
+        normal.innerHTML =
+            `<div class="empty">
+                Could not load matches.
+            </div>`;
+
+
+        one.innerHTML =
+            `<div class="empty">
+                Could not load matches.
+            </div>`;
+
+
+        headshot.innerHTML =
+            `<div class="empty">
+                Could not load matches.
+            </div>`;
+
+    }
+
+}
+
+
+/* =====================================
+   JOIN MATCH
+===================================== */
+
+window.joinMatch = async function(matchId){
+
+    const user =
+        auth.currentUser;
+
+
+    if(!user){
+
+        openLogin();
+
+        document.getElementById(
+            "authMessage"
+        ).innerText =
+            "Please login first.";
+
+        return;
+    }
+
+
+    try{
+
+        await addDoc(
+            collection(
+                db,
+                "registrations"
+            ),
+            {
+
+                matchId: matchId,
+
+                uid: user.uid,
+
+                email: user.email,
+
+                createdAt:
+                    serverTimestamp()
+
+            }
+        );
+
+
+        alert(
+            "Match joined successfully!"
+        );
+
+
+    }catch(error){
+
+        console.error(
+            "JOIN ERROR:",
+            error
+        );
+
+
+        alert(
+            "Could not join match: " +
+            error.message
+        );
+
+    }
+
+};
+
+
+/* =====================================
+   START WEBSITE
+===================================== */
+
+loadSettings();
+
+loadMatches();
+
+</script>
+
+</body>
+</html>
