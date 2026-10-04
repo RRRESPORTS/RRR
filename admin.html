@@ -1,1 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ZEG-G Tournament Admin</title>
 
+<style>
+*{box-sizing:border-box}
+
+body{
+margin:0;
+background:#f3f4f6;
+font-family:Arial;
+color:#16181d
+}
+
+.wrap{
+max-width:1150px;
+margin:auto;
+padding:20px
+}
+
+.top{
+background:#11131a;
+color:#fff;
+padding:18px;
+border-radius:12px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:18px
+}
+
+.card{
+background:#fff;
+padding:20px;
+border-radius:12px;
+box-shadow:0 2px 12px #0001
+}
+
+.tabs{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin-bottom:16px
+}
+
+.tabs button{
+padding:11px 15px;
+border:1px solid #ddd;
+border-radius:8px;
+background:#fff;
+font-weight:bold;
+cursor:pointer
+}
+
+.tabs .active{
+background:#e50914;
+color:#fff;
+border-color:#e50914
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:18px
+}
+
+.tab.hidden,
+.hidden{
+display:none
+}
+
+input,
+select,
+textarea{
+width:100%;
+padding:11px;
+border:1px solid #ddd;
+border-radius:8px;
+margin:5px 0 12px
+}
+
+button{
+padding:10px 14px;
+border:0;
+border-radius:8px;
+font-weight:bold;
+cursor:pointer
+}
+
+.red{
+background:#e50914;
+color:#fff
+}
+
+.danger{
+background:#ffe1e1;
+color:#a00
+}
+
+.item{
+border:1px solid #eee;
+padding:12px;
+border-radius:8px;
+margin:8px 0
+}
+
+.row{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px
+}
+
+.small{
+font-size:12px;
+color:#777
+}
+
+@media(max-width:700px){
+.grid,
+.row{
+grid-template-columns:1fr
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<div class="top">
+<b>ZEG-G TOURNAMENT — ADMIN</b>
+<button id="logout" class="red hidden">Logout</button>
+</div>
+
+<div id="login" class="card">
+
+<h2>Admin Login</h2>
+
+<input id="email"
+type="email"
+placeholder="Admin Email">
+
+<input id="pass"
+type="password"
+placeholder="Password">
+
+<button class="red" onclick="doLogin()">
+Login
+</button>
+
+</div>
+
+<div id="app" class="hidden">
+
+<div class="tabs">
+
+<button class="active"
+onclick="show('settings',this)">
+Website
+</button>
+
+<button onclick="show('matches',this)">
+Matches
+</button>
+
+<button onclick="show('payments',this)">
+Payments
+</button>
+
+<button onclick="show('users',this)">
+Users
+</button>
+
+<button onclick="show('withdrawals',this)">
+Withdrawals
+</button>
+
+</div>
+
+
+<section id="settings" class="tab">
+
+<div class="card">
+
+<h2>Website Control</h2>
+
+<label>Notice</label>
+<input id="notice">
+
+<label>Hero Text</label>
+<input id="heroText">
+
+<label>Hero Image URL</label>
+<input id="heroUrl">
+
+<label>Logo URL</label>
+<input id="logoUrl">
+
+<label>Live Embed URL</label>
+<input id="liveUrl">
+
+<div class="row">
+
+<div>
+<label>App URL</label>
+<input id="appLink">
+</div>
+
+<div>
+<label>Telegram URL</label>
+<input id="telegramLink">
+</div>
+
+</div>
+
+<label>Minimum Withdraw</label>
+<input id="minWithdraw" type="number">
+
+<label>Rules & Conditions</label>
+<textarea id="rules" rows="10"></textarea>
+
+<button class="red"
+onclick="saveSettings()">
+Save Website
+</button>
+
+</div>
+
+</section>
+
+
+<section id="matches" class="tab hidden">
+
+<div class="grid">
+
+<div class="card">
+
+<h2>Add / Edit Match</h2>
+
+<input id="editId" type="hidden">
+
+<label>Title</label>
+<input id="title">
+
+<label>Category</label>
+
+<select id="category">
+
+<option value="normal">
+Normal
+</option>
+
+<option value="1v1">
+1 VS 1
+</option>
+
+<option value="headshot">
+Only Headshot
+</option>
+
+</select>
+
+<label>Matches Found Text</label>
+<input id="count"
+placeholder="16 Matches Found">
+
+<label>Entry Fee</label>
+<input id="fee" type="number">
+
+<label>Image URL</label>
+<input id="imageUrl">
+
+<label>Enabled</label>
+
+<select id="enabled">
+
+<option value="true">
+Yes
+</option>
+
+<option value="false">
+No
+</option>
+
+</select>
+
+<button class="red"
+onclick="saveMatch()">
+Save Match
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>All Matches</h2>
+
+<div id="matchList"></div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<section id="payments" class="tab hidden">
+
+<div class="grid">
+
+<div class="card">
+
+<h2>Payment Method</h2>
+
+<input id="payId" type="hidden">
+
+<label>Name</label>
+<input id="payName"
+placeholder="bKash / Nagad / Rocket">
+
+<label>Number</label>
+<input id="payNumber">
+
+<button class="red"
+onclick="savePayment()">
+Save
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>Methods</h2>
+
+<div id="payList"></div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<section id="users" class="tab hidden">
+
+<div class="card">
+
+<h2>User Control</h2>
+
+<button onclick="loadUsers()">
+Refresh
+</button>
+
+<div id="userList"></div>
+
+</div>
+
+</section>
+
+
+<section id="withdrawals" class="tab hidden">
+
+<div class="card">
+
+<h2>Withdrawal Control</h2>
+
+<button onclick="loadWithdrawals()">
+Refresh
+</button>
+
+<div id="withdrawList"></div>
+
+</div>
+
+</section>
+
+</div>
+</div>
+
+
+<script type="module">
+
+import{initializeApp}from"https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+
+import{
+getAuth,
+onAuthStateChanged,
+signInWithEmailAndPassword,
+signOut
+}from"https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+import{
+getFirestore,
+doc,
+getDoc,
+setDoc,
+collection,
+getDocs,
+addDoc,
+updateDoc,
+deleteDoc
+}from"https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+
+const firebaseConfig={
+
+apiKey:"YOUR_API_KEY",
+
+authDomain:"YOUR_PROJECT.firebaseapp.com",
+
+projectId:"YOUR_PROJECT_ID",
+
+storageBucket:"YOUR_PROJECT.appspot.com",
+
+messagingSenderId:"YOUR_SENDER_ID",
+
+appId:"YOUR_APP_ID"
+
+};
+
+
+const ADMIN_EMAIL="YOUR_ADMIN_EMAIL";
+
+
+const app=initializeApp(firebaseConfig);
+
+const auth=getAuth(app);
+
+const db=getFirestore(app);
+
+const $=x=>document.getElementById(x);
+
+
+function esc(s){
+
+return String(s??"").replace(
+/[&<>"']/g,
+c=>({
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#039;"
+}[c])
+);
+
+}
+
+
+window.doLogin=async()=>{
+
+try{
+
+await signInWithEmailAndPassword(
+auth,
+$("email").value,
+$("pass").value
+);
+
+}catch(e){
+
+alert(e.message);
+
+}
+
+};
+
+
+$("logout").onclick=()=>signOut(auth);
+
+
+onAuthStateChanged(auth,u=>{
+
+if(u && u.email===ADMIN_EMAIL){
+
+$("login").classList.add("hidden");
+
+$("app").classList.remove("hidden");
+
+$("logout").classList.remove("hidden");
+
+loadAll();
+
+}else{
+
+$("login").classList.remove("hidden");
+
+$("app").classList.add("hidden");
+
+$("logout").classList.add("hidden");
+
+}
+
+});
+
+
+window.show=(id,b)=>{
+
+document
+.querySelectorAll(".tab")
+.forEach(x=>x.classList.add("hidden"));
+
+$(id).classList.remove("hidden");
+
+document
+.querySelectorAll(".tabs button")
+.forEach(x=>x.classList.remove("active"));
+
+b.classList.add("active");
+
+};
+
+
+async function loadAll(){
+
+loadSettings();
+loadMatches();
+loadPayments();
+loadUsers();
+loadWithdrawals();
+
+}
+
+
+async function loadSettings(){
+
+let s=await getDoc(
+doc(db,"site","settings")
+);
+
+let x=s.data()||{};
+
+[
+"notice",
+"heroText",
+"heroUrl",
+"logoUrl",
+"liveUrl",
+"appLink",
+"telegramLink",
+"minWithdraw",
+"rules"
+].forEach(k=>{
+
+$(k).value=x[k]??"";
+
+});
+
+}
+
+
+window.saveSettings=async()=>{
+
+await setDoc(
+doc(db,"site","settings"),
+{
+
+notice:$("notice").value,
+
+heroText:$("heroText").value,
+
+heroUrl:$("heroUrl").value,
+
+logoUrl:$("logoUrl").value,
+
+liveUrl:$("liveUrl").value,
+
+appLink:$("appLink").value,
+
+telegramLink:$("telegramLink").value,
+
+minWithdraw:Number(
+$("minWithdraw").value||100
+),
+
+rules:$("rules").value
+
+},
+{merge:true}
+);
+
+alert("Website updated.");
+
+};
+
+
+window.saveMatch=async()=>{
+
+let id=$("editId").value;
+
+let d={
+
+title:$("title").value,
+
+category:$("category").value,
+
+count:$("count").value,
+
+entryFee:Number(
+$("fee").value||0
+),
+
+imageUrl:$("imageUrl").value,
+
+enabled:$("enabled").value==="true"
+
+};
+
+
+if(!d.title)
+return alert("Title required");
+
+
+if(id){
+
+await updateDoc(
+doc(db,"matches",id),
+d
+);
+
+}else{
+
+await addDoc(
+collection(db,"matches"),
+d
+);
+
+}
+
+
+clearMatch();
+
+loadMatches();
+
+};
+
+
+function clearMatch(){
+
+[
+"editId",
+"title",
+"count",
+"fee",
+"imageUrl"
+].forEach(x=>$(x).value="");
+
+$("category").value="normal";
+
+$("enabled").value="true";
+
+}
+
+
+async function loadMatches(){
+
+let s=await getDocs(
+collection(db,"matches")
+);
+
+$("matchList").innerHTML=
+
+s.docs.map(d=>{
+
+let x=d.data();
+
+return `
+
+<div class="item">
+
+<b>${esc(x.title)}</b>
+
+<br>
+
+${x.category}
+· ৳${x.entryFee||0}
+· ${x.enabled?"ON":"OFF"}
+
+<br>
+
+<button
+onclick="editMatch('${d.id}')">
+Edit
+</button>
+
+<button
+class="danger"
+onclick="deleteMatch('${d.id}')">
+Delete
+</button>
+
+</div>
+
+`;
+
+}).join("")||"No matches.";
+
+}
+
+
+window.editMatch=async id=>{
+
+let x=(await getDoc(
+doc(db,"matches",id)
+)).data();
+
+$("editId").value=id;
+
+$("title").value=x.title||"";
+
+$("category").value=x.category||"normal";
+
+$("count").value=x.count||"";
+
+$("fee").value=x.entryFee||0;
+
+$("imageUrl").value=x.imageUrl||"";
+
+$("enabled").value=
+String(x.enabled!==false);
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+
+};
+
+
+window.deleteMatch=async id=>{
+
+if(confirm("Delete match?")){
+
+await deleteDoc(
+doc(db,"matches",id)
+);
+
+loadMatches();
+
+}
+
+};
+
+
+window.savePayment=async()=>{
+
+let id=$("payId").value;
+
+let d={
+name:$("payName").value,
+number:$("payNumber").value
+};
+
+if(!d.name)
+return alert("Name required");
+
+
+if(id){
+
+await updateDoc(
+doc(db,"paymentMethods",id),
+d
+);
+
+}else{
+
+await addDoc(
+collection(db,"paymentMethods"),
+d
+);
+
+}
+
+
+$("payId").value="";
+$("payName").value="";
+$("payNumber").value="";
+
+loadPayments();
+
+};
+
+
+async function loadPayments(){
+
+let s=await getDocs(
+collection(db,"paymentMethods")
+);
+
+$("payList").innerHTML=
+
+s.docs.map(d=>{
+
+let x=d.data();
+
+return `
+
+<div class="item">
+
+<b>${esc(x.name)}</b>
+
+<br>
+
+${esc(x.number)}
+
+<br>
+
+<button onclick="editPay('${d.id}')">
+Edit
+</button>
+
+<button
+class="danger"
+onclick="deletePay('${d.id}')">
+Delete
+</button>
+
+</div>
+
+`;
+
+}).join("")||"No payment methods.";
+
+}
+
+
+window.editPay=async id=>{
+
+let x=(await getDoc(
+doc(db,"paymentMethods",id)
+)).data();
+
+$("payId").value=id;
+
+$("payName").value=x.name||"";
+
+$("payNumber").value=x.number||"";
+
+};
+
+
+window.deletePay=async id=>{
+
+if(confirm("Delete?")){
+
+await deleteDoc(
+doc(db,"paymentMethods",id)
+);
+
+loadPayments();
+
+}
+
+};
+
+
+window.loadUsers=async()=>{
+
+let s=await getDocs(
+collection(db,"users")
+);
+
+$("userList").innerHTML=
+
+s.docs.map(d=>{
+
+let x=d.data();
+
+return `
+
+<div class="item">
+
+<b>${esc(x.name||"User")}</b>
+—
+${esc(x.email||"")}
+
+<br>
+
+Balance ৳${x.balance||0}
+· Earn ৳${x.earnBalance||0}
+· ${x.verified?"Verified":"Unverified"}
+
+<br>
+
+<input
+id="b${d.id}"
+type="number"
+value="${x.balance||0}">
+
+<input
+id="e${d.id}"
+type="number"
+value="${x.earnBalance||0}">
+
+<button onclick="updateUser('${d.id}')">
+Update Balance
+</button>
+
+<button
+onclick="verify('${d.id}',${!x.verified})">
+
+${x.verified?"Unverify":"Verify"}
+
+</button>
+
+</div>
+
+`;
+
+}).join("")||"No users.";
+
+};
+
+
+window.updateUser=async id=>{
+
+await updateDoc(
+doc(db,"users",id),
+{
+balance:Number(
+$("b"+id).value||0
+),
+
+earnBalance:Number(
+$("e"+id).value||0
+)
+}
+);
+
+loadUsers();
+
+};
+
+
+window.verify=async(id,v)=>{
+
+await updateDoc(
+doc(db,"users",id),
+{
+verified:v
+}
+);
+
+loadUsers();
+
+};
+
+
+window.loadWithdrawals=async()=>{
+
+let s=await getDocs(
+collection(db,"withdrawals")
+);
+
+$("withdrawList").innerHTML=
+
+s.docs.map(d=>{
+
+let x=d.data();
+
+return `
+
+<div class="item">
+
+<b>${esc(x.email||"")}</b>
+
+<br>
+
+৳${x.amount}
+· ${esc(x.method||"")}
+· ${esc(x.number||"")}
+
+<br>
+
+Status:
+${esc(x.status||"pending")}
+
+${x.status==="pending"
+
+?`
+
+<button
+class="red"
+onclick="approve(
+'${d.id}',
+'${x.uid}',
+${x.amount}
+)">
+Approve
+</button>
+
+<button
+onclick="reject('${d.id}')">
+Reject
+</button>
+
+`
+
+:""}
+
+</div>
+
+`;
+
+}).join("")||"No requests.";
+
+};
+
+
+window.approve=async(id,uid,amount)=>{
+
+let u=await getDoc(
+doc(db,"users",uid)
+);
+
+let bal=Number(
+u.data()?.balance||0
+);
+
+if(bal<Number(amount))
+return alert("Insufficient user balance.");
+
+await updateDoc(
+doc(db,"users",uid),
+{
+balance:bal-Number(amount)
+}
+);
+
+await updateDoc(
+doc(db,"withdrawals",id),
+{
+status:"completed"
+}
+);
+
+loadWithdrawals();
+loadUsers();
+
+};
+
+
+window.reject=async id=>{
+
+await updateDoc(
+doc(db,"withdrawals",id),
+{
+status:"rejected"
+}
+);
+
+loadWithdrawals();
+
+};
+
+</script>
+
+</body>
+</html>
