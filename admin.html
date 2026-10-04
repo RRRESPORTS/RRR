@@ -53,8 +53,8 @@
     <div class="login-container" id="loginContainer">
         <div class="login-box">
             <h2>Admin Login</h2>
-            <input type="text" id="adminUser" class="form-control" placeholder="Admin ID (zeg-g999)">
-            <input type="password" id="adminPass" class="form-control" placeholder="Password (999zeg-g999)">
+            <input type="text" id="adminUser" class="form-control" placeholder="Admin ID">
+            <input type="password" id="adminPass" class="form-control" placeholder="Password">
             <button class="admin-btn" onclick="checkAdminLogin()">Login to Panel</button>
         </div>
     </div>
@@ -111,7 +111,7 @@
                 <button class="admin-btn" onclick="alert('Notice updated')">Update Notice</button>
             </div>
 
-            <!-- Card 6: Room ID & Match Control (With Real Match List & Delete Option) -->
+            <!-- Card 6: Room ID & Match Control -->
             <div class="admin-card">
                 <h3>🔑 Room ID & Match Control</h3>
                 <div class="list-container" id="adminMatchList">
@@ -152,7 +152,7 @@
             const userInput = document.getElementById("adminUser").value.trim();
             const passInput = document.getElementById("adminPass").value.trim();
 
-            if(userInput === "zeg-g999" && passInput === "999zeg-g999") {
+            if(userInput === "9133" && passInput === "909090") {
                 sessionStorage.setItem("isAdminLoggedIn", "true");
                 document.getElementById("loginContainer").style.display = "none";
                 document.getElementById("adminDashboard").style.display = "block";
@@ -167,7 +167,6 @@
             location.reload();
         }
 
-        // Match Create
         window.addNewMatchToDB = async function() {
             const code = document.getElementById("mCode").value.trim();
             const name = document.getElementById("mName").value.trim();
@@ -201,7 +200,6 @@
             }
         }
 
-        // Set Room ID & Password
         window.setRoomCreds = async function(matchId) {
             const rId = document.getElementById(`rid_${matchId}`).value.trim();
             const rPass = document.getElementById(`rpass_${matchId}`).value.trim();
@@ -217,7 +215,6 @@
             }
         }
 
-        // Delete Match Option
         window.deleteMatch = async function(matchId) {
             if(confirm("Apni ki nischit bhabe ei match ti delete korte chan?")) {
                 try {
@@ -230,9 +227,7 @@
             }
         }
 
-        // Fetch Data from Database
         async function loadAdminData() {
-            // 1. Add Balance Requests
             const addBalContainer = document.getElementById("addBalanceRequestsList");
             try {
                 const snap = await getDocs(collection(db, "addBalanceRequests"));
@@ -249,7 +244,6 @@
                 }
             } catch(e) {}
 
-            // 2. Withdraw Requests
             const withdrawContainer = document.getElementById("withdrawRequestsList");
             try {
                 const snap = await getDocs(collection(db, "withdrawRequests"));
@@ -266,7 +260,6 @@
                 }
             } catch(e) {}
 
-            // 3. Active Matches List (With Room ID Input & Delete Button)
             const matchListContainer = document.getElementById("adminMatchList");
             try {
                 const snap = await getDocs(collection(db, "matches"));
@@ -288,9 +281,7 @@
                             </div>`;
                     });
                 }
-            } catch(e) {
-                console.log(e);
-            }
+            } catch(e) {}
         }
     </script>
 </body>
