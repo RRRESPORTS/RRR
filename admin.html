@@ -41,10 +41,10 @@
         .admin-btn:hover { box-shadow: 0 0 10px var(--neon-cyan); }
         
         /* List Items inside Cards */
-        .list-container { max-height: 220px; overflow-y: auto; margin-top: 10px; }
+        .list-container { max-height: 250px; overflow-y: auto; margin-top: 10px; }
         .list-item { background: #1f2937; padding: 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; border-left: 3px solid var(--neon-cyan); }
-        .btn-approve { background: var(--neon-green); border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; color: #000; }
-        .btn-fail { background: var(--neon-pink); color: #fff; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .btn-approve { background: var(--neon-green); border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; color: #000; }
+        .btn-fail { background: var(--neon-pink); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -85,7 +85,7 @@
             <div class="admin-card">
                 <h3>💳 Add Balance Requests</h3>
                 <div class="list-container" id="addBalanceRequestsList">
-                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">কোনো অ্যাড ব্যালেন্স রিকোয়েস্ট নেই।</p>
+                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono add balance request nei.</p>
                 </div>
             </div>
 
@@ -93,7 +93,7 @@
             <div class="admin-card">
                 <h3>💸 Withdraw Requests</h3>
                 <div class="list-container" id="withdrawRequestsList">
-                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">কোনো উইথড্র রিকোয়েস্ট নেই।</p>
+                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono withdraw request nei.</p>
                 </div>
             </div>
 
@@ -101,21 +101,21 @@
             <div class="admin-card">
                 <h3>🚫 User Block / Ban Setting</h3>
                 <input type="text" id="blockUserEmail" class="form-control" placeholder="User Email">
-                <button class="admin-btn" style="background: var(--neon-pink); color: #fff;" onclick="blockUser()">Ban / Block User</button>
+                <button class="admin-btn" style="background: var(--neon-pink); color: #fff;" onclick="alert('Feature ready')">Ban / Block User</button>
             </div>
 
             <!-- Card 5: Website Notice & Banner Control -->
             <div class="admin-card">
-                <h3>📢 Notice & Banner Setting</h3>
+                <h3>📢 Notice Setting</h3>
                 <textarea id="noticeText" class="form-control" placeholder="Update Website Notice..." rows="3"></textarea>
-                <button class="admin-btn" onclick="updateWebsiteSettings()">Update Notice</button>
+                <button class="admin-btn" onclick="alert('Notice updated')">Update Notice</button>
             </div>
 
-            <!-- Card 6: Room ID & Match Control (Updated with Active Matches List) -->
+            <!-- Card 6: Room ID & Match Control (With Real Match List & Delete Option) -->
             <div class="admin-card">
                 <h3>🔑 Room ID & Match Control</h3>
                 <div class="list-container" id="adminMatchList">
-                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">কোনো ম্যাচ পাওয়া যায়নি।</p>
+                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono match paowa jayni.</p>
                 </div>
             </div>
 
@@ -158,7 +158,7 @@
                 document.getElementById("adminDashboard").style.display = "block";
                 loadAdminData();
             } else {
-                alert("ভুল ID বা Password!");
+                alert("Vul ID ba Password!");
             }
         }
 
@@ -167,7 +167,7 @@
             location.reload();
         }
 
-        // Create Match Function
+        // Match Create
         window.addNewMatchToDB = async function() {
             const code = document.getElementById("mCode").value.trim();
             const name = document.getElementById("mName").value.trim();
@@ -178,7 +178,7 @@
             const slots = document.getElementById("mSlots").value.trim();
 
             if(!code || !name || !fee) {
-                alert("দয়া করে কোড, নাম এবং এন্ট্রি ফি দিন।");
+                alert("Doya kore Code, Name ebong Entry Fee din.");
                 return;
             }
 
@@ -194,14 +194,14 @@
                     roomId: "",
                     roomPass: ""
                 });
-                alert("ম্যাচ সফলভাবে তৈরি হয়েছে!");
+                alert("Match successfully create hoyeche!");
                 location.reload();
             } catch(e) {
-                alert("এরর: " + e.message);
+                alert("Error: " + e.message);
             }
         }
 
-        // Set Room ID & Password for a specific match
+        // Set Room ID & Password
         window.setRoomCreds = async function(matchId) {
             const rId = document.getElementById(`rid_${matchId}`).value.trim();
             const rPass = document.getElementById(`rpass_${matchId}`).value.trim();
@@ -211,26 +211,26 @@
                     roomId: rId,
                     roomPass: rPass
                 });
-                alert("রুম আইডি এবং পাসওয়ার্ড সফলভাবে আপডেট করা হয়েছে!");
+                alert("Room ID & Password successfully update kora hoyeche!");
             } catch(e) {
-                alert("এরর: " + e.message);
+                alert("Error: " + e.message);
             }
         }
 
-        // Delete Match Function
+        // Delete Match Option
         window.deleteMatch = async function(matchId) {
-            if(confirm("আপনি কি নিশ্চিতভাবে এই ম্যাচটি ডিলিট করতে চান?")) {
+            if(confirm("Apni ki nischit bhabe ei match ti delete korte chan?")) {
                 try {
                     await deleteDoc(doc(db, "matches", matchId));
-                    alert("ম্যাচ ডিলিট করা হয়েছে!");
+                    alert("Match successfully delete kora hoyeche!");
                     loadAdminData();
                 } catch(e) {
-                    alert("এরর: " + e.message);
+                    alert("Error: " + e.message);
                 }
             }
         }
 
-        // Fetch Real-time Requests and Matches
+        // Fetch Data from Database
         async function loadAdminData() {
             // 1. Add Balance Requests
             const addBalContainer = document.getElementById("addBalanceRequestsList");
@@ -266,12 +266,12 @@
                 }
             } catch(e) {}
 
-            // 3. Active Matches List for Room ID Control
+            // 3. Active Matches List (With Room ID Input & Delete Button)
             const matchListContainer = document.getElementById("adminMatchList");
             try {
                 const snap = await getDocs(collection(db, "matches"));
                 if(snap.empty) {
-                    matchListContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">কোনো ম্যাচ পাওয়া যায়নি।</p>`;
+                    matchListContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono match paowa jayni.</p>`;
                 } else {
                     matchListContainer.innerHTML = "";
                     snap.forEach((d) => {
@@ -292,9 +292,6 @@
                 console.log(e);
             }
         }
-
-        window.blockUser = function() { alert("User block feature ready."); }
-        window.updateWebsiteSettings = function() { alert("Notice updated."); }
     </script>
 </body>
 </html>
