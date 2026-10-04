@@ -1,202 +1,190 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AG Admin Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <style>body { background-color: #030712; color: #fff; font-family: sans-serif; }</style>
-</head>
-<body class="p-4 max-w-4xl mx-auto space-y-6">
-    <h1 class="text-xl font-bold text-[#00ff66]">⚙ AG Tournament Admin Panel</h1>
+    <title>ZEG-G Admin Panel | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <div class="flex gap-2 flex-wrap">
-        <button onclick="switchAdminTab('users')" class="bg-gray-800 px-3 py-2 rounded text-xs font-bold">Users</button>
-        <button onclick="switchAdminTab('addmatch')" class="bg-gray-800 px-3 py-2 rounded text-xs font-bold">Add Match</button>
-        <button onclick="switchAdminTab('matches')" class="bg-gray-800 px-3 py-2 rounded text-xs font-bold">Manage Matches & Room ID</button>
-        <button onclick="switchAdminTab('withdraws')" class="bg-gray-800 px-3 py-2 rounded text-xs font-bold">Withdraw Requests</button>
-    </div>
-
-    <!-- USERS TAB -->
-    <div id="adm-users" class="space-y-3 bg-[#111827] p-4 rounded-xl border border-gray-800">
-        <h2 class="text-sm font-bold text-amber-400">User Management</h2>
-        <input id="search-box" oninput="searchUsers()" placeholder="Search by TJ-ID, Mail, or Number..." class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-xs text-white" />
-        <div id="users-list-container" class="space-y-2 text-xs">Loading users...</div>
-    </div>
-
-    <!-- ADD MATCH TAB -->
-    <div id="adm-addmatch" class="hidden space-y-3 bg-[#111827] p-4 rounded-xl border border-gray-800 text-xs">
-        <h2 class="text-sm font-bold text-[#00ff66]">Add New Match</h2>
-        <input id="m-title" placeholder="Match Title (e.g., Free Fire Solo)" class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-white" />
-        <input id="m-id" placeholder="Match ID (e.g., FF-101)" class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-white" />
-        <input id="m-time" placeholder="Time (e.g., 8:00 PM)" class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-white" />
-        <input id="m-entry" type="number" placeholder="Entry Fee (৳)" class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-white" />
-        <input id="m-prize" type="number" placeholder="Win Prize (৳)" class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-white" />
-        <button onclick="addNewMatch()" class="w-full bg-[#00ff66] text-black font-bold py-2 rounded uppercase">Publish Match</button>
-    </div>
-
-    <!-- MATCHES LIST & ROOM ID TAB -->
-    <div id="adm-matches" class="hidden space-y-3 bg-[#111827] p-4 rounded-xl border border-gray-800 text-xs">
-        <h2 class="text-sm font-bold text-blue-400">Match Room ID & Pass Setup</h2>
-        <div id="admin-match-list" class="space-y-3">Loading matches...</div>
-    </div>
-
-    <!-- WITHDRAW REQUESTS TAB -->
-    <div id="adm-withdraws" class="hidden space-y-3 bg-[#111827] p-4 rounded-xl border border-gray-800 text-xs">
-        <h2 class="text-sm font-bold text-purple-400">Withdraw Requests</h2>
-        <div id="admin-wd-list" class="space-y-2">Loading requests...</div>
-    </div>
-
-    <script>
-        const firebaseConfig = {
-          apiKey: "AIzaSyAbW9RUriAT60Cx3l-PymDflcAKsKTnSi",
-          authDomain: "ag-tournament-eb4b4.firebaseapp.com",
-          databaseURL: "https://ag-tournament-999-default-rtdb.firebaseio.com",
-          projectId: "ag-tournament-eb4b4"
-        };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-        const db = firebase.database();
-
-        function switchAdminTab(tab) {
-            ['users', 'addmatch', 'matches', 'withdraws'].forEach(t => {
-                document.getElementById('adm-' + t).classList.add('hidden');
-            });
-            document.getElementById('adm-' + tab).classList.remove('hidden');
+    <style>
+        :root {
+            --bg-color: #070913;
+            --panel-bg: rgba(13, 17, 28, 0.85);
+            --neon-purple: #9333ea;
+            --neon-cyan: #06b6d4;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-glow: rgba(6, 182, 212, 0.2);
         }
 
-        let allUsersData = {};
-        db.ref('users').on('value', snap => {
-            allUsersData = snap.val() || {};
-            renderUsers(allUsersData);
-        });
-
-        function renderUsers(users) {
-            let container = document.getElementById('users-list-container');
-            container.innerHTML = "";
-            let keys = Object.keys(users);
-            if(keys.length === 0) { container.innerHTML = "No users found."; return; }
-
-            keys.forEach(k => {
-                let u = users[k];
-                container.innerHTML += `
-                    <div class="bg-gray-900 p-3 rounded border border-gray-800 space-y-2">
-                        <div><b>Email:</b> ${u.email} | <b>TJ-ID:</b> <span class="text-[#00ff66]">${u.tjId}</span> | <b>Balance:</b> ৳${u.balance || 0}</div>
-                        <div><b>Phone:</b> ${u.phone || 'N/A'}</div>
-                        <div class="flex gap-2 items-center">
-                            <input id="bal-${k}" type="number" placeholder="Add/Set Bal" class="bg-gray-800 p-1 rounded text-white w-24" />
-                            <button onclick="updateUserBal('${k}')" class="bg-green-600 text-white px-2 py-1 rounded">Update Bal</button>
-                            <button onclick="toggleBan('${k}', ${u.isBanned})" class="bg-${u.isBanned ? 'green' : 'red'}-600 text-white px-2 py-1 rounded">${u.isBanned ? 'Unban' : 'Ban'}</button>
-                        </div>
-                    </div>
-                `;
-            });
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
         }
 
-        function searchUsers() {
-            let query = document.getElementById('search-box').value.toLowerCase();
-            let filtered = {};
-            Object.keys(allUsersData).forEach(k => {
-                let u = allUsersData[k];
-                if((u.email && u.email.toLowerCase().includes(query)) || (u.tjId && u.tjId.toLowerCase().includes(query)) || (u.phone && u.phone.includes(query))) {
-                    filtered[k] = u;
-                }
-            });
-            renderUsers(filtered);
+        /* Sidebar */
+        aside {
+            width: 260px;
+            background: var(--panel-bg);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .admin-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 40px;
+        }
+        .menu-links { list-style: none; display: flex; flex-direction: column; gap: 15px; }
+        .menu-links a {
+            text-decoration: none; color: var(--text-muted);
+            font-weight: 600; padding: 12px 15px; border-radius: 8px;
+            display: flex; align-items: center; gap: 12px; transition: 0.3s;
+        }
+        .menu-links a:hover, .menu-links a.active {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--neon-cyan);
+            border-left: 3px solid var(--neon-cyan);
         }
 
-        function updateUserBal(k) {
-            let val = Number(document.getElementById('bal-' + k).value);
-            db.ref('users/' + k).update({ balance: val }, () => alert('Balance updated!'));
+        /* Main Content */
+        main { flex: 1; padding: 40px; overflow-y: auto; }
+        .top-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px;
+        }
+        .top-header h2 { font-family: 'Orbitron', sans-serif; font-size: 24px; }
+        .admin-badge {
+            background: rgba(147, 51, 234, 0.2); border: 1px solid var(--neon-purple);
+            padding: 6px 15px; border-radius: 20px; font-size: 14px; color: #d8b4fe;
         }
 
-        function toggleBan(k, currentStatus) {
-            db.ref('users/' + k).update({ isBanned: !currentStatus }, () => alert('Status updated!'));
+        /* Dashboard Stats Cards */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px;
         }
-
-        function addNewMatch() {
-            let title = document.getElementById('m-title').value.trim();
-            let matchId = document.getElementById('m-id').value.trim();
-            let time = document.getElementById('m-time').value.trim();
-            let entry = Number(document.getElementById('m-entry').value);
-            let prize = Number(document.getElementById('m-prize').value);
-            if(!title || !matchId) return alert('Fill required fields!');
-
-            db.ref('matches').push({ title, matchId, time, entry, prize, roomId: "", roomPass: "" }, () => {
-                alert('Match published successfully!');
-                document.getElementById('m-title').value = '';
-                document.getElementById('m-id').value = '';
-            });
+        .stat-card {
+            background: var(--panel-bg); border: 1px solid var(--border-glow);
+            padding: 25px; border-radius: 12px; backdrop-filter: blur(10px);
         }
+        .stat-card h4 { color: var(--text-muted); font-size: 14px; margin-bottom: 10px; }
+        .stat-card .value { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 700; color: var(--neon-cyan); }
 
-        db.ref('matches').on('value', snap => {
-            let container = document.getElementById('admin-match-list');
-            container.innerHTML = "";
-            if(!snap.exists()) { container.innerHTML = "No matches."; return; }
-
-            snap.forEach(mSnap => {
-                let mKey = mSnap.key, m = mSnap.val();
-                container.innerHTML += `
-                    <div class="bg-gray-900 p-3 rounded border border-gray-800 space-y-2">
-                        <div><b>${m.title}</b> (${m.matchId}) - Entry: ৳${m.entry}</div>
-                        <div class="flex gap-2">
-                            <input id="r-id-${mKey}" value="${m.roomId || ''}" placeholder="Room ID" class="bg-gray-800 p-1 rounded text-white w-1/2" />
-                            <input id="r-pass-${mKey}" value="${m.roomPass || ''}" placeholder="Password" class="bg-gray-800 p-1 rounded text-white w-1/2" />
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="saveRoomDetails('${mKey}')" class="bg-blue-600 text-white px-3 py-1 rounded">Save Room ID & Pass</button>
-                            <button onclick="deleteMatch('${mKey}')" class="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
-                        </div>
-                    </div>
-                `;
-            });
-        });
-
-        function saveRoomDetails(mKey) {
-            let roomId = document.getElementById('r-id-' + mKey).value.trim();
-            let roomPass = document.getElementById('r-pass-' + mKey).value.trim();
-            db.ref('matches/' + mKey).update({ roomId, roomPass }, () => alert('Room details updated!'));
+        /* Tournament Management Section */
+        .panel-section {
+            background: var(--panel-bg); border: 1px solid var(--border-glow);
+            padding: 25px; border-radius: 12px;
         }
-
-        function deleteMatch(mKey) {
-            if(confirm('Delete this match?')) db.ref('matches/' + mKey).remove();
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
         }
-
-        db.ref('allWithdrawRequests').on('value', snap => {
-            let container = document.getElementById('admin-wd-list');
-            container.innerHTML = "";
-            if(!snap.exists()) { container.innerHTML = "No requests."; return; }
-
-            snap.forEach(wSnap => {
-                let wKey = wSnap.key, w = wSnap.val();
-                let col = w.status === 'Approved' ? 'text-green-400' : (w.status === 'Failed' ? 'text-red-400' : 'text-amber-400');
-                container.innerHTML += `
-                    <div class="bg-gray-900 p-3 rounded border border-gray-800 flex justify-between items-center">
-                        <div>
-                            <div><b>Email:</b> ${w.email}</div>
-                            <div><b>Bkash:</b> ${w.number} | <b>Amount:</b> ৳${w.amount}</div>
-                            <div>Status: <span class="${col}">${w.status}</span></div>
-                        </div>
-                        <div class="flex flex-col gap-1">
-                            <button onclick="updateWdStatus('${wKey}', '${w.userKey}', 'Approved')" class="bg-green-600 px-2 py-1 rounded text-white">Approve</button>
-                            <button onclick="updateWdStatus('${wKey}', '${w.userKey}', 'Failed')" class="bg-red-600 px-2 py-1 rounded text-white">Failed</button>
-                        </div>
-                    </div>
-                `;
-            });
-        });
-
-        function updateWdStatus(wKey, userKey, status) {
-            db.ref('allWithdrawRequests/' + wKey).update({ status });
-            db.ref('withdraws/' + userKey).orderByChild('status').once('value', s => {
-                s.forEach(child => {
-                    db.ref('withdraws/' + userKey + '/' + child.key).update({ status });
-                });
-            });
-            alert('Withdraw status updated to ' + status);
+        .section-header h3 { font-family: 'Orbitron', sans-serif; font-size: 18px; }
+        
+        .btn-action {
+            background: linear-gradient(45deg, var(--neon-purple), var(--neon-cyan));
+            color: #fff; border: none; padding: 10px 20px; border-radius: 8px;
+            font-family: 'Orbitron', sans-serif; font-weight: 700; cursor: pointer; transition: 0.3s;
         }
-    </script>
+        .btn-action:hover { opacity: 0.8; box-shadow: 0 0 15px rgba(6,182,212,0.4); }
+
+        /* Table Style */
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
+        th { color: var(--text-muted); font-weight: 600; }
+        td span.status { padding: 5px 10px; border-radius: 6px; font-size: 12px; }
+        td span.active { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            aside { width: 100%; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside>
+        <div>
+            <div class="admin-logo">ZEG-G ADMIN</div>
+            <ul class="menu-links">
+                <li><a href="#" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard</a></li>
+                <li><a href="#"><i class="fa-solid fa-trophy"></i> Tournaments</a></li>
+                <li><a href="#"><i class="fa-solid fa-users"></i> Users & Teams</a></li>
+                <li><a href="#"><i class="fa-solid fa-wallet"></i> Transactions</a></li>
+                <li><a href="index.html"><i class="fa-solid fa-globe"></i> Visit Site</a></li>
+            </ul>
+        </div>
+        <div>
+            <a href="index.html" style="color: #ef4444; text-decoration: none; font-weight: 600;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </aside>
+
+    <!-- Main Panel -->
+    <main>
+        <div class="top-header">
+            <h2>Dashboard Overview</h2>
+            <div class="admin-badge"><i class="fa-solid fa-shield-halved"></i> Super Admin</div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h4>Total Users</h4>
+                <div class="value">1,420</div>
+            </div>
+            <div class="stat-card">
+                <h4>Active Tournaments</h4>
+                <div class="value">06</div>
+            </div>
+            <div class="stat-card">
+                <h4>Total Revenue</h4>
+                <div class="value">৳24,500</div>
+            </div>
+        </div>
+
+        <!-- Management Table -->
+        <div class="panel-section">
+            <div class="section-header">
+                <h3>Manage Tournaments</h3>
+                <button class="btn-action">+ Add Tournament</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tournament Name</th>
+                        <th>Game</th>
+                        <th>Prize Pool</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Free Fire Squad Championship</td>
+                        <td>Free Fire</td>
+                        <td>৳10,000</td>
+                        <td><span class="status active">Live</span></td>
+                    </tr>
+                    <tr>
+                        <td>PUBG Battle Royale</td>
+                        <td>PUBG Mobile</td>
+                        <td>৳15,000</td>
+                        <td><span class="status active">Upcoming</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
 </body>
 </html>
