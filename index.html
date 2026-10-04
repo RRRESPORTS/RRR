@@ -1,363 +1,239 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AG TOURNAMENT</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AG-TOURNAMENT - User</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <style>
-        body { background-color: #070a12; color: #fff; font-family: sans-serif; padding-bottom: 90px; }
-        .select-none { user-select: none; -webkit-user-select: none; }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 </head>
-<body class="min-h-screen">
-    <div class="bg-[#04060b] py-3 px-4 flex justify-between items-center border-b-2 border-[#00ff66] shadow-lg fixed top-0 left-0 right-0 z-40">
-        <div class="flex items-center gap-2">
-            <span id="top-email" class="text-xs text-gray-300 font-bold truncate max-w-[140px]">Guest</span>
-            <span id="top-tj-id" class="bg-[#00ff66]/20 text-[#00ff66] text-[10px] px-2 py-0.5 rounded border border-[#00ff66]/30 hidden">TJ-ID: --</span>
-        </div>
-        <div class="flex items-center gap-2">
-            <button id="google-login-btn" onclick="loginWithGoogle()" class="bg-white hover:bg-gray-200 text-black px-3 py-1 rounded-lg font-bold text-xs">Login</button>
-            <a href="admin.html" target="_blank" class="bg-amber-500 text-black px-2 py-1 rounded font-bold text-[10px]">⚙ Admin</a>
-            <button onclick="toggleMenu()" class="text-[#00ff66] text-xl font-bold px-1">☰</button>
-        </div>
-        <div id="dropdown-menu" class="hidden absolute top-14 right-3 bg-[#111827] border border-[#00ff66]/40 rounded-xl w-56 shadow-2xl z-50 p-3 space-y-2 text-xs">
-            <button onclick="openTab('profile'); toggleMenu();" class="w-full text-left py-2 px-2 hover:bg-gray-800 rounded font-semibold text-gray-200">👤 Profile</button>
-            <button onclick="openTab('home'); toggleMenu();" class="w-full text-left py-2 px-2 hover:bg-gray-800 rounded font-semibold text-gray-200">🎮 Match</button>
-            <button onclick="openTab('addbalance'); toggleMenu();" class="w-full text-left py-2 px-2 hover:bg-gray-800 rounded font-semibold text-gray-200">➕ Add Balance</button>
-            <button onclick="openTab('withdraw'); toggleMenu();" class="w-full text-left py-2 px-2 hover:bg-gray-800 rounded font-semibold text-gray-200">💸 Withdraw</button>
-            <button onclick="openTab('support'); toggleMenu();" class="w-full text-left py-2 px-2 hover:bg-gray-800 rounded font-semibold text-gray-200">📞 Shohayota</button>
-            <div class="border-t border-gray-800 pt-1">
-                <button onclick="logoutUser()" class="w-full bg-red-500/20 text-red-400 py-1.5 rounded font-bold">Logout</button>
-            </div>
-        </div>
-    </div>
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-20">
 
-    <div class="pt-16 max-w-lg mx-auto px-4">
-        <div id="welcome-banner" class="my-3 bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-[#00ff66]/30 p-3 rounded-xl text-center hidden">
-            <p id="welcome-text" class="text-sm font-bold text-[#00ff66]"></p>
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 px-4 py-3 flex justify-between items-center">
+        <h1 class="text-xl font-bold text-emerald-400">AG-TOURNAMENT</h1>
+        <div class="flex items-center gap-3">
+            <button id="loginBtn" onclick="googleLogin()" class="bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg text-sm font-semibold transition">Login</button>
+            <a id="adminLink" href="admin.html" class="hidden bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-lg text-sm font-semibold transition">Admin Panel</a>
+            <button id="logoutBtn" onclick="logout()" class="hidden bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-lg text-sm font-semibold transition">Logout</button>
         </div>
-        <div class="bg-[#111827] border border-gray-800 rounded-2xl p-4 my-4 shadow-xl flex justify-between items-center">
-            <div>
-                <p class="text-gray-400 text-xs">Total Balance</p>
-                <h2 id="user-balance-view" class="text-2xl font-black text-[#00ff66]">৳0</h2>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="openTab('addbalance')" class="bg-[#00ff66] text-black text-xs font-bold px-3 py-2 rounded-xl">Add Balance</button>
-                <button onclick="openTab('withdraw')" class="bg-amber-500 text-black text-xs font-bold px-3 py-2 rounded-xl">Withdraw</button>
-            </div>
-        </div>
-        <div class="bg-amber-500/10 border border-amber-500/50 rounded-xl p-3 mb-4 flex items-center gap-2 text-xs">
-            <span class="bg-amber-500 text-black font-bold px-2 py-0.5 rounded">NOTICE</span>
-            <p id="notice-box" class="text-gray-200 font-semibold">Loading Notice...</p>
+    </header>
+
+    <main class="max-w-md mx-auto p-4 space-y-4">
+        <!-- Notice Board -->
+        <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex items-start gap-3">
+            <span class="bg-amber-500 text-slate-900 text-xs font-bold px-2 py-0.5 rounded uppercase">NOTICE</span>
+            <p id="noticeDisplay" class="text-sm text-amber-200 font-medium">Loading Notice...</p>
         </div>
 
-        <div id="tab-home" class="space-y-4">
-            <h3 class="text-sm font-bold text-gray-300">Live Tournaments</h3>
-            <div id="match-cards-container" class="space-y-4"></div>
+        <h3 class="text-base font-bold text-slate-200 pt-2">Live Tournaments</h3>
+        <div id="tournamentsList" class="space-y-4">
+            <!-- Matches load dynamically -->
         </div>
+    </main>
 
-        <div id="tab-addbalance" class="hidden space-y-4">
-            <div class="bg-[#111827] border border-gray-800 rounded-2xl p-4">
-                <h3 class="text-sm font-bold text-[#00ff66] mb-3">Add Balance (Auto Verification)</h3>
-                <div class="bg-gray-800/50 p-2.5 rounded-lg text-xs mb-3 text-gray-300">
-                    Bkash/Nagad Personal: <strong class="text-white">01902009133</strong> number e tk pathiye niche trnx id din.
-                </div>
-                <div class="space-y-3 text-xs">
-                    <div><label class="text-gray-400 block mb-1">Amount (৳)</label><input id="add-bal-amount" type="number" placeholder="Ex: 100" class="w-full bg-[#1f2937] border border-gray-700 p-2.5 rounded-lg text-white" /></div>
-                    <div><label class="text-gray-400 block mb-1">TrxID</label><input id="add-bal-trx" placeholder="Ex: 9K8765TR" class="w-full bg-[#1f2937] border border-gray-700 p-2.5 rounded-lg text-white" /></div>
-                </div>
-                <button onclick="submitAutoAddBalance()" class="w-full bg-[#00ff66] text-black font-bold py-3 rounded-xl mt-4 text-xs uppercase">Verify & Add Balance</button>
-            </div>
-        </div>
-
-        <div id="tab-withdraw" class="hidden space-y-4">
-            <div class="bg-[#111827] border border-gray-800 rounded-2xl p-4">
-                <h3 class="text-sm font-bold text-amber-500 mb-2">Withdraw Balance</h3>
-                <p class="text-[11px] text-gray-400 mb-3">Limit: Min ৳20 - Max ৳1000</p>
-                <div class="space-y-3 text-xs">
-                    <div><label class="text-gray-400 block mb-1">Gateway</label><input readonly="readonly" value="bKash Personal" class="w-full bg-[#1f2937] border border-gray-700 p-2.5 rounded-lg text-gray-300" /></div>
-                    <div><label class="text-gray-400 block mb-1">bKash Number *</label><input id="wd-number" placeholder="01700000000" class="w-full bg-[#1f2937] border border-gray-700 p-2.5 rounded-lg text-white" /></div>
-                    <div><label class="text-gray-400 block mb-1">Amount (৳) *</label><input id="wd-amount" type="number" placeholder="20 to 1000" class="w-full bg-[#1f2937] border border-gray-700 p-2.5 rounded-lg text-white" /></div>
-                </div>
-                <button id="wd-hold-btn" onmousedown="startWdHold()" onmouseup="cancelWdHold()" ontouchstart="startWdHold()" ontouchend="cancelWdHold()" class="w-full bg-amber-500 text-black font-bold py-3 rounded-xl mt-4 text-xs uppercase select-none">
-                    ৩ সেকেন্ড চেপে ধরে রাখুন (Confirm)
-                </button>
-            </div>
-            <div class="bg-[#111827] border border-gray-800 rounded-2xl p-4">
-                <h4 class="text-xs font-bold text-gray-300 mb-2">Withdraw History & Status</h4>
-                <div id="wd-history-list" class="space-y-2 text-xs">
-                    <p class="text-gray-500 text-center">No history found.</p>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-profile" class="hidden space-y-4">
-            <div class="bg-[#111827] border border-gray-800 rounded-2xl p-4 text-xs space-y-3">
-                <h3 class="text-sm font-bold text-[#00ff66]">User Profile</h3>
-                <div><span class="text-gray-400 block">Email:</span> <span id="pf-email" class="text-white font-bold">--</span></div>
-                <div><span class="text-gray-400 block">TJ-ID:</span> <span id="pf-tj" class="text-[#00ff66] font-bold">--</span></div>
-                <div>
-                    <label class="text-gray-400 block mb-1">Phone Number</label>
-                    <div class="flex gap-2">
-                        <input id="pf-phone-input" placeholder="01700000000" class="w-full bg-[#1f2937] border border-gray-700 p-2 rounded text-white" />
-                        <button onclick="saveProfilePhone()" class="bg-[#00ff66] text-black px-4 rounded font-bold">Save</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-support" class="hidden space-y-4">
-            <div class="bg-[#111827] border border-gray-800 rounded-2xl p-4 text-xs space-y-3">
-                <h3 class="text-sm font-bold text-[#00ff66]">Sahayota & Support</h3>
-                <p class="text-gray-300">Jekono shomosay jogajog korun:</p>
-                <div class="bg-gray-800/50 p-3 rounded-lg text-white">
-                    <p>📞 Helpline: <strong>01902009133</strong></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="bg-[#04060b] border-t border-gray-800 fixed bottom-0 left-0 right-0 py-3 px-6 flex justify-around items-center z-40 text-xs">
-        <button onclick="openTab('home')" class="text-gray-400 hover:text-[#00ff66] font-bold flex flex-col items-center">🏠 Home</button>
-        <button onclick="openTab('addbalance')" class="text-gray-400 hover:text-[#00ff66] font-bold flex flex-col items-center">➕ Add Balance</button>
-        <button onclick="openTab('withdraw')" class="text-gray-400 hover:text-[#00ff66] font-bold flex flex-col items-center">💸 Withdraw</button>
-    </div>
-
-    <div id="joinModal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50 p-4">
-        <div class="bg-[#0d1322] border border-[#00ff66] rounded-2xl w-full max-w-sm p-5 relative">
-            <button onclick="closeJoinModal()" class="absolute top-3 right-3 text-gray-400 text-lg">✕</button>
-            <h3 class="text-[#00ff66] text-sm font-bold mb-3">Join Tournament</h3>
-            <div id="modal-match-info" class="bg-gray-800/50 p-2.5 rounded text-[11px] mb-3 text-gray-300"></div>
-            <div class="space-y-2.5 text-xs mb-4">
-                <div><label class="text-gray-400 block mb-1">In-Game Name *</label><input id="j-name" placeholder="Ex: AG_SHARK" class="w-full bg-[#1f2937] border border-gray-700 p-2 rounded text-white" /></div>
-            </div>
-            <button id="hold-join-btn" onmousedown="startJoinHold()" onmouseup="cancelJoinHold()" ontouchstart="startJoinHold()" ontouchend="cancelJoinHold()" class="w-full bg-[#00ff66] text-black font-bold py-3 rounded-xl text-xs uppercase select-none">
-                ৩ সেকেন্ড চেপে ধরে Join কনফার্ম করুন
-            </button>
-        </div>
-    </div>
-
-    <div id="roomModal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50 p-4">
-        <div class="bg-[#0d1322] border border-blue-500 rounded-2xl w-full max-w-sm p-5 relative text-xs">
-            <button onclick="closeRoomModal()" class="absolute top-3 right-3 text-gray-400 text-lg">✕</button>
-            <h3 class="text-blue-400 text-sm font-bold mb-3">Room Details</h3>
-            <div class="space-y-3 bg-gray-800/40 p-3 rounded-lg border border-gray-700">
-                <div><span class="text-gray-400 block">Room ID:</span> <span id="room-id-val" class="text-white font-bold text-sm">--</span></div>
-                <div><span class="text-gray-400 block">Password:</span> <span id="room-pass-val" class="text-[#00ff66] font-bold text-sm">--</span></div>
-            </div>
-            <button onclick="closeRoomModal()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl mt-4 uppercase">Close</button>
-        </div>
-    </div>
-
-    <div id="wdCardModal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50 p-4">
-        <div class="bg-[#111827] border border-amber-500 rounded-2xl w-full max-w-sm p-5 relative text-xs space-y-3">
-            <h3 class="text-amber-400 font-bold text-sm text-center">Withdraw Details Card</h3>
-            <div class="bg-gray-800/50 p-3 rounded-lg space-y-1.5 text-gray-300">
-                <p>Gateway: <strong class="text-white" id="c-gateway">bKash Personal</strong></p>
-                <p>bKash Number: <strong class="text-white" id="c-number">--</strong></p>
-                <p>Amount: <strong class="text-[#00ff66]" id="c-amount">--</strong></p>
-                <p>TrxID: <strong class="text-white" id="c-trx">--</strong></p>
-                <p>Status: <strong class="text-amber-400" id="c-status">Pending</strong></p>
-            </div>
-            <button onclick="closeWdCardModal()" class="w-full bg-amber-500 text-black font-bold py-2 rounded-lg uppercase">OK</button>
+    <!-- Participants Modal -->
+    <div id="participantsModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 w-full max-w-md p-5 rounded-xl border border-slate-700">
+            <h3 class="text-lg font-bold mb-3 text-emerald-400">Joined Participants</h3>
+            <ul id="participantsList" class="space-y-2 max-h-60 overflow-y-auto mb-4 text-sm">
+                <!-- List items -->
+            </ul>
+            <button onclick="closeModal()" class="bg-slate-700 hover:bg-slate-600 w-full py-2 rounded-lg text-sm font-bold">Close</button>
         </div>
     </div>
 
     <script>
         const firebaseConfig = {
-          apiKey: "AIzaSyAbW9RUriAT60Cx3l-PymDflcAKsKTnSi",
-          authDomain: "ag-tournament-eb4b4.firebaseapp.com",
-          databaseURL: "https://ag-tournament-999-default-rtdb.firebaseio.com",
-          projectId: "ag-tournament-eb4b4"
+            apiKey: "AIzaSyDummyKeyForAGTournament",
+            authDomain: "ag-tournament-999.firebaseapp.com",
+            projectId: "ag-tournament-999",
+            storageBucket: "ag-tournament-999.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123:web:abc"
         };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-        const db = firebase.database();
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
         const auth = firebase.auth();
+        const adminEmail = "abujar2578@gmail.com";
 
-        let currentUser = null, userDbKey = null, currentBalance = 0, selectedMatchKey = null, selectedMatchData = null, holdTimer = null;
+        let currentUser = null;
 
-        function toggleMenu() { document.getElementById('dropdown-menu').classList.toggle('hidden'); }
-        function openTab(tabName) {
-            ['home', 'addbalance', 'withdraw', 'profile', 'support'].forEach(function(t) {
-                let el = document.getElementById('tab-' + t);
-                if(el) el.classList.add('hidden');
-            });
-            let targetEl = document.getElementById('tab-' + tabName);
-            if(targetEl) targetEl.classList.remove('hidden');
-        }
-        function loginWithGoogle() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-        function logoutUser() { auth.signOut().then(function() { window.location.reload(); }); }
-
-        auth.onAuthStateChanged(function(user) {
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
             if (user) {
-                currentUser = user;
-                userDbKey = user.email.replace(/[.@]/g, '_');
-                document.getElementById('top-email').innerText = user.email;
-                document.getElementById('google-login-btn').classList.add('hidden');
-                document.getElementById('top-tj-id').classList.remove('hidden');
-                document.getElementById('welcome-banner').classList.remove('hidden');
-                document.getElementById('welcome-text').innerText = "Shagotom " + (user.displayName || user.email) + "!";
-                document.getElementById('pf-email').innerText = user.email;
-
-                let userRef = db.ref('users/' + userDbKey);
-                userRef.once('value', function(snap) {
-                    if (!snap.exists()) {
-                        userRef.set({ email: user.email, tjId: 'TJ-' + Math.floor(1000 + Math.random() * 9000), balance: 0, phone: '', isBanned: false });
-                    }
-                });
-
-                userRef.on('value', function(snap) {
-                    let d = snap.val() || {};
-                    if(d.isBanned) { alert('Account Banned!'); logoutUser(); return; }
-                    currentBalance = d.balance || 0;
-                    document.getElementById('user-balance-view').innerText = '৳' + currentBalance;
-                    document.getElementById('top-tj-id').innerText = d.tjId || 'TJ-----';
-                    document.getElementById('pf-tj').innerText = d.tjId || '--';
-                    if(d.phone) document.getElementById('pf-phone-input').value = d.phone;
-                });
-
-                db.ref('withdraws/' + userDbKey).on('value', function(snap) {
-                    let list = document.getElementById('wd-history-list');
-                    list.innerHTML = "";
-                    if(snap.exists()) {
-                        snap.forEach(function(item) {
-                            let w = item.val();
-                            let col = w.status === 'Approved' ? 'text-green-400' : (w.status === 'Failed' ? 'text-red-400' : 'text-amber-400');
-                            list.innerHTML += '<div class="bg-[#1f2937] p-2.5 rounded border border-gray-700 flex justify-between items-center"><div><span class="text-white font-bold">৳' + w.amount + '</span> (' + w.number + ')</div><div class="' + col + ' font-bold">' + w.status + '</div></div>';
-                        });
-                    } else { list.innerHTML = '<p class="text-gray-500 text-center">No history.</p>'; }
-                });
+                document.getElementById('loginBtn').classList.add('hidden');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                if (user.email === adminEmail) {
+                    document.getElementById('adminLink').classList.remove('hidden');
+                }
             } else {
-                currentUser = null; userDbKey = null; currentBalance = 0;
-                document.getElementById('top-email').innerText = "Guest";
-                document.getElementById('google-login-btn').classList.remove('hidden');
-                document.getElementById('top-tj-id').classList.add('hidden');
-                document.getElementById('welcome-banner').classList.add('hidden');
-                document.getElementById('user-balance-view').innerText = "৳0";
+                document.getElementById('loginBtn').classList.remove('hidden');
+                document.getElementById('logoutBtn').classList.add('hidden');
+                document.getElementById('adminLink').classList.add('hidden');
             }
         });
 
-        function saveProfilePhone() {
-            if(!currentUser) return alert('Login first!');
-            let phone = document.getElementById('pf-phone-input').value.trim();
-            if(!phone) return alert('Enter phone!');
-            db.ref('users/' + userDbKey).update({ phone: phone }, function() { alert('Saved!'); });
+        function googleLogin() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch((error) => alert("Login Failed: " + error.message));
         }
 
-        db.ref('site_notice').on('value', function(s) { 
-            document.getElementById('notice-box').innerText = s.val() || "No notice.";
+        function logout() {
+            auth.signOut();
+        }
+
+        // Notice Listener
+        db.collection("settings").doc("notice").onSnapshot((doc) => {
+            if (doc.exists) {
+                document.getElementById('noticeDisplay').innerText = doc.data().text;
+            } else {
+                document.getElementById('noticeDisplay').innerText = "No notice available.";
+            }
         });
 
-        db.ref('matches').on('value', function(snap) {
-            let container = document.getElementById('match-cards-container');
+        // Load Matches & Slot System
+        db.collection("tournaments").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
+            const container = document.getElementById('tournamentsList');
             container.innerHTML = "";
-            if(!snap.exists()) { container.innerHTML = '<p class="text-gray-500 text-center">No matches.</p>'; return; }
 
-            snap.forEach(function(matchSnap) {
-                let mKey = matchSnap.key, m = matchSnap.val();
-                let isJoined = currentUser && m.joinedUsers && m.joinedUsers[userDbKey];
-                let roomId = m.roomId || "", roomPass = m.roomPass || "";
+            if (snapshot.empty) {
+                container.innerHTML = `<p class="text-center text-slate-500 text-sm">No active tournaments found.</p>`;
+                return;
+            }
 
-                let btnHTML = "";
-                if (!currentUser) {
-                    btnHTML = '<button onclick="loginWithGoogle()" class="w-full bg-white text-black font-bold py-2 rounded text-xs uppercase">Login to Join</button>';
-                } else if (isJoined) {
-                    if (roomId !== "") {
-                        btnHTML = '<button onclick="openRoomModal(\'' + roomId + '\', \'' + roomPass + '\')" class="w-full bg-blue-600 text-white font-bold py-2 rounded text-xs uppercase">View Room ID & Pass</button>';
-                    } else {
-                        btnHTML = '<button class="w-full bg-green-600/30 text-green-400 font-bold py-2 rounded text-xs uppercase border border-green-500">Joined</button>';
-                    }
-                } else {
-                    btnHTML = '<button onclick="openJoinModal(\'' + mKey + '\', ' + (m.entry || 0) + ', \'' + (m.title || 'Match') + '\')" class="w-full bg-[#00ff66] text-black font-bold py-2 rounded text-xs uppercase">Join Match</button>';
+            snapshot.forEach((doc) => {
+                const match = doc.data();
+                const matchId = doc.id;
+                const joinedUsers = match.joinedUsers || [];
+                const current = joinedUsers.length;
+                const max = match.maxSlots || 50;
+                const percent = (current / max) * 100;
+                const hasJoined = currentUser && joinedUsers.some(u => u.uid === currentUser.uid);
+                const isFull = current >= max;
+
+                const cardHtml = `
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 space-y-3 shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-slate-100">${match.title}</h4>
+                                <p class="text-xs text-slate-400">Time: <span id="timer-${matchId}" class="text-emerald-400 font-semibold">Calculating...</span></p>
+                            </div>
+                            <button onclick="openMoreModal('${matchId}')" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-xs font-semibold">
+                                <i class="fa-solid fa-users mr-1"></i> More (${current})
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs bg-slate-900/50 p-2 rounded-lg border border-slate-700/50">
+                            <div><span class="text-slate-400">Entry:</span> ৳${match.entryFee}</div>
+                            <div><span class="text-slate-400">Prize:</span> ৳${match.prizePool}</div>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs text-slate-400">
+                                <span>Slots Filled</span>
+                                <span class="font-bold text-slate-200">${current} / ${max}</span>
+                            </div>
+                            <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
+                                <div class="bg-emerald-500 h-full transition-all duration-300" style="width: ${percent}%"></div>
+                            </div>
+                        </div>
+                        ${hasJoined ? 
+                            `<div class="w-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-center py-2 rounded-lg text-sm font-bold">Joined Successfully</div>` :
+                            `<button onclick="joinMatch('${matchId}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg text-sm transition ${isFull ? 'opacity-50 cursor-not-allowed' : ''}">
+                                ${isFull ? 'SLOT FULL' : 'LOGIN TO JOIN'}
+                            </button>`
+                        }
+                    </div>
+                `;
+                container.innerHTML += cardHtml;
+
+                if (match.matchTime) {
+                    startCountdown(matchId, match.matchTime);
                 }
-
-                container.innerHTML += '<div class="bg-[#111827] border border-gray-800 rounded-2xl p-4 shadow-xl space-y-2 text-xs"><div class="flex justify-between font-bold text-gray-400"><span class="text-[#00ff66]">Free Fire</span><span>' + (m.matchId || 'FF') + '</span></div><h4 class="text-sm font-bold text-white">' + (m.title || '') + '</h4><div class="flex justify-between text-gray-300"><span>Time:</span> <strong>' + (m.time || '') + '</strong></div><div class="flex justify-between text-gray-300"><span>Entry:</span> <strong>৳' + (m.entry || 0) + '</strong></div><div class="flex justify-between text-gray-300"><span>Prize:</span> <strong class="text-[#00ff66]">৳' + (m.prize || 0) + '</strong></div><div class="pt-2">' + btnHTML + '</div></div>';
             });
         });
 
-        function openJoinModal(mKey, entryFee, title) {
-            if(!currentUser) { loginWithGoogle(); return; }
-            selectedMatchKey = mKey;
-            db.ref('matches/' + mKey).once('value', function(s) { selectedMatchData = s.val(); });
-            if(currentBalance < entryFee) { alert('Low balance!'); openTab('addbalance'); return; }
-            document.getElementById('modal-match-info').innerText = title + ' | Fee: ৳' + entryFee;
-            document.getElementById('joinModal').style.display = 'flex';
-        }
-        function closeJoinModal() { document.getElementById('joinModal').style.display = 'none'; }
-        function openRoomModal(id, pass) {
-            document.getElementById('room-id-val').innerText = id;
-            document.getElementById('room-pass-val').innerText = pass;
-            document.getElementById('roomModal').style.display = 'flex';
-        }
-        function closeRoomModal() { document.getElementById('roomModal').style.display = 'none'; }
+        function joinMatch(matchId) {
+            if (!currentUser) {
+                alert("Please login first to join the match!");
+                googleLogin();
+                return;
+            }
 
-        function startJoinHold() {
-            let btn = document.getElementById('hold-join-btn');
-            btn.innerText = "Holding... 3";
-            let c = 2;
-            holdTimer = setInterval(function() {
-                btn.innerText = "Holding... " + c; c--;
-                if(c < 0) { clearInterval(holdTimer); executeJoinMatch(); }
-            }, 1000);
-        }
-        function cancelJoinHold() { clearInterval(holdTimer); document.getElementById('hold-join-btn').innerText = "৩ সেকেন্ড চেপে ধরে Join কনফার্ম করুন"; }
+            const matchRef = db.collection("tournaments").doc(matchId);
+            db.runTransaction(async (transaction) => {
+                const matchDoc = await transaction.get(matchRef);
+                if (!matchDoc.exists) throw "Match does not exist!";
 
-        function executeJoinMatch() {
-            let name = document.getElementById('j-name').value.trim();
-            if(!name) { alert('Enter name!'); return; }
-            let entry = Number(selectedMatchData.entry || 0);
-            db.ref('users/' + userDbKey).update({ balance: currentBalance - entry }, function() {
-                db.ref('matches/' + selectedMatchKey + '/joinedUsers/' + userDbKey).set({ name: name, email: currentUser.email });
-                alert('Joined successfully!');
-                closeJoinModal();
-            });
-        }
+                const data = matchDoc.data();
+                const joinedUsers = data.joinedUsers || [];
+                const max = data.maxSlots || 50;
 
-        function submitAutoAddBalance() {
-            if(!currentUser) return alert('Login first!');
-            let amt = Number(document.getElementById('add-bal-amount').value), trx = document.getElementById('add-bal-trx').value.trim();
-            if(amt <= 0 || !trx) return alert('Fill all fields!');
-            let btn = event.target; btn.innerText = "Verifying..."; btn.disabled = true;
-            setTimeout(function() {
-                db.ref('users/' + userDbKey).update({ balance: currentBalance + amt }, function() {
-                    db.ref('addBalanceRequests').push({ email: currentUser.email, amount: amt, trx: trx, status: 'Approved' });
-                    alert('Balance Added!');
-                    btn.innerText = "Verify & Add Balance"; btn.disabled = false;
-                    openTab('home');
+                if (joinedUsers.length >= max) throw "Sorry, all slots are full!";
+                if (joinedUsers.some(u => u.uid === currentUser.uid)) throw "You have already joined this match!";
+
+                joinedUsers.push({
+                    uid: currentUser.uid,
+                    name: currentUser.displayName || "User",
+                    email: currentUser.email
                 });
-            }, 3000);
-        }
 
-        function startWdHold() {
-            if(!currentUser) return alert('Login first!');
-            let num = document.getElementById('wd-number').value.trim(), amt = Number(document.getElementById('wd-amount').value);
-            if(!num || amt < 20 || amt > 1000) return alert('Invalid details or limit (20-1000)!');
-            if(currentBalance < amt) return alert('Low balance!');
-            let btn = document.getElementById('wd-hold-btn'); btn.innerText = "Processing... 3";
-            let c = 2;
-            holdTimer = setInterval(function() {
-                btn.innerText = "Processing... " + c; c--;
-                if(c < 0) { clearInterval(holdTimer); executeWithdraw(num, amt); }
-            }, 1000);
-        }
-        function cancelWdHold() { clearInterval(holdTimer); document.getElementById('wd-hold-btn').innerText = "৩ সেকেন্ড চেপে ধরে রাখুন (Confirm)"; }
-
-        function executeWithdraw(num, amt) {
-            db.ref('users/' + userDbKey).update({ balance: currentBalance - amt });
-            let rTrx = 'AGWD-' + Math.floor(100000 + Math.random() * 900000);
-            db.ref('withdraws/' + userDbKey).push({ amount: amt, number: num, trxId: rTrx, status: 'Pending' });
-            db.ref('allWithdrawRequests').push({ userKey: userDbKey, email: currentUser.email, amount: amt, number: num, trxId: rTrx, status: 'Pending' }, function() {
-                document.getElementById('c-number').innerText = num;
-                document.getElementById('c-amount').innerText = '৳' + amt;
-                document.getElementById('c-trx').innerText = rTrx;
-                document.getElementById('wdCardModal').style.display = 'flex';
+                transaction.update(matchRef, { joinedUsers: joinedUsers });
+            }).then(() => {
+                alert("Successfully joined the match!");
+            }).catch((error) => {
+                alert(error);
             });
         }
-        function closeWdCardModal() { document.getElementById('wdCardModal').style.display = 'none'; }
+
+        function openMoreModal(matchId) {
+            const modal = document.getElementById('participantsModal');
+            const listEl = document.getElementById('participantsList');
+            listEl.innerHTML = "<li class='text-slate-400'>Loading...</li>";
+            modal.classList.remove('hidden');
+
+            db.collection("tournaments").doc(matchId).get().then((doc) => {
+                if (doc.exists) {
+                    const users = doc.data().joinedUsers || [];
+                    listEl.innerHTML = "";
+                    if (users.length === 0) {
+                        listEl.innerHTML = "<li class='text-slate-500'>No participants yet.</li>";
+                        return;
+                    }
+                    users.forEach((user, index) => {
+                        listEl.innerHTML += `<li class="bg-slate-900 p-2 rounded flex justify-between items-center text-xs border border-slate-700/50"><span>${index + 1}. ${user.name}</span> <span class="text-slate-500">${user.email}</span></li>`;
+                    });
+                }
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('participantsModal').classList.add('hidden');
+        }
+
+        function startCountdown(matchId, matchTimeString) {
+            const countDownDate = new Date(matchTimeString).getTime();
+            const x = setInterval(function() {
+                const now = new Date().getTime();
+                const distance = countDownDate - now;
+                const timerElement = document.getElementById("timer-" + matchId);
+                if (!timerElement) { clearInterval(x); return; }
+
+                if (distance < 0) {
+                    clearInterval(x);
+                    timerElement.innerHTML = "Match Started!";
+                } else {
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                    timerElement.innerHTML = `${hours}h ${minutes}m ${seconds}s`;
+                }
+            }, 1000);
+        }
     </script>
 </body>
 </html>
