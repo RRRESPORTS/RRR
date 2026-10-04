@@ -3,204 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZEG-G TOURNAMENT | Ultimate Gaming Arena</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <title>ZEG-G TOURNAMENT</title>
     <style>
         :root {
             --bg-color: #0b0f19;
-            --card-bg: rgba(18, 24, 38, 0.7);
-            --neon-purple: #9333ea;
-            --neon-cyan: #06b6d4;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border-glow: rgba(147, 51, 234, 0.3);
+            --card-bg: #111827;
+            --neon-green: #00ff66;
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff007f;
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(147, 51, 234, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.15) 0%, transparent 40%);
-            min-height: 100vh;
-        }
-
-        nav {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 8%; backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            position: sticky; top: 0; z-index: 1000;
-        }
-        .logo {
-            font-family: 'Orbitron', sans-serif; font-size: 24px; font-weight: 900;
-            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .nav-links { display: flex; gap: 20px; list-style: none; align-items: center; }
-        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 600; transition: 0.3s; font-size: 14px; }
-        .nav-links a:hover { color: var(--neon-cyan); }
-
-        .hero { text-align: center; padding: 80px 20px; max-width: 900px; margin: 0 auto; }
-        .hero h1 { font-family: 'Orbitron', sans-serif; font-size: 38px; font-weight: 900; margin-bottom: 20px; line-height: 1.2; }
-        .hero h1 span { background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero p { color: var(--text-muted); font-size: 16px; margin-bottom: 30px; }
-
-        .btn-glow {
-            display: inline-block; padding: 10px 25px;
-            font-family: 'Orbitron', sans-serif; font-weight: 700; text-decoration: none; color: #fff;
-            background: linear-gradient(45deg, var(--neon-purple), var(--neon-cyan));
-            border-radius: 30px; box-shadow: 0 0 20px rgba(147, 51, 234, 0.4); transition: 0.3s; cursor: pointer; border: none;
-        }
-        .btn-glow:hover { transform: translateY(-3px); box-shadow: 0 0 30px rgba(6, 182, 212, 0.7); }
-
-        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
-        .section-title { font-family: 'Orbitron', sans-serif; font-size: 24px; margin-bottom: 30px; border-left: 4px solid var(--neon-cyan); padding-left: 15px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 70px; }
         
-        .card {
-            background: var(--card-bg); border: 1px solid var(--border-glow);
-            border-radius: 16px; padding: 25px; backdrop-filter: blur(12px); transition: 0.3s;
-        }
-        .card:hover { border-color: var(--neon-cyan); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .card h3 { font-family: 'Orbitron', sans-serif; font-size: 18px; margin-bottom: 15px; }
-        .card-info { display: flex; justify-content: space-between; color: var(--text-muted); margin-bottom: 20px; font-size: 14px; }
-        .card-info span i { color: var(--neon-cyan); margin-right: 5px; }
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--card-bg); border-bottom: 1px solid rgba(0, 243, 255, 0.2); position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 20px; font-weight: bold; color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0,243,255,0.5); }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .login-btn { background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 5px 15px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        .login-btn:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 10px var(--neon-cyan); }
+        .menu-icon { font-size: 24px; cursor: pointer; color: var(--neon-pink); }
+
+        /* Balance Banner */
+        .balance-container { background: linear-gradient(135deg, #1f2937, #111827); margin: 15px; padding: 20px; border-radius: 12px; border: 1px solid rgba(0,255,102,0.3); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 0 15px rgba(0,255,102,0.1); }
+        .bal-info h4 { color: var(--text-muted); font-size: 14px; }
+        .bal-info h2 { color: var(--neon-green); font-size: 24px; text-shadow: 0 0 8px rgba(0,255,102,0.4); }
+        .bal-btns button { padding: 8px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 5px; }
+        .btn-add { background: var(--neon-green); color: #000; }
+        .btn-withdraw { background: var(--neon-pink); color: #fff; }
+
+        /* Main Container */
+        .container { padding: 0 15px; }
+        .section { display: none; }
+        .section.active { display: block; }
         
-        .card-btn {
-            display: block; text-align: center; background: transparent;
-            border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
-            padding: 10px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.3s; cursor: pointer; width: 100%;
-        }
-        .card-btn:hover { background: var(--neon-cyan); color: #0b0f19; box-shadow: 0 0 15px rgba(6, 182, 212, 0.5); }
+        /* Match Card */
+        .match-card { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.2); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(0,243,255,0.05); }
+        .match-banner { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
+        .match-title { font-size: 18px; color: var(--neon-cyan); margin-bottom: 5px; }
+        .match-details { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        .timer { background: rgba(255,0,127,0.1); color: var(--neon-pink); padding: 5px; border-radius: 4px; text-align: center; font-weight: bold; margin-bottom: 10px; }
+        .match-actions { display: flex; gap: 10px; }
+        .action-btn { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-join { background: var(--neon-cyan); color: #000; }
+        .btn-joined-players { background: #374151; color: #fff; }
 
-        #auth-section { background: rgba(18, 24, 38, 0.95); border: 1px solid var(--neon-purple); padding: 20px; border-radius: 12px; max-width: 350px; margin: 20px auto; display: none; text-align: center; }
-        #auth-section input { width: 100%; padding: 10px; margin: 10px 0; background: #0b0f19; border: 1px solid var(--text-muted); color: #fff; border-radius: 6px; }
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100; }
+        .nav-item { text-align: center; color: var(--text-muted); font-size: 12px; cursor: pointer; }
+        .nav-item.active { color: var(--neon-cyan); }
+        .nav-item div { font-size: 18px; }
 
-        footer { text-align: center; padding: 40px; color: var(--text-muted); border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: 60px; font-size: 14px; }
+        /* Drawer Menu */
+        .drawer { position: fixed; top: 0; right: -250px; width: 250px; height: 100%; background: #111827; box-shadow: -5px 0 15px rgba(0,0,0,0.5); z-index: 1000; transition: 0.3s; padding: 20px; border-left: 1px solid var(--neon-pink); }
+        .drawer.open { right: 0; }
+        .drawer-close { font-size: 20px; cursor: pointer; text-align: right; margin-bottom: 20px; color: var(--neon-pink); }
+        .drawer-links { list-style: none; }
+        .drawer-links li { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .drawer-links li:hover { color: var(--neon-cyan); }
+
+        /* Forms & Modals */
+        .form-control { width: 100%; padding: 10px; margin: 10px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; }
+        .submit-btn { width: 100%; padding: 12px; background: var(--neon-green); border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+        
+        /* Hold Button for Withdraw */
+        .hold-btn { background: var(--neon-pink); color: #fff; width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; user-select: none; }
+        
+        /* Notice Board */
+        .notice-box { background: rgba(0,243,255,0.05); border-left: 4px solid var(--neon-cyan); padding: 10px; margin: 15px; font-size: 14px; border-radius: 0 6px 6px 0; }
     </style>
 </head>
 <body>
 
-    <nav>
-        <div class="logo">ZEG-G</div>
-        <ul class="nav-links">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="admin.html" style="color: var(--neon-cyan);">Admin Panel</a></li>
-            <li><span id="user-display" style="color: var(--neon-cyan); font-size: 13px;"></span></li>
-            <li><button id="login-toggle-btn" class="btn-glow" style="padding: 5px 12px; font-size: 11px;" onclick="toggleAuth()">Login</button></li>
-        </ul>
-    </nav>
+    <header>
+        <div class="logo">ZEG-G TOURNAMENT</div>
+        <div class="header-right">
+            <button class="login-btn" onclick="toggleAuthModal()">Login</button>
+            <div class="menu-icon" onclick="toggleDrawer()">☰</div>
+        </div>
+    </header>
 
-    <div id="auth-section">
-        <h3 style="font-family:'Orbitron'; margin-bottom: 10px; font-size: 16px;">Player Login / Signup</h3>
-        <input type="email" id="email" placeholder="Enter Email">
-        <input type="password" id="password" placeholder="Enter Password">
-        <button class="btn-glow" style="width: 100%; padding: 8px; margin-top: 5px; font-size: 12px;" onclick="loginUser()">Submit</button>
-    </div>
-
-    <section class="hero">
-        <h1>CONQUER THE ARENA WITH <span>ZEG-G TOURNAMENT</span></h1>
-        <p>Register your squad, compete in live matches, and win real cash rewards.</p>
-    </section>
-
-    <div class="container">
-        <h2 class="section-title">Live Tournaments</h2>
-        <div class="grid" id="tournament-grid">
-            <p style="color: var(--text-muted);">Loading tournaments from Firebase...</p>
+    <!-- Balance Section -->
+    <div class="balance-container">
+        <div class="bal-info">
+            <h4>Total Balance</h4>
+            <h2 id="userBalance">৳0.00</h2>
+        </div>
+        <div class="bal-btns">
+            <button class="btn-add" onclick="switchTab('addBalance')">Add Balance</button>
+            <button class="btn-withdraw" onclick="switchTab('withdraw')">Withdraw</button>
         </div>
     </div>
 
-    <footer>
-        <p>&copy; 2026 ZEG-G TOURNAMENT. All rights reserved.</p>
-    </footer>
+    <!-- Notice Box -->
+    <div class="notice-box" id="siteNotice">
+        Loading notice...
+    </div>
 
+    <!-- Main Container Content -->
+    <div class="container">
+        <!-- Home / Match Option -->
+        <div id="matchSection" class="section active">
+            <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">Live & Upcoming Matches</h3>
+            <div id="matchListContainer">
+                <!-- Matches will load dynamically -->
+            </div>
+        </div>
+
+        <!-- My Match Section -->
+        <div id="myMatchSection" class="section">
+            <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">My Registered Matches</h3>
+            <div id="myMatchListContainer">
+                <p style="color: var(--text-muted);">You have not joined any matches yet.</p>
+            </div>
+        </div>
+
+        <!-- Add Balance Section -->
+        <div id="addBalanceSection" class="section">
+            <h3 style="color: var(--neon-green);">Add Balance via bKash</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0;">Send Money only to this Personal Number: <strong style="color: #fff;">01700000000</strong></p>
+            <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #374151; margin-top: 10px;">
+                <input type="text" id="bkashTrxID" class="form-control" placeholder="Enter Transaction ID (TrxID)">
+                <input type="number" id="addAmount" class="form-control" placeholder="Amount (Min ৳5 - Max ৳100)">
+                <button class="submit-btn" onclick="submitAddBalance()">Submit Request</button>
+            </div>
+        </div>
+
+        <!-- Withdraw Section -->
+        <div id="withdrawSection" class="section">
+            <h3 style="color: var(--neon-pink);">Withdraw Funds</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0;">শুদ্ধ বিকাশ পার্সোনাল নাম্বার গ্রহনযোগ্য।</p>
+            <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #374151; margin-top: 10px;">
+                <input type="text" id="withdrawNumber" class="form-control" placeholder="bKash Personal Number">
+                <input type="number" id="withdrawAmount" class="form-control" placeholder="Amount (Min ৳50 - Max ৳200)">
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Hold the button below for 3 seconds to complete withdrawal.</p>
+                <button class="hold-btn" id="holdWithdrawBtn" onmousedown="startHold()" onmouseup="cancelHold()" ontouchstart="startHold()" ontouchend="cancelHold()">Hold 3 Seconds to Withdraw</button>
+            </div>
+            
+            <h4 style="margin-top: 20px; font-size: 14px; color: var(--neon-cyan);">Withdraw History</h4>
+            <div id="withdrawHistoryList" style="margin-top: 10px;">
+                <!-- History Cards -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Drawer Menu -->
+    <div class="drawer" id="sideDrawer">
+        <div class="drawer-close" onclick="toggleDrawer()">✕</div>
+        <ul class="drawer-links">
+            <li onclick="switchTab('matchSection'); toggleDrawer();">Match</li>
+            <li onclick="switchTab('myMatchSection'); toggleDrawer();">My Match</li>
+            <li onclick="switchTab('addBalance'); toggleDrawer();">Add Balance</li>
+            <li onclick="switchTab('withdraw'); toggleDrawer();">Withdraw</li>
+            <li onclick="toggleDrawer(); alert('Profile feature coming soon');">Profile</li>
+        </ul>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('matchSection')">
+            <div>🏠</div>Home
+        </div>
+        <div class="nav-item" onclick="switchTab('myMatchSection')">
+            <div>🎮</div>My Match
+        </div>
+        <div class="nav-item" onclick="switchTab('addBalance')">
+            <div>💳</div>Add Balance
+        </div>
+        <div class="nav-item" onclick="switchTab('withdraw')">
+            <div>💸</div>Withdraw
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Tomar original Firebase Configuration
+        // Tomar Firebase Config ekhane boshabe
         const firebaseConfig = {
-            apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
-            authDomain: "zeg-g-tournament.firebaseapp.com",
-            projectId: "zeg-g-tournament",
-            storageBucket: "zeg-g-tournament.firebasestorage.app",
-            messagingSenderId: "907178832675",
-            appId: "1:907178832675:web:414bc01f1b3a4695455296",
-            measurementId: "G-PLN2DEP794"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
 
-        window.toggleAuth = function() {
-            const box = document.getElementById('auth-section');
-            box.style.display = box.style.display === 'block' ? 'none' : 'block';
+        // Global functions integration
+        window.switchTab = function(tabId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
+            
+            if(tabId === 'matchSection') document.getElementById('matchSection').classList.add('active');
+            if(tabId === 'myMatchSection') document.getElementById('myMatchSection').classList.add('active');
+            if(tabId === 'addBalance') document.getElementById('addBalanceSection').classList.add('active');
+            if(tabId === 'withdraw') document.getElementById('withdrawSection').classList.add('active');
         }
 
-        window.loginUser = async function() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                alert("Login Successful!");
-                document.getElementById('auth-section').style.display = 'none';
-            } catch (error) {
-                try {
-                    await createUserWithEmailAndPassword(auth, email, password);
-                    alert("Account Created & Logged In Successfully!");
-                    document.getElementById('auth-section').style.display = 'none';
-                } catch (err) {
-                    alert("Error: " + err.message);
-                }
-            }
+        window.toggleDrawer = function() {
+            document.getElementById('sideDrawer').classList.toggle('open');
         }
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('user-display').innerText = user.email.split('@')[0];
-                document.getElementById('login-toggle-btn').innerText = "Logout";
-                document.getElementById('login-toggle-btn').onclick = () => signOut(auth).then(() => alert("Logged out"));
-            } else {
-                document.getElementById('user-display').innerText = "";
-                document.getElementById('login-toggle-btn').innerText = "Login";
-                document.getElementById('login-toggle-btn').onclick = toggleAuth;
-            }
-        });
-
-        async function loadTournaments() {
-            const grid = document.getElementById('tournament-grid');
-            grid.innerHTML = "";
-            try {
-                const querySnapshot = await getDocs(collection(db, "tournaments"));
-                if(querySnapshot.empty) {
-                    grid.innerHTML = "<p style='color:var(--text-muted);'>No tournaments live right now. Go to Admin Panel to add one!</p>";
-                    return;
-                }
-                querySnapshot.forEach((doc) => {
-                    const t = doc.data();
-                    grid.innerHTML += `
-                        <div class="card">
-                            <h3>${t.name}</h3>
-                            <div class="card-info">
-                                <span><i class="fa-solid fa-trophy"></i> ৳${t.prize}</span>
-                                <span><i class="fa-solid fa-gamepad"></i> ${t.game}</span>
-                            </div>
-                            <button class="card-btn" onclick="alert('Squad registered for ${t.name}!')">Register Squad</button>
-                        </div>
-                    `;
-                });
-            } catch (e) {
-                grid.innerHTML = "<p style='color:var(--text-muted);'>Please create 'tournaments' collection in Firestore database first.</p>";
-            }
+        window.toggleAuthModal = function() {
+            alert("Login/Signup modal placeholder. Ensure Firebase Auth is active.");
         }
-        loadTournaments();
+
+        let holdTimer;
+        window.startHold = function() {
+            const num = document.getElementById('withdrawNumber').value;
+            const amt = parseFloat(document.getElementById('withdrawAmount').value);
+            if(!num || num.length < 11) { alert("সঠিক বিকাশ পার্সোনাল নাম্বার দিন।"); return; }
+            if(isNaN(amt) || amt < 50 || amt > 200) { alert("মিনিমাম ৳৫০ এবং ম্যাক্সিমাম ৳২০০ উইথড্র করতে পারবেন।"); return; }
+            
+            document.getElementById('holdWithdrawBtn').style.background = '#00ff66';
+            document.getElementById('holdWithdrawBtn').innerText = "Holding... Keep holding!";
+            
+            holdTimer = setTimeout(() => {
+                alert("Withdraw Request Successful!");
+                document.getElementById('holdWithdrawBtn').style.background = '#ff007f';
+                document.getElementById('holdWithdrawBtn').innerText = "Hold 3 Seconds to Withdraw";
+                // Add withdraw history card logic here
+            }, 3000);
+        }
+
+        window.cancelHold = function() {
+            clearTimeout(holdTimer);
+            document.getElementById('holdWithdrawBtn').style.background = '#ff007f';
+            document.getElementById('holdWithdrawBtn').innerText = "Hold 3 Seconds to Withdraw";
+        }
+
+        window.submitAddBalance = function() {
+            const trxID = document.getElementById('bkashTrxID').value;
+            const amount = document.getElementById('addAmount').value;
+            if(!trxID || !amount) { alert("সব তথ্য পূরণ করুন।"); return; }
+            if(amount < 5 || amount > 100) { alert("মিনিমাম ৳৫ এবং ম্যাক্সিমাম ৳১০০ এন্ট্রি দিন।"); return; }
+            alert("Add balance request submitted to Admin.");
+        }
     </script>
 </body>
 </html>
