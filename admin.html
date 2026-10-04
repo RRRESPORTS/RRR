@@ -2,229 +2,233 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ZEG-G Tournament Admin</title>
 
 <style>
 *{box-sizing:border-box}
 
 body{
-margin:0;
-background:#f3f4f6;
-font-family:Arial;
-color:#16181d
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#080b12;
+    color:#fff;
 }
 
-.wrap{
-max-width:1150px;
-margin:auto;
-padding:20px
+header{
+    background:#101722;
+    padding:18px;
+    border-bottom:1px solid #293448;
 }
 
-.top{
-background:#11131a;
-color:#fff;
-padding:18px;
-border-radius:12px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:18px
+.logo{
+    color:#00e5ff;
+    font-size:23px;
+    font-weight:bold;
 }
 
-.card{
-background:#fff;
-padding:20px;
-border-radius:12px;
-box-shadow:0 2px 12px #0001
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:20px;
 }
 
-.tabs{
-display:flex;
-gap:8px;
-flex-wrap:wrap;
-margin-bottom:16px
+.login{
+    max-width:400px;
+    margin:80px auto;
+    background:#111722;
+    padding:25px;
+    border-radius:15px;
+    border:1px solid #293448;
 }
 
-.tabs button{
-padding:11px 15px;
-border:1px solid #ddd;
-border-radius:8px;
-background:#fff;
-font-weight:bold;
-cursor:pointer
+input,textarea,select{
+    width:100%;
+    padding:12px;
+    margin:7px 0;
+    background:#0b1019;
+    color:#fff;
+    border:1px solid #293448;
+    border-radius:8px;
 }
 
-.tabs .active{
-background:#e50914;
-color:#fff;
-border-color:#e50914
-}
-
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:18px
-}
-
-.tab.hidden,
-.hidden{
-display:none
-}
-
-input,
-select,
 textarea{
-width:100%;
-padding:11px;
-border:1px solid #ddd;
-border-radius:8px;
-margin:5px 0 12px
+    min-height:120px;
 }
 
 button{
-padding:10px 14px;
-border:0;
-border-radius:8px;
-font-weight:bold;
-cursor:pointer
+    border:0;
+    padding:10px 15px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+    margin:3px;
 }
 
-.red{
-background:#e50914;
-color:#fff
+.primary{
+    background:#00e5ff;
+    color:#001014;
 }
 
 .danger{
-background:#ffe1e1;
-color:#a00
+    background:#ff4655;
+    color:white;
 }
 
-.item{
-border:1px solid #eee;
-padding:12px;
-border-radius:8px;
-margin:8px 0
+.dark{
+    background:#222c3d;
+    color:white;
 }
 
-.row{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px
+.panel{
+    display:none;
+}
+
+.tabs{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+.card{
+    background:#111722;
+    border:1px solid #293448;
+    border-radius:12px;
+    padding:18px;
+    margin-bottom:15px;
+}
+
+h2{
+    border-left:4px solid #00e5ff;
+    padding-left:10px;
 }
 
 .small{
-font-size:12px;
-color:#777
+    color:#9da8ba;
+    font-size:13px;
 }
 
-@media(max-width:700px){
-.grid,
-.row{
-grid-template-columns:1fr
-}
+.status{
+    padding:5px 8px;
+    border-radius:6px;
+    background:#172235;
+    display:inline-block;
 }
 </style>
 </head>
 
 <body>
 
-<div class="wrap">
+<header>
+    <div class="logo">ZEG-G TOURNAMENT — ADMIN</div>
+</header>
 
-<div class="top">
-<b>ZEG-G TOURNAMENT — ADMIN</b>
-<button id="logout" class="red hidden">Logout</button>
-</div>
+<div class="container">
 
-<div id="login" class="card">
+<!-- ADMIN LOGIN -->
+
+<div id="loginBox" class="login">
 
 <h2>Admin Login</h2>
 
-<input id="email"
-type="email"
-placeholder="Admin Email">
+<input
+    id="email"
+    type="email"
+    placeholder="Admin Email"
+>
 
-<input id="pass"
-type="password"
-placeholder="Password">
+<input
+    id="password"
+    type="password"
+    placeholder="Password"
+>
 
-<button class="red" onclick="doLogin()">
+<button class="primary" onclick="adminLogin()">
 Login
 </button>
 
+<p id="loginMessage"></p>
+
 </div>
 
-<div id="app" class="hidden">
+
+<!-- ADMIN PANEL -->
+
+<div id="adminPanel" class="panel">
 
 <div class="tabs">
 
-<button class="active"
-onclick="show('settings',this)">
+<button class="primary" onclick="showTab('website')">
 Website
 </button>
 
-<button onclick="show('matches',this)">
+<button class="dark" onclick="showTab('matches')">
 Matches
 </button>
 
-<button onclick="show('payments',this)">
+<button class="dark" onclick="showTab('payments')">
 Payments
 </button>
 
-<button onclick="show('users',this)">
+<button class="dark" onclick="showTab('users')">
 Users
 </button>
 
-<button onclick="show('withdrawals',this)">
+<button class="dark" onclick="showTab('withdrawals')">
 Withdrawals
+</button>
+
+<button class="danger" onclick="logout()">
+Logout
 </button>
 
 </div>
 
 
-<section id="settings" class="tab">
+<!-- WEBSITE -->
+
+<section id="website">
+
+<h2>Website Settings</h2>
 
 <div class="card">
 
-<h2>Website Control</h2>
-
 <label>Notice</label>
-<input id="notice">
+<input id="notice" placeholder="Website Notice">
+
+<label>Hero Title</label>
+<input id="heroTitle" placeholder="Hero Title">
 
 <label>Hero Text</label>
-<input id="heroText">
+<input id="heroText" placeholder="Hero Text">
 
 <label>Hero Image URL</label>
-<input id="heroUrl">
+<input id="heroImage" placeholder="Image URL">
 
-<label>Logo URL</label>
-<input id="logoUrl">
+<label>Live Match URL</label>
+<input id="liveUrl" placeholder="YouTube Live URL">
 
-<label>Live Embed URL</label>
-<input id="liveUrl">
-
-<div class="row">
-
-<div>
 <label>App URL</label>
-<input id="appLink">
-</div>
+<input id="appUrl" placeholder="App Download URL">
 
-<div>
 <label>Telegram URL</label>
-<input id="telegramLink">
-</div>
+<input id="telegramUrl" placeholder="Telegram URL">
 
-</div>
+<label>Minimum Withdrawal</label>
+<input
+    id="minWithdrawal"
+    type="number"
+    placeholder="Minimum Withdrawal"
+>
 
-<label>Minimum Withdraw</label>
-<input id="minWithdraw" type="number">
+<label>Rules</label>
+<textarea
+    id="rules"
+    placeholder="Rules & Conditions"
+></textarea>
 
-<label>Rules & Conditions</label>
-<textarea id="rules" rows="10"></textarea>
-
-<button class="red"
-onclick="saveSettings()">
+<button class="primary" onclick="saveWebsite()">
 Save Website
 </button>
 
@@ -233,25 +237,23 @@ Save Website
 </section>
 
 
-<section id="matches" class="tab hidden">
+<!-- MATCHES -->
 
-<div class="grid">
+<section id="matches" style="display:none">
+
+<h2>Match Management</h2>
 
 <div class="card">
 
-<h2>Add / Edit Match</h2>
+<input
+    id="matchTitle"
+    placeholder="Match Title"
+>
 
-<input id="editId" type="hidden">
-
-<label>Title</label>
-<input id="title">
-
-<label>Category</label>
-
-<select id="category">
+<select id="matchCategory">
 
 <option value="normal">
-Normal
+Normal Match
 </option>
 
 <option value="1v1">
@@ -259,803 +261,1009 @@ Normal
 </option>
 
 <option value="headshot">
-Only Headshot
+Headshot
 </option>
 
 </select>
 
-<label>Matches Found Text</label>
-<input id="count"
-placeholder="16 Matches Found">
+<input
+    id="matchCount"
+    placeholder="Example: 48 Players"
+>
 
-<label>Entry Fee</label>
-<input id="fee" type="number">
+<input
+    id="entryFee"
+    type="number"
+    placeholder="Entry Fee"
+>
 
-<label>Image URL</label>
-<input id="imageUrl">
+<input
+    id="matchImage"
+    placeholder="Match Image URL"
+>
 
-<label>Enabled</label>
+<label>
+<input
+    id="matchEnabled"
+    type="checkbox"
+    checked
+>
+Enabled
+</label>
 
-<select id="enabled">
+<br>
 
-<option value="true">
-Yes
-</option>
-
-<option value="false">
-No
-</option>
-
-</select>
-
-<button class="red"
-onclick="saveMatch()">
-Save Match
+<button class="primary" onclick="saveMatch()">
+Add Match
 </button>
 
 </div>
-
-
-<div class="card">
-
-<h2>All Matches</h2>
 
 <div id="matchList"></div>
 
-</div>
-
-</div>
-
 </section>
 
 
-<section id="payments" class="tab hidden">
+<!-- PAYMENTS -->
 
-<div class="grid">
+<section id="payments" style="display:none">
+
+<h2>Payment Methods</h2>
 
 <div class="card">
 
-<h2>Payment Method</h2>
+<input
+    id="paymentName"
+    placeholder="bKash / Nagad"
+>
 
-<input id="payId" type="hidden">
+<input
+    id="paymentNumber"
+    placeholder="Payment Number"
+>
 
-<label>Name</label>
-<input id="payName"
-placeholder="bKash / Nagad / Rocket">
-
-<label>Number</label>
-<input id="payNumber">
-
-<button class="red"
-onclick="savePayment()">
-Save
+<button class="primary" onclick="addPayment()">
+Add Payment Method
 </button>
 
 </div>
 
-
-<div class="card">
-
-<h2>Methods</h2>
-
-<div id="payList"></div>
-
-</div>
-
-</div>
+<div id="paymentList"></div>
 
 </section>
 
 
-<section id="users" class="tab hidden">
+<!-- USERS -->
 
-<div class="card">
+<section id="users" style="display:none">
 
-<h2>User Control</h2>
-
-<button onclick="loadUsers()">
-Refresh
-</button>
+<h2>Users</h2>
 
 <div id="userList"></div>
 
-</div>
-
 </section>
 
 
-<section id="withdrawals" class="tab hidden">
+<!-- WITHDRAWALS -->
 
-<div class="card">
+<section id="withdrawals" style="display:none">
 
-<h2>Withdrawal Control</h2>
+<h2>Withdrawals</h2>
 
-<button onclick="loadWithdrawals()">
-Refresh
-</button>
-
-<div id="withdrawList"></div>
-
-</div>
+<div id="withdrawalList"></div>
 
 </section>
 
 </div>
+
 </div>
 
 
 <script type="module">
 
-import{initializeApp}from"https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 
-import{
-getAuth,
-onAuthStateChanged,
-signInWithEmailAndPassword,
-signOut
-}from"https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
+}
+from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-import{
-getFirestore,
-doc,
-getDoc,
-setDoc,
-collection,
-getDocs,
-addDoc,
-updateDoc,
-deleteDoc
-}from"https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    addDoc,
+    collection,
+    getDocs,
+    updateDoc,
+    deleteDoc,
+    serverTimestamp
+}
+from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 
-const firebaseConfig={
+/* =================================
+   FIREBASE CONFIG
+================================= */
 
-apiKey:"YOUR_API_KEY",
+const firebaseConfig = {
 
-authDomain:"YOUR_PROJECT.firebaseapp.com",
+    apiKey:
+    "AIzaSyDpOp2wyMj-7-5n4Vifpl6Ev2IB_hNg2TU",
 
-projectId:"YOUR_PROJECT_ID",
+    authDomain:
+    "ag-tournament-999.firebaseapp.com",
 
-storageBucket:"YOUR_PROJECT.appspot.com",
+    databaseURL:
+    "https://ag-tournament-999-default-rtdb.firebaseio.com",
 
-messagingSenderId:"YOUR_SENDER_ID",
+    projectId:
+    "ag-tournament-999",
 
-appId:"YOUR_APP_ID"
+    storageBucket:
+    "ag-tournament-999.firebasestorage.app",
+
+    messagingSenderId:
+    "761085533810",
+
+    appId:
+    "1:761085533810:web:c79e01d5ccca07f6416ceb",
+
+    measurementId:
+    "G-7M23XV9VS4"
+};
+
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const db = getFirestore(app);
+
+
+/* =================================
+   ADMIN EMAIL
+================================= */
+
+const ADMIN_EMAIL =
+"abujar2578@gmail.com";
+
+
+/* =================================
+   ADMIN LOGIN
+================================= */
+
+window.adminLogin = async function(){
+
+    const email =
+    document.getElementById("email")
+    .value
+    .trim();
+
+    const password =
+    document.getElementById("password")
+    .value;
+
+    const message =
+    document.getElementById("loginMessage");
+
+    if(!email || !password){
+
+        message.innerText =
+        "Email and password required.";
+
+        return;
+    }
+
+    try{
+
+        await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+        message.innerText =
+        "Login successful.";
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        message.innerText =
+        error.message;
+    }
 
 };
 
 
-const ADMIN_EMAIL="YOUR_ADMIN_EMAIL";
+/* =================================
+   AUTH CHECK
+================================= */
 
+onAuthStateChanged(auth, function(user){
 
-const app=initializeApp(firebaseConfig);
+    if(
+        user &&
+        user.email &&
+        user.email.toLowerCase() ===
+        ADMIN_EMAIL.toLowerCase()
+    ){
 
-const auth=getAuth(app);
+        document.getElementById(
+            "loginBox"
+        ).style.display = "none";
 
-const db=getFirestore(app);
+        document.getElementById(
+            "adminPanel"
+        ).style.display = "block";
 
-const $=x=>document.getElementById(x);
+        loadWebsite();
+        loadMatches();
+        loadPayments();
+        loadUsers();
+        loadWithdrawals();
 
+    }
 
-function esc(s){
+    else{
 
-return String(s??"").replace(
-/[&<>"']/g,
-c=>({
-"&":"&amp;",
-"<":"&lt;",
-">":"&gt;",
-'"':"&quot;",
-"'":"&#039;"
-}[c])
-);
+        document.getElementById(
+            "loginBox"
+        ).style.display = "block";
 
-}
+        document.getElementById(
+            "adminPanel"
+        ).style.display = "none";
 
-
-window.doLogin=async()=>{
-
-try{
-
-await signInWithEmailAndPassword(
-auth,
-$("email").value,
-$("pass").value
-);
-
-}catch(e){
-
-alert(e.message);
-
-}
-
-};
-
-
-$("logout").onclick=()=>signOut(auth);
-
-
-onAuthStateChanged(auth,u=>{
-
-if(u && u.email===ADMIN_EMAIL){
-
-$("login").classList.add("hidden");
-
-$("app").classList.remove("hidden");
-
-$("logout").classList.remove("hidden");
-
-loadAll();
-
-}else{
-
-$("login").classList.remove("hidden");
-
-$("app").classList.add("hidden");
-
-$("logout").classList.add("hidden");
-
-}
+    }
 
 });
 
 
-window.show=(id,b)=>{
+/* =================================
+   LOGOUT
+================================= */
 
-document
-.querySelectorAll(".tab")
-.forEach(x=>x.classList.add("hidden"));
+window.logout = async function(){
 
-$(id).classList.remove("hidden");
-
-document
-.querySelectorAll(".tabs button")
-.forEach(x=>x.classList.remove("active"));
-
-b.classList.add("active");
+    await signOut(auth);
 
 };
 
 
-async function loadAll(){
+/* =================================
+   TABS
+================================= */
 
-loadSettings();
-loadMatches();
-loadPayments();
-loadUsers();
-loadWithdrawals();
+window.showTab = function(tab){
 
-}
+    const tabs = [
+        "website",
+        "matches",
+        "payments",
+        "users",
+        "withdrawals"
+    ];
 
+    tabs.forEach(function(item){
 
-async function loadSettings(){
+        document.getElementById(item)
+        .style.display =
+        item === tab
+        ? "block"
+        : "none";
 
-let s=await getDoc(
-doc(db,"site","settings")
-);
-
-let x=s.data()||{};
-
-[
-"notice",
-"heroText",
-"heroUrl",
-"logoUrl",
-"liveUrl",
-"appLink",
-"telegramLink",
-"minWithdraw",
-"rules"
-].forEach(k=>{
-
-$(k).value=x[k]??"";
-
-});
-
-}
-
-
-window.saveSettings=async()=>{
-
-await setDoc(
-doc(db,"site","settings"),
-{
-
-notice:$("notice").value,
-
-heroText:$("heroText").value,
-
-heroUrl:$("heroUrl").value,
-
-logoUrl:$("logoUrl").value,
-
-liveUrl:$("liveUrl").value,
-
-appLink:$("appLink").value,
-
-telegramLink:$("telegramLink").value,
-
-minWithdraw:Number(
-$("minWithdraw").value||100
-),
-
-rules:$("rules").value
-
-},
-{merge:true}
-);
-
-alert("Website updated.");
+    });
 
 };
 
 
-window.saveMatch=async()=>{
+/* =================================
+   WEBSITE SETTINGS
+================================= */
 
-let id=$("editId").value;
+async function loadWebsite(){
 
-let d={
+    try{
 
-title:$("title").value,
+        const snap =
+        await getDoc(
+            doc(db,"site","settings")
+        );
 
-category:$("category").value,
+        if(!snap.exists()) return;
 
-count:$("count").value,
+        const d = snap.data();
 
-entryFee:Number(
-$("fee").value||0
-),
+        document.getElementById("notice")
+        .value = d.notice || "";
 
-imageUrl:$("imageUrl").value,
+        document.getElementById("heroTitle")
+        .value = d.heroTitle || "";
 
-enabled:$("enabled").value==="true"
+        document.getElementById("heroText")
+        .value = d.heroText || "";
+
+        document.getElementById("heroImage")
+        .value = d.heroImage || "";
+
+        document.getElementById("liveUrl")
+        .value = d.liveUrl || "";
+
+        document.getElementById("appUrl")
+        .value = d.appUrl || "";
+
+        document.getElementById("telegramUrl")
+        .value = d.telegramUrl || "";
+
+        document.getElementById("minWithdrawal")
+        .value = d.minWithdrawal || 0;
+
+        document.getElementById("rules")
+        .value = d.rules || "";
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
+
+window.saveWebsite = async function(){
+
+    try{
+
+        await setDoc(
+
+            doc(db,"site","settings"),
+
+            {
+
+                notice:
+                document.getElementById("notice").value,
+
+                heroTitle:
+                document.getElementById("heroTitle").value,
+
+                heroText:
+                document.getElementById("heroText").value,
+
+                heroImage:
+                document.getElementById("heroImage").value,
+
+                liveUrl:
+                document.getElementById("liveUrl").value,
+
+                appUrl:
+                document.getElementById("appUrl").value,
+
+                telegramUrl:
+                document.getElementById("telegramUrl").value,
+
+                minWithdrawal:
+                Number(
+                    document.getElementById(
+                        "minWithdrawal"
+                    ).value
+                ) || 0,
+
+                rules:
+                document.getElementById("rules").value,
+
+                updatedAt:
+                serverTimestamp()
+
+            }
+
+        );
+
+        alert("Website settings saved.");
+
+    }
+
+    catch(error){
+
+        alert(error.message);
+
+    }
 
 };
 
 
-if(!d.title)
-return alert("Title required");
+/* =================================
+   MATCHES
+================================= */
 
+window.saveMatch = async function(){
 
-if(id){
+    try{
 
-await updateDoc(
-doc(db,"matches",id),
-d
-);
+        await addDoc(
 
-}else{
+            collection(db,"matches"),
 
-await addDoc(
-collection(db,"matches"),
-d
-);
+            {
 
-}
+                title:
+                document.getElementById(
+                    "matchTitle"
+                ).value,
 
+                category:
+                document.getElementById(
+                    "matchCategory"
+                ).value,
 
-clearMatch();
+                countText:
+                document.getElementById(
+                    "matchCount"
+                ).value,
 
-loadMatches();
+                entryFee:
+                Number(
+                    document.getElementById(
+                        "entryFee"
+                    ).value
+                ) || 0,
+
+                image:
+                document.getElementById(
+                    "matchImage"
+                ).value,
+
+                enabled:
+                document.getElementById(
+                    "matchEnabled"
+                ).checked,
+
+                createdAt:
+                serverTimestamp()
+
+            }
+
+        );
+
+        alert("Match added successfully.");
+
+        document.getElementById(
+            "matchTitle"
+        ).value = "";
+
+        document.getElementById(
+            "matchCount"
+        ).value = "";
+
+        document.getElementById(
+            "entryFee"
+        ).value = "";
+
+        document.getElementById(
+            "matchImage"
+        ).value = "";
+
+        loadMatches();
+
+    }
+
+    catch(error){
+
+        alert(error.message);
+
+    }
 
 };
-
-
-function clearMatch(){
-
-[
-"editId",
-"title",
-"count",
-"fee",
-"imageUrl"
-].forEach(x=>$(x).value="");
-
-$("category").value="normal";
-
-$("enabled").value="true";
-
-}
 
 
 async function loadMatches(){
 
-let s=await getDocs(
-collection(db,"matches")
-);
+    const list =
+    document.getElementById(
+        "matchList"
+    );
 
-$("matchList").innerHTML=
+    list.innerHTML = "";
 
-s.docs.map(d=>{
+    try{
 
-let x=d.data();
+        const snap =
+        await getDocs(
+            collection(db,"matches")
+        );
 
-return `
+        snap.forEach(function(item){
 
-<div class="item">
+            const d = item.data();
 
-<b>${esc(x.title)}</b>
+            const div =
+            document.createElement("div");
 
-<br>
+            div.className = "card";
 
-${x.category}
-· ৳${x.entryFee||0}
-· ${x.enabled?"ON":"OFF"}
+            div.innerHTML = `
 
-<br>
+                <b>${d.title || "Match"}</b>
 
-<button
-onclick="editMatch('${d.id}')">
-Edit
-</button>
+                <p class="small">
+                    Category:
+                    ${d.category || ""}
 
-<button
-class="danger"
-onclick="deleteMatch('${d.id}')">
-Delete
-</button>
+                    <br>
 
-</div>
+                    Entry Fee:
+                    ৳${d.entryFee || 0}
 
-`;
+                    <br>
 
-}).join("")||"No matches.";
+                    Status:
+                    ${d.enabled === false
+                    ? "Disabled"
+                    : "Enabled"}
+                </p>
 
-}
+                <button
+                    class="danger"
+                    onclick="deleteMatch('${item.id}')"
+                >
+                    Delete
+                </button>
 
+            `;
 
-window.editMatch=async id=>{
+            list.appendChild(div);
 
-let x=(await getDoc(
-doc(db,"matches",id)
-)).data();
+        });
 
-$("editId").value=id;
+    }
 
-$("title").value=x.title||"";
+    catch(error){
 
-$("category").value=x.category||"normal";
+        console.error(error);
 
-$("count").value=x.count||"";
-
-$("fee").value=x.entryFee||0;
-
-$("imageUrl").value=x.imageUrl||"";
-
-$("enabled").value=
-String(x.enabled!==false);
-
-window.scrollTo({
-top:0,
-behavior:"smooth"
-});
-
-};
-
-
-window.deleteMatch=async id=>{
-
-if(confirm("Delete match?")){
-
-await deleteDoc(
-doc(db,"matches",id)
-);
-
-loadMatches();
-
-}
-
-};
-
-
-window.savePayment=async()=>{
-
-let id=$("payId").value;
-
-let d={
-name:$("payName").value,
-number:$("payNumber").value
-};
-
-if(!d.name)
-return alert("Name required");
-
-
-if(id){
-
-await updateDoc(
-doc(db,"paymentMethods",id),
-d
-);
-
-}else{
-
-await addDoc(
-collection(db,"paymentMethods"),
-d
-);
+    }
 
 }
 
 
-$("payId").value="";
-$("payName").value="";
-$("payNumber").value="";
+window.deleteMatch = async function(id){
 
-loadPayments();
+    if(
+        !confirm(
+            "Are you sure you want to delete this match?"
+        )
+    ) return;
+
+    await deleteDoc(
+        doc(db,"matches",id)
+    );
+
+    loadMatches();
+
+};
+
+
+/* =================================
+   PAYMENT METHODS
+================================= */
+
+window.addPayment = async function(){
+
+    const name =
+    document.getElementById(
+        "paymentName"
+    ).value.trim();
+
+    const number =
+    document.getElementById(
+        "paymentNumber"
+    ).value.trim();
+
+    if(!name || !number){
+
+        alert(
+            "Payment name and number required."
+        );
+
+        return;
+    }
+
+    await addDoc(
+
+        collection(
+            db,
+            "paymentMethods"
+        ),
+
+        {
+
+            name:name,
+
+            number:number,
+
+            createdAt:
+            serverTimestamp()
+
+        }
+
+    );
+
+    document.getElementById(
+        "paymentName"
+    ).value = "";
+
+    document.getElementById(
+        "paymentNumber"
+    ).value = "";
+
+    loadPayments();
 
 };
 
 
 async function loadPayments(){
 
-let s=await getDocs(
-collection(db,"paymentMethods")
-);
+    const list =
+    document.getElementById(
+        "paymentList"
+    );
 
-$("payList").innerHTML=
+    list.innerHTML = "";
 
-s.docs.map(d=>{
+    const snap =
+    await getDocs(
+        collection(
+            db,
+            "paymentMethods"
+        )
+    );
 
-let x=d.data();
+    snap.forEach(function(item){
 
-return `
+        const d = item.data();
 
-<div class="item">
+        const div =
+        document.createElement("div");
 
-<b>${esc(x.name)}</b>
+        div.className = "card";
 
-<br>
+        div.innerHTML = `
 
-${esc(x.number)}
+            <b>${d.name || ""}</b>
 
-<br>
+            <p>
+                ${d.number || ""}
+            </p>
 
-<button onclick="editPay('${d.id}')">
-Edit
-</button>
+            <button
+                class="danger"
+                onclick="deletePayment('${item.id}')"
+            >
+                Delete
+            </button>
 
-<button
-class="danger"
-onclick="deletePay('${d.id}')">
-Delete
-</button>
+        `;
 
-</div>
+        list.appendChild(div);
 
-`;
-
-}).join("")||"No payment methods.";
+    });
 
 }
 
 
-window.editPay=async id=>{
+window.deletePayment = async function(id){
 
-let x=(await getDoc(
-doc(db,"paymentMethods",id)
-)).data();
+    await deleteDoc(
+        doc(
+            db,
+            "paymentMethods",
+            id
+        )
+    );
 
-$("payId").value=id;
-
-$("payName").value=x.name||"";
-
-$("payNumber").value=x.number||"";
+    loadPayments();
 
 };
 
 
-window.deletePay=async id=>{
+/* =================================
+   USERS
+================================= */
 
-if(confirm("Delete?")){
+async function loadUsers(){
 
-await deleteDoc(
-doc(db,"paymentMethods",id)
-);
+    const list =
+    document.getElementById(
+        "userList"
+    );
 
-loadPayments();
+    list.innerHTML = "";
+
+    const snap =
+    await getDocs(
+        collection(db,"users")
+    );
+
+    snap.forEach(function(item){
+
+        const d = item.data();
+
+        const div =
+        document.createElement("div");
+
+        div.className = "card";
+
+        div.innerHTML = `
+
+            <b>
+                ${d.email || item.id}
+            </b>
+
+            <p>
+
+                Balance:
+                ৳${d.balance || 0}
+
+                <br>
+
+                Earn Balance:
+                ৳${d.earnBalance || 0}
+
+                <br>
+
+                Verified:
+                ${d.verified ? "Yes" : "No"}
+
+            </p>
+
+            <input
+                id="bal_${item.id}"
+                type="number"
+                placeholder="New Balance"
+            >
+
+            <input
+                id="earn_${item.id}"
+                type="number"
+                placeholder="New Earn Balance"
+            >
+
+            <button
+                class="primary"
+                onclick="updateUser('${item.id}')"
+            >
+                Update
+            </button>
+
+            <button
+                class="dark"
+                onclick="
+                verifyUser(
+                    '${item.id}',
+                    ${!d.verified}
+                )
+                "
+            >
+                ${d.verified
+                ? "Unverify"
+                : "Verify"}
+
+            </button>
+
+        `;
+
+        list.appendChild(div);
+
+    });
 
 }
+
+
+window.updateUser = async function(id){
+
+    const balanceValue =
+    document.getElementById(
+        "bal_"+id
+    ).value;
+
+    const earnValue =
+    document.getElementById(
+        "earn_"+id
+    ).value;
+
+    const update = {};
+
+    if(balanceValue !== "")
+        update.balance =
+        Number(balanceValue);
+
+    if(earnValue !== "")
+        update.earnBalance =
+        Number(earnValue);
+
+    if(
+        Object.keys(update).length === 0
+    ){
+
+        alert(
+            "Enter a value first."
+        );
+
+        return;
+    }
+
+    await updateDoc(
+        doc(db,"users",id),
+        update
+    );
+
+    alert("User updated.");
+
+    loadUsers();
 
 };
 
 
-window.loadUsers=async()=>{
+window.verifyUser = async function(
+    id,
+    value
+){
 
-let s=await getDocs(
-collection(db,"users")
-);
+    await updateDoc(
 
-$("userList").innerHTML=
+        doc(
+            db,
+            "users",
+            id
+        ),
 
-s.docs.map(d=>{
+        {
+            verified:value
+        }
 
-let x=d.data();
+    );
 
-return `
-
-<div class="item">
-
-<b>${esc(x.name||"User")}</b>
-—
-${esc(x.email||"")}
-
-<br>
-
-Balance ৳${x.balance||0}
-· Earn ৳${x.earnBalance||0}
-· ${x.verified?"Verified":"Unverified"}
-
-<br>
-
-<input
-id="b${d.id}"
-type="number"
-value="${x.balance||0}">
-
-<input
-id="e${d.id}"
-type="number"
-value="${x.earnBalance||0}">
-
-<button onclick="updateUser('${d.id}')">
-Update Balance
-</button>
-
-<button
-onclick="verify('${d.id}',${!x.verified})">
-
-${x.verified?"Unverify":"Verify"}
-
-</button>
-
-</div>
-
-`;
-
-}).join("")||"No users.";
+    loadUsers();
 
 };
 
 
-window.updateUser=async id=>{
+/* =================================
+   WITHDRAWALS
+================================= */
 
-await updateDoc(
-doc(db,"users",id),
-{
-balance:Number(
-$("b"+id).value||0
-),
+async function loadWithdrawals(){
 
-earnBalance:Number(
-$("e"+id).value||0
-)
+    const list =
+    document.getElementById(
+        "withdrawalList"
+    );
+
+    list.innerHTML = "";
+
+    try{
+
+        const snap =
+        await getDocs(
+            collection(
+                db,
+                "withdrawals"
+            )
+        );
+
+        snap.forEach(function(item){
+
+            const d = item.data();
+
+            const div =
+            document.createElement("div");
+
+            div.className = "card";
+
+            div.innerHTML = `
+
+                <b>
+                    ${d.email ||
+                    d.uid ||
+                    "User"}
+                </b>
+
+                <p>
+
+                    Amount:
+                    ৳${d.amount || 0}
+
+                    <br>
+
+                    Method:
+                    ${d.method || ""}
+
+                    <br>
+
+                    Number:
+                    ${d.number || ""}
+
+                    <br>
+
+                    Status:
+                    ${d.status || "pending"}
+
+                </p>
+
+                <button
+                    class="primary"
+                    onclick="
+                    withdrawAction(
+                        '${item.id}',
+                        'approved'
+                    )
+                    "
+                >
+                    Approve
+                </button>
+
+                <button
+                    class="danger"
+                    onclick="
+                    withdrawAction(
+                        '${item.id}',
+                        'rejected'
+                    )
+                    "
+                >
+                    Reject
+                </button>
+
+            `;
+
+            list.appendChild(div);
+
+        });
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+    }
+
 }
-);
-
-loadUsers();
-
-};
 
 
-window.verify=async(id,v)=>{
+window.withdrawAction =
+async function(id,status){
 
-await updateDoc(
-doc(db,"users",id),
-{
-verified:v
-}
-);
+    await updateDoc(
 
-loadUsers();
+        doc(
+            db,
+            "withdrawals",
+            id
+        ),
 
-};
+        {
 
+            status:status,
 
-window.loadWithdrawals=async()=>{
+            processedAt:
+            serverTimestamp()
 
-let s=await getDocs(
-collection(db,"withdrawals")
-);
+        }
 
-$("withdrawList").innerHTML=
+    );
 
-s.docs.map(d=>{
-
-let x=d.data();
-
-return `
-
-<div class="item">
-
-<b>${esc(x.email||"")}</b>
-
-<br>
-
-৳${x.amount}
-· ${esc(x.method||"")}
-· ${esc(x.number||"")}
-
-<br>
-
-Status:
-${esc(x.status||"pending")}
-
-${x.status==="pending"
-
-?`
-
-<button
-class="red"
-onclick="approve(
-'${d.id}',
-'${x.uid}',
-${x.amount}
-)">
-Approve
-</button>
-
-<button
-onclick="reject('${d.id}')">
-Reject
-</button>
-
-`
-
-:""}
-
-</div>
-
-`;
-
-}).join("")||"No requests.";
-
-};
-
-
-window.approve=async(id,uid,amount)=>{
-
-let u=await getDoc(
-doc(db,"users",uid)
-);
-
-let bal=Number(
-u.data()?.balance||0
-);
-
-if(bal<Number(amount))
-return alert("Insufficient user balance.");
-
-await updateDoc(
-doc(db,"users",uid),
-{
-balance:bal-Number(amount)
-}
-);
-
-await updateDoc(
-doc(db,"withdrawals",id),
-{
-status:"completed"
-}
-);
-
-loadWithdrawals();
-loadUsers();
-
-};
-
-
-window.reject=async id=>{
-
-await updateDoc(
-doc(db,"withdrawals",id),
-{
-status:"rejected"
-}
-);
-
-loadWithdrawals();
+    loadWithdrawals();
 
 };
 
