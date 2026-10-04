@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AG Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>body { background-color: #030712; color: #fff; font-family: sans-serif; }</style>
+</head>
+<body class="p-4 max-w-4xl mx-auto space-y-6">
+    <h1 class="text-xl font-bold text-[#00ff66]">⚙ AG Tournament Admin Panel</h1>
+    
+    <div class="flex gap-2 flex-wrap">
+        <button onclick="switchAdminTab('users')" class="bg-gray-800 px-3 py-2 rounded text-xs font-bold">Users</button>
+        <button onclick="switchAdminTab('addmatch')" class="bg-gray-800 px-3 py-2 rounded text-xs font-bold">Add Match</button>
+        <button onclick="switchAdminTab('matches')" class="bg-gray-800 px-3 py-2 rounded text-xs font-bold">Manage Matches & Room ID</button>
+        <button onclick="switchAdminTab('withdraws')" class="bg-gray-800 px-3 py-2 rounded text-xs font-bold">Withdraw Requests</button>
+    </div>
+
+    <!-- USERS TAB -->
+    <div id="adm-users" class="space-y-3 bg-[#111827] p-4 rounded-xl border border-gray-800">
+        <h2 class="text-sm font-bold text-amber-400">User Management</h2>
+        <input id="search-box" oninput="searchUsers()" placeholder="Search by TJ-ID, Mail, or Number..." class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-xs text-white" />
+        <div id="users-list-container" class="space-y-2 text-xs">Loading users...</div>
+    </div>
+
+    <!-- ADD MATCH TAB -->
+    <div id="adm-addmatch" class="hidden space-y-3 bg-[#111827] p-4 rounded-xl border border-gray-800 text-xs">
+        <h2 class="text-sm font-bold text-[#00ff66]">Add New Match</h2>
+        <input id="m-title" placeholder="Match Title (e.g., Free Fire Solo)" class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-white" />
+        <input id="m-id" placeholder="Match ID (e.g., FF-101)" class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-white" />
+        <input id="m-time" placeholder="Time (e.g., 8:00 PM)" class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-white" />
+        <input id="m-entry" type="number" placeholder="Entry Fee (৳)" class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-white" />
+        <input id="m-prize" type="number" placeholder="Win Prize (৳)" class="w-full bg-gray-900 border border-gray-700 p-2 rounded text-white" />
+        <button onclick="addNewMatch()" class="w-full bg-[#00ff66] text-black font-bold py-2 rounded uppercase">Publish Match</button>
+    </div>
+
+    <!-- MATCHES LIST & ROOM ID TAB -->
+    <div id="adm-matches" class="hidden space-y-3 bg-[#111827] p-4 rounded-xl border border-gray-800 text-xs">
+        <h2 class="text-sm font-bold text-blue-400">Match Room ID & Pass Setup</h2>
+        <div id="admin-match-list" class="space-y-3">Loading matches...</div>
+    </div>
+
+    <!-- WITHDRAW REQUESTS TAB -->
+    <div id="adm-withdraws" class="hidden space-y-3 bg-[#111827] p-4 rounded-xl border border-gray-800 text-xs">
+        <h2 class="text-sm font-bold text-purple-400">Withdraw Requests</h2>
+        <div id="admin-wd-list" class="space-y-2">Loading requests...</div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyAbW9RUriAT60Cx3l-PymDflcAKsKTnSi",
+          authDomain: "ag-tournament-eb4b4.firebaseapp.com",
+          databaseURL: "https://ag-tournament-999-default-rtdb.firebaseio.com",
+          projectId: "ag-tournament-eb4b4"
+        };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.database();
+
+        function switchAdminTab(tab) {
+            ['users', 'addmatch', 'matches', 'withdraws'].forEach(t => {
+                document.getElementById('adm-' + t).classList.add('hidden');
+            });
+            document.getElementById('adm-' + tab).classList.remove('hidden');
+        }
+
+        let allUsersData = {};
+        db.ref('users').on('value', snap => {
+            allUsersData = snap.val() || {};
+            renderUsers(allUsersData);
+        });
+
+        function renderUsers(users) {
+            let container = document.getElementById('users-list-container');
+            container.innerHTML = "";
+            let keys = Object.keys(users);
+            if(keys.length === 0) { container.innerHTML = "No users found."; return; }
+
+            keys.forEach(k => {
+                let u = users[k];
+                container.innerHTML += `
+                    <div class="bg-gray-900 p-3 rounded border border-gray-800 space-y-2">
+                        <div><b>Email:</b> ${u.email} | <b>TJ-ID:</b> <span class="text-[#00ff66]">${u.tjId}</span> | <b>Balance:</b> ৳${u.balance || 0}</div>
+                        <div><b>Phone:</b> ${u.phone || 'N/A'}</div>
+                        <div class="flex gap-2 items-center">
+                            <input id="bal-${k}" type="number" placeholder="Add/Set Bal" class="bg-gray-800 p-1 rounded text-white w-24" />
+                            <button onclick="updateUserBal('${k}')" class="bg-green-600 text-white px-2 py-1 rounded">Update Bal</button>
+                            <button onclick="toggleBan('${k}', ${u.isBanned})" class="bg-${u.isBanned ? 'green' : 'red'}-600 text-white px-2 py-1 rounded">${u.isBanned ? 'Unban' : 'Ban'}</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function searchUsers() {
+            let query = document.getElementById('search-box').value.toLowerCase();
+            let filtered = {};
+            Object.keys(allUsersData).forEach(k => {
+                let u = allUsersData[k];
+                if((u.email && u.email.toLowerCase().includes(query)) || (u.tjId && u.tjId.toLowerCase().includes(query)) || (u.phone && u.phone.includes(query))) {
+                    filtered[k] = u;
+                }
+            });
+            renderUsers(filtered);
+        }
+
+        function updateUserBal(k) {
+            let val = Number(document.getElementById('bal-' + k).value);
+            db.ref('users/' + k).update({ balance: val }, () => alert('Balance updated!'));
+        }
+
+        function toggleBan(k, currentStatus) {
+            db.ref('users/' + k).update({ isBanned: !currentStatus }, () => alert('Status updated!'));
+        }
+
+        function addNewMatch() {
+            let title = document.getElementById('m-title').value.trim();
+            let matchId = document.getElementById('m-id').value.trim();
+            let time = document.getElementById('m-time').value.trim();
+            let entry = Number(document.getElementById('m-entry').value);
+            let prize = Number(document.getElementById('m-prize').value);
+            if(!title || !matchId) return alert('Fill required fields!');
+
+            db.ref('matches').push({ title, matchId, time, entry, prize, roomId: "", roomPass: "" }, () => {
+                alert('Match published successfully!');
+                document.getElementById('m-title').value = '';
+                document.getElementById('m-id').value = '';
+            });
+        }
+
+        db.ref('matches').on('value', snap => {
+            let container = document.getElementById('admin-match-list');
+            container.innerHTML = "";
+            if(!snap.exists()) { container.innerHTML = "No matches."; return; }
+
+            snap.forEach(mSnap => {
+                let mKey = mSnap.key, m = mSnap.val();
+                container.innerHTML += `
+                    <div class="bg-gray-900 p-3 rounded border border-gray-800 space-y-2">
+                        <div><b>${m.title}</b> (${m.matchId}) - Entry: ৳${m.entry}</div>
+                        <div class="flex gap-2">
+                            <input id="r-id-${mKey}" value="${m.roomId || ''}" placeholder="Room ID" class="bg-gray-800 p-1 rounded text-white w-1/2" />
+                            <input id="r-pass-${mKey}" value="${m.roomPass || ''}" placeholder="Password" class="bg-gray-800 p-1 rounded text-white w-1/2" />
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="saveRoomDetails('${mKey}')" class="bg-blue-600 text-white px-3 py-1 rounded">Save Room ID & Pass</button>
+                            <button onclick="deleteMatch('${mKey}')" class="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+        function saveRoomDetails(mKey) {
+            let roomId = document.getElementById('r-id-' + mKey).value.trim();
+            let roomPass = document.getElementById('r-pass-' + mKey).value.trim();
+            db.ref('matches/' + mKey).update({ roomId, roomPass }, () => alert('Room details updated!'));
+        }
+
+        function deleteMatch(mKey) {
+            if(confirm('Delete this match?')) db.ref('matches/' + mKey).remove();
+        }
+
+        db.ref('allWithdrawRequests').on('value', snap => {
+            let container = document.getElementById('admin-wd-list');
+            container.innerHTML = "";
+            if(!snap.exists()) { container.innerHTML = "No requests."; return; }
+
+            snap.forEach(wSnap => {
+                let wKey = wSnap.key, w = wSnap.val();
+                let col = w.status === 'Approved' ? 'text-green-400' : (w.status === 'Failed' ? 'text-red-400' : 'text-amber-400');
+                container.innerHTML += `
+                    <div class="bg-gray-900 p-3 rounded border border-gray-800 flex justify-between items-center">
+                        <div>
+                            <div><b>Email:</b> ${w.email}</div>
+                            <div><b>Bkash:</b> ${w.number} | <b>Amount:</b> ৳${w.amount}</div>
+                            <div>Status: <span class="${col}">${w.status}</span></div>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <button onclick="updateWdStatus('${wKey}', '${w.userKey}', 'Approved')" class="bg-green-600 px-2 py-1 rounded text-white">Approve</button>
+                            <button onclick="updateWdStatus('${wKey}', '${w.userKey}', 'Failed')" class="bg-red-600 px-2 py-1 rounded text-white">Failed</button>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+        function updateWdStatus(wKey, userKey, status) {
+            db.ref('allWithdrawRequests/' + wKey).update({ status });
+            db.ref('withdraws/' + userKey).orderByChild('status').once('value', s => {
+                s.forEach(child => {
+                    db.ref('withdraws/' + userKey + '/' + child.key).update({ status });
+                });
+            });
+            alert('Withdraw status updated to ' + status);
+        }
+    </script>
+</body>
+</html>
