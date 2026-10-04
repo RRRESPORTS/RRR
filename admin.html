@@ -42,7 +42,7 @@
         
         /* List Items inside Cards */
         .list-container { max-height: 220px; overflow-y: auto; margin-top: 10px; }
-        .list-item { background: #1f2937; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-left: 3px solid var(--neon-cyan); }
+        .list-item { background: #1f2937; padding: 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; border-left: 3px solid var(--neon-cyan); }
         .btn-approve { background: var(--neon-green); border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; color: #000; }
         .btn-fail { background: var(--neon-pink); color: #fff; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
     </style>
@@ -71,21 +71,21 @@
             <!-- Card 1: Add Match Setting -->
             <div class="admin-card">
                 <h3>🎮 Match Create Setting</h3>
-                <input type="text" id="mCode" class="form-control" placeholder="Match Code">
+                <input type="text" id="mCode" class="form-control" placeholder="Match Code (e.g. M01)">
                 <input type="text" id="mName" class="form-control" placeholder="Match Name (e.g. Solo Free Fire)">
                 <input type="number" id="mFee" class="form-control" placeholder="Entry Fee (৳)">
                 <input type="text" id="mFirstPrize" class="form-control" placeholder="First Prize">
                 <input type="text" id="mSecondPrize" class="form-control" placeholder="Second Prize">
                 <input type="datetime-local" id="mTime" class="form-control">
                 <input type="number" id="mSlots" class="form-control" placeholder="Total Slots">
-                <button class="admin-user-btn admin-btn" onclick="addNewMatch()">Create Match</button>
+                <button class="admin-btn" onclick="addNewMatchToDB()">Create Match</button>
             </div>
 
             <!-- Card 2: User Add Balance Requests -->
             <div class="admin-card">
                 <h3>💳 Add Balance Requests</h3>
                 <div class="list-container" id="addBalanceRequestsList">
-                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono add balance request nei.</p>
+                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">কোনো অ্যাড ব্যালেন্স রিকোয়েস্ট নেই।</p>
                 </div>
             </div>
 
@@ -93,7 +93,7 @@
             <div class="admin-card">
                 <h3>💸 Withdraw Requests</h3>
                 <div class="list-container" id="withdrawRequestsList">
-                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono withdraw request nei.</p>
+                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">কোনো উইথড্র রিকোয়েস্ট নেই।</p>
                 </div>
             </div>
 
@@ -111,12 +111,12 @@
                 <button class="admin-btn" onclick="updateWebsiteSettings()">Update Notice</button>
             </div>
 
-            <!-- Card 6: Room ID & Match Control -->
+            <!-- Card 6: Room ID & Match Control (Updated with Active Matches List) -->
             <div class="admin-card">
                 <h3>🔑 Room ID & Match Control</h3>
-                <input type="text" id="roomMatchId" class="form-control" placeholder="Match ID">
-                <input type="text" id="roomIDPass" class="form-control" placeholder="Room ID & Password">
-                <button class="admin-btn" onclick="updateRoomCreds()">Set Room Credentials</button>
+                <div class="list-container" id="adminMatchList">
+                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">কোনো ম্যাচ পাওয়া যায়নি।</p>
+                </div>
             </div>
 
         </div>
@@ -125,7 +125,6 @@
     <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -145,7 +144,7 @@
             if(sessionStorage.getItem("isAdminLoggedIn") === "true") {
                 document.getElementById("loginContainer").style.display = "none";
                 document.getElementById("adminDashboard").style.display = "block";
-                loadRealRequests();
+                loadAdminData();
             }
         }
 
@@ -157,9 +156,9 @@
                 sessionStorage.setItem("isAdminLoggedIn", "true");
                 document.getElementById("loginContainer").style.display = "none";
                 document.getElementById("adminDashboard").style.display = "block";
-                loadRealRequests();
+                loadAdminData();
             } else {
-                alert("Vul ID ba Password!");
+                alert("ভুল ID বা Password!");
             }
         }
 
@@ -168,55 +167,134 @@
             location.reload();
         }
 
-        // Real data fetch function from Firestore collections
-        async function loadRealRequests() {
-            // Add Balance Requests Load
-            const addBalContainer = document.getElementById("addBalanceRequestsList");
-            try {
-                const querySnapshot = await getDocs(collection(db, "addBalanceRequests"));
-                if(querySnapshot.empty) {
-                    addBalContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono add balance request nei.</p>`;
-                } else {
-                    addBalContainer.innerHTML = "";
-                    querySnapshot.forEach((docSnap) => {
-                        const data = docSnap.data();
-                        addBalContainer.innerHTML += `
-                            <div class="list-item">
-                                <span>Trx: ${data.trxId || 'N/A'} | ৳${data.amount || 0}</span>
-                                <button class="btn-approve" onclick="alert('Request approved ID: ${docSnap.id}')">Accept</button>
-                            </div>`;
-                    });
-                }
-            } catch(e) {
-                console.log("Add balance data fetch error: ", e);
+        // Create Match Function
+        window.addNewMatchToDB = async function() {
+            const code = document.getElementById("mCode").value.trim();
+            const name = document.getElementById("mName").value.trim();
+            const fee = document.getElementById("mFee").value.trim();
+            const firstPrize = document.getElementById("mFirstPrize").value.trim();
+            const secondPrize = document.getElementById("mSecondPrize").value.trim();
+            const time = document.getElementById("mTime").value;
+            const slots = document.getElementById("mSlots").value.trim();
+
+            if(!code || !name || !fee) {
+                alert("দয়া করে কোড, নাম এবং এন্ট্রি ফি দিন।");
+                return;
             }
 
-            // Withdraw Requests Load
-            const withdrawContainer = document.getElementById("withdrawRequestsList");
             try {
-                const querySnapshot = await getDocs(collection(db, "withdrawRequests"));
-                if(querySnapshot.empty) {
-                    withdrawContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono withdraw request nei.</p>`;
-                } else {
-                    withdrawContainer.innerHTML = "";
-                    querySnapshot.forEach((docSnap) => {
-                        const data = docSnap.data();
-                        withdrawContainer.innerHTML += `
-                            <div class="list-item">
-                                <span>${data.number || 'N/A'} | ৳${data.amount || 0}</span>
-                                <button class="btn-approve" onclick="alert('Approved ID: ${docSnap.id}')">Approve</button>
-                            </div>`;
-                    });
-                }
+                await setDoc(doc(db, "matches", code), {
+                    matchCode: code,
+                    matchName: name,
+                    entryFee: fee,
+                    firstPrize: firstPrize,
+                    secondPrize: secondPrize,
+                    matchTime: time,
+                    totalSlots: slots,
+                    roomId: "",
+                    roomPass: ""
+                });
+                alert("ম্যাচ সফলভাবে তৈরি হয়েছে!");
+                location.reload();
             } catch(e) {
-                console.log("Withdraw data fetch error: ", e);
+                alert("এরর: " + e.message);
             }
         }
 
-        window.addNewMatch = function() { alert("Match creation feature ready."); }
+        // Set Room ID & Password for a specific match
+        window.setRoomCreds = async function(matchId) {
+            const rId = document.getElementById(`rid_${matchId}`).value.trim();
+            const rPass = document.getElementById(`rpass_${matchId}`).value.trim();
+
+            try {
+                await updateDoc(doc(db, "matches", matchId), {
+                    roomId: rId,
+                    roomPass: rPass
+                });
+                alert("রুম আইডি এবং পাসওয়ার্ড সফলভাবে আপডেট করা হয়েছে!");
+            } catch(e) {
+                alert("এরর: " + e.message);
+            }
+        }
+
+        // Delete Match Function
+        window.deleteMatch = async function(matchId) {
+            if(confirm("আপনি কি নিশ্চিতভাবে এই ম্যাচটি ডিলিট করতে চান?")) {
+                try {
+                    await deleteDoc(doc(db, "matches", matchId));
+                    alert("ম্যাচ ডিলিট করা হয়েছে!");
+                    loadAdminData();
+                } catch(e) {
+                    alert("এরর: " + e.message);
+                }
+            }
+        }
+
+        // Fetch Real-time Requests and Matches
+        async function loadAdminData() {
+            // 1. Add Balance Requests
+            const addBalContainer = document.getElementById("addBalanceRequestsList");
+            try {
+                const snap = await getDocs(collection(db, "addBalanceRequests"));
+                if(!snap.empty) {
+                    addBalContainer.innerHTML = "";
+                    snap.forEach((d) => {
+                        const data = d.data();
+                        addBalContainer.innerHTML += `
+                            <div class="list-item">
+                                <span>Trx: ${data.trxId || 'N/A'} | ৳${data.amount || 0}</span>
+                                <button class="btn-approve" onclick="alert('Accepted')">Accept</button>
+                            </div>`;
+                    });
+                }
+            } catch(e) {}
+
+            // 2. Withdraw Requests
+            const withdrawContainer = document.getElementById("withdrawRequestsList");
+            try {
+                const snap = await getDocs(collection(db, "withdrawRequests"));
+                if(!snap.empty) {
+                    withdrawContainer.innerHTML = "";
+                    snap.forEach((d) => {
+                        const data = d.data();
+                        withdrawContainer.innerHTML += `
+                            <div class="list-item">
+                                <span>${data.number || 'N/A'} | ৳${data.amount || 0}</span>
+                                <button class="btn-approve" onclick="alert('Approved')">Approve</button>
+                            </div>`;
+                    });
+                }
+            } catch(e) {}
+
+            // 3. Active Matches List for Room ID Control
+            const matchListContainer = document.getElementById("adminMatchList");
+            try {
+                const snap = await getDocs(collection(db, "matches"));
+                if(snap.empty) {
+                    matchListContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">কোনো ম্যাচ পাওয়া যায়নি।</p>`;
+                } else {
+                    matchListContainer.innerHTML = "";
+                    snap.forEach((d) => {
+                        const m = d.data();
+                        matchListContainer.innerHTML += `
+                            <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                                <strong style="color: var(--neon-cyan);">${m.matchName} (Code: ${m.matchCode})</strong>
+                                <input type="text" id="rid_${m.matchCode}" class="form-control" placeholder="Room ID" value="${m.roomId || ''}" style="margin: 2px 0; padding: 6px;">
+                                <input type="text" id="rpass_${m.matchCode}" class="form-control" placeholder="Password" value="${m.roomPass || ''}" style="margin: 2px 0; padding: 6px;">
+                                <div style="display: flex; gap: 5px; width: 100%; margin-top: 5px;">
+                                    <button class="btn-approve" style="flex: 1;" onclick="setRoomCreds('${m.matchCode}')">Save Room ID</button>
+                                    <button class="btn-fail" onclick="deleteMatch('${m.matchCode}')">Delete</button>
+                                </div>
+                            </div>`;
+                    });
+                }
+            } catch(e) {
+                console.log(e);
+            }
+        }
+
         window.blockUser = function() { alert("User block feature ready."); }
         window.updateWebsiteSettings = function() { alert("Notice updated."); }
-        window.updateRoomCreds = function() { alert("Room credentials updated."); }
     </script>
 </body>
 </html>
