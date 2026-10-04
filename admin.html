@@ -16,104 +16,207 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; }
-        h2 { color: var(--neon-cyan); margin-bottom: 20px; text-shadow: 0 0 10px rgba(0,243,255,0.4); }
-        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        
+        /* Login Box */
+        .login-container { display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-box { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.3); padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 0 20px rgba(0,243,255,0.1); }
+        .login-box h2 { color: var(--neon-cyan); margin-bottom: 20px; text-align: center; }
+        
+        /* Dashboard Container */
+        #adminDashboard { display: none; max-width: 1200px; margin: 0 auto; }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid rgba(0,243,255,0.2); padding-bottom: 15px; }
+        .dashboard-header h2 { color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0,243,255,0.4); }
+        
+        /* Card Grid System */
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
         .admin-card { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.2); border-radius: 12px; padding: 20px; box-shadow: 0 0 15px rgba(0,243,255,0.05); }
-        .admin-card h3 { font-size: 16px; color: var(--neon-pink); margin-bottom: 15px; border-bottom: 1px solid #374151; padding-bottom: 8px; }
-        .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; }
-        .admin-btn { width: 100%; padding: 10px; background: var(--neon-cyan); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
-        .list-item { background: #1f2937; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
-        .btn-approve { background: var(--neon-green); border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .admin-card h3 { font-size: 16px; color: var(--neon-pink); margin-bottom: 15px; border-bottom: 1px solid #374151; padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        
+        /* Form Controls */
+        .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; font-size: 14px; }
+        .form-control:focus { border-color: var(--neon-cyan); outline: none; }
+        
+        /* Buttons */
+        .admin-btn { width: 100%; padding: 10px; background: var(--neon-cyan); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .admin-btn:hover { box-shadow: 0 0 10px var(--neon-cyan); }
+        
+        /* List Items inside Cards */
+        .list-container { max-height: 220px; overflow-y: auto; margin-top: 10px; }
+        .list-item { background: #1f2937; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-left: 3px solid var(--neon-cyan); }
+        .btn-approve { background: var(--neon-green); border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; color: #000; }
         .btn-fail { background: var(--neon-pink); color: #fff; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <h2>ZEG-G TOURNAMENT - ADMIN PANEL</h2>
-
-    <div class="admin-grid">
-        <!-- 1. Add Match Setting -->
-        <div class="admin-card">
-            <h3>Add Match Setting</h3>
-            <input type="text" id="mCode" class="form-control" placeholder="Match Code">
-            <input type="text" id="mName" class="form-control" placeholder="Match Name">
-            <input type="number" id="mFee" class="form-control" placeholder="Entry Fee">
-            <input type="text" id="mFirstPrize" class="form-control" placeholder="First Prize">
-            <input type="text" id="mSecondPrize" class="form-control" placeholder="Second Prize">
-            <input type="text" id="mSurprise" class="form-control" placeholder="Surprise Prize">
-            <input type="datetime-local" id="mTime" class="form-control">
-            <input type="number" id="mSlots" class="form-control" placeholder="Total Slots">
-            <button class="admin-btn" onclick="addNewMatch()">Create Match</button>
-        </div>
-
-        <!-- 2. User Add Balance Control -->
-        <div class="admin-card">
-            <h3>User Add Balance Requests</h3>
-            <div id="addBalanceRequestsList">
-                <div class="list-item">
-                    <span>User: abujar | Trx: TX12345 | ৳50</span>
-                    <div>
-                        <button class="btn-approve" onclick="alert('Approved!')">Accept</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. Withdraw Request Control -->
-        <div class="admin-card">
-            <h3>Withdraw Requests</h3>
-            <div id="withdrawRequestsList">
-                <div class="list-item">
-                    <span>01700000000 | ৳100</span>
-                    <div>
-                        <button class="btn-approve" onclick="alert('Approved!')">Approve</button>
-                        <button class="btn-fail" onclick="alert('Failed!')">Fail</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. User Block Setting -->
-        <div class="admin-card">
-            <h3>User Block Settings</h3>
-            <input type="text" id="blockUserEmail" class="form-control" placeholder="User Email or ID">
-            <button class="admin-btn" style="background: var(--neon-pink); color: #fff;" onclick="blockUser()">Ban / Block User</button>
-        </div>
-
-        <!-- 5. Notice & Image Change Setting -->
-        <div class="admin-card">
-            <h3>Website Notice & Banner</h3>
-            <textarea id="noticeText" class="form-control" placeholder="Update Notice Message..."></textarea>
-            <input type="text" id="bannerImgUrl" class="form-control" placeholder="Banner Image URL">
-            <button class="admin-btn" onclick="updateWebsiteSettings()">Update Site Data</button>
-        </div>
-
-        <!-- 6. Match Delete / Room ID Control -->
-        <div class="admin-card">
-            <h3>Match Control & Room IDs</h3>
-            <input type="text" id="roomMatchId" class="form-control" placeholder="Match ID">
-            <input type="text" id="roomIDPass" class="form-control" placeholder="Room ID & Password">
-            <button class="admin-btn" onclick="updateRoomCreds()">Set Room Credentials</button>
-            <button class="admin-btn" style="background: #ff007f; color: #fff; margin-top: 5px;" onclick="deleteMatch()">Delete Match</button>
+    <!-- Admin Login Screen -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <h2>Admin Login</h2>
+            <input type="text" id="adminUser" class="form-control" placeholder="Admin ID (zeg-g999)">
+            <input type="password" id="adminPass" class="form-control" placeholder="Password (999zeg-g999)">
+            <button class="admin-btn" onclick="checkAdminLogin()">Login to Panel</button>
         </div>
     </div>
 
-    <script>
-        function addNewMatch() {
-            alert("Match created successfully and added to database.");
+    <!-- Admin Dashboard (Cards View) -->
+    <div id="adminDashboard">
+        <div class="dashboard-header">
+            <h2>ZEG-G ADMIN DASHBOARD</h2>
+            <button onclick="logoutAdmin()" style="background: var(--neon-pink); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">Logout</button>
+        </div>
+
+        <div class="admin-grid">
+            
+            <!-- Card 1: Add Match Setting -->
+            <div class="admin-card">
+                <h3>🎮 Match Create Setting</h3>
+                <input type="text" id="mCode" class="form-control" placeholder="Match Code">
+                <input type="text" id="mName" class="form-control" placeholder="Match Name (e.g. Solo Free Fire)">
+                <input type="number" id="mFee" class="form-control" placeholder="Entry Fee (৳)">
+                <input type="text" id="mFirstPrize" class="form-control" placeholder="First Prize">
+                <input type="text" id="mSecondPrize" class="form-control" placeholder="Second Prize">
+                <input type="datetime-local" id="mTime" class="form-control">
+                <input type="number" id="mSlots" class="form-control" placeholder="Total Slots">
+                <button class="admin-user-btn admin-btn" onclick="addNewMatch()">Create Match</button>
+            </div>
+
+            <!-- Card 2: User Add Balance Requests -->
+            <div class="admin-card">
+                <h3>💳 Add Balance Requests</h3>
+                <div class="list-container" id="addBalanceRequestsList">
+                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono add balance request nei.</p>
+                </div>
+            </div>
+
+            <!-- Card 3: Withdraw Request Control -->
+            <div class="admin-card">
+                <h3>💸 Withdraw Requests</h3>
+                <div class="list-container" id="withdrawRequestsList">
+                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono withdraw request nei.</p>
+                </div>
+            </div>
+
+            <!-- Card 4: User Block / Ban Setting -->
+            <div class="admin-card">
+                <h3>🚫 User Block / Ban Setting</h3>
+                <input type="text" id="blockUserEmail" class="form-control" placeholder="User Email">
+                <button class="admin-btn" style="background: var(--neon-pink); color: #fff;" onclick="blockUser()">Ban / Block User</button>
+            </div>
+
+            <!-- Card 5: Website Notice & Banner Control -->
+            <div class="admin-card">
+                <h3>📢 Notice & Banner Setting</h3>
+                <textarea id="noticeText" class="form-control" placeholder="Update Website Notice..." rows="3"></textarea>
+                <button class="admin-btn" onclick="updateWebsiteSettings()">Update Notice</button>
+            </div>
+
+            <!-- Card 6: Room ID & Match Control -->
+            <div class="admin-card">
+                <h3>🔑 Room ID & Match Control</h3>
+                <input type="text" id="roomMatchId" class="form-control" placeholder="Match ID">
+                <input type="text" id="roomIDPass" class="form-control" placeholder="Room ID & Password">
+                <button class="admin-btn" onclick="updateRoomCreds()">Set Room Credentials</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
+          authDomain: "zeg-g-tournament.firebaseapp.com",
+          projectId: "zeg-g-tournament",
+          storageBucket: "zeg-g-tournament.firebasestorage.app",
+          messagingSenderId: "907178832675",
+          appId: "1:907178832675:web:414bc01f1b3a4695455296",
+          measurementId: "G-PLN2DEP794"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.onload = function() {
+            if(sessionStorage.getItem("isAdminLoggedIn") === "true") {
+                document.getElementById("loginContainer").style.display = "none";
+                document.getElementById("adminDashboard").style.display = "block";
+                loadRealRequests();
+            }
         }
-        function updateWebsiteSettings() {
-            alert("Website notice & banner updated!");
+
+        window.checkAdminLogin = function() {
+            const userInput = document.getElementById("adminUser").value.trim();
+            const passInput = document.getElementById("adminPass").value.trim();
+
+            if(userInput === "zeg-g999" && passInput === "999zeg-g999") {
+                sessionStorage.setItem("isAdminLoggedIn", "true");
+                document.getElementById("loginContainer").style.display = "none";
+                document.getElementById("adminDashboard").style.display = "block";
+                loadRealRequests();
+            } else {
+                alert("Vul ID ba Password!");
+            }
         }
-        function blockUser() {
-            alert("User has been banned.");
+
+        window.logoutAdmin = function() {
+            sessionStorage.removeItem("isAdminLoggedIn");
+            location.reload();
         }
-        function updateRoomCreds() {
-            alert("Room ID & Password updated!");
+
+        // Real data fetch function from Firestore collections
+        async function loadRealRequests() {
+            // Add Balance Requests Load
+            const addBalContainer = document.getElementById("addBalanceRequestsList");
+            try {
+                const querySnapshot = await getDocs(collection(db, "addBalanceRequests"));
+                if(querySnapshot.empty) {
+                    addBalContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono add balance request nei.</p>`;
+                } else {
+                    addBalContainer.innerHTML = "";
+                    querySnapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
+                        addBalContainer.innerHTML += `
+                            <div class="list-item">
+                                <span>Trx: ${data.trxId || 'N/A'} | ৳${data.amount || 0}</span>
+                                <button class="btn-approve" onclick="alert('Request approved ID: ${docSnap.id}')">Accept</button>
+                            </div>`;
+                    });
+                }
+            } catch(e) {
+                console.log("Add balance data fetch error: ", e);
+            }
+
+            // Withdraw Requests Load
+            const withdrawContainer = document.getElementById("withdrawRequestsList");
+            try {
+                const querySnapshot = await getDocs(collection(db, "withdrawRequests"));
+                if(querySnapshot.empty) {
+                    withdrawContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono withdraw request nei.</p>`;
+                } else {
+                    withdrawContainer.innerHTML = "";
+                    querySnapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
+                        withdrawContainer.innerHTML += `
+                            <div class="list-item">
+                                <span>${data.number || 'N/A'} | ৳${data.amount || 0}</span>
+                                <button class="btn-approve" onclick="alert('Approved ID: ${docSnap.id}')">Approve</button>
+                            </div>`;
+                    });
+                }
+            } catch(e) {
+                console.log("Withdraw data fetch error: ", e);
+            }
         }
-        function deleteMatch() {
-            alert("Match deleted successfully.");
-        }
+
+        window.addNewMatch = function() { alert("Match creation feature ready."); }
+        window.blockUser = function() { alert("User block feature ready."); }
+        window.updateWebsiteSettings = function() { alert("Notice updated."); }
+        window.updateRoomCreds = function() { alert("Room credentials updated."); }
     </script>
 </body>
 </html>
