@@ -183,7 +183,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
         const firebaseConfig = {
@@ -323,14 +323,70 @@
         // Run match load on startup
         loadWebMatches();
 
-        window.submitAddBalance = function() {
-            if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
-            alert("Add balance request submitted successfully.");
+        // Submit Add Balance Request to Firestore
+        window.submitAddBalance = async function() {
+            if(!auth.currentUser) { 
+                alert("প্রথমে লগইন করুন!"); 
+                openAuthModal(); 
+                return; 
+            }
+            
+            const trxId = document.getElementById('bkashTrxID').value.trim();
+            const amount = document.getElementById('addAmount').value.trim();
+
+            if(!trxId || !amount) {
+                alert("দয়া করে TrxID এবং Amount দিন।");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "addBalanceRequests"), {
+                    userId: auth.currentUser.uid,
+                    email: auth.currentUser.email,
+                    trxId: trxId,
+                    amount: Number(amount),
+                    status: "pending",
+                    timestamp: new Date()
+                });
+                alert("Add balance request successfully admin panel-এ পাঠানো হয়েছে!");
+                document.getElementById('bkashTrxID').value = "";
+                document.getElementById('addAmount').value = "";
+            } catch(error) {
+                alert("Error: " + error.message);
+            }
         }
 
-        window.submitWithdraw = function() {
-            if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
-            alert("Withdraw request submitted successfully.");
+        // Submit Withdraw Request to Firestore
+        window.submitWithdraw = async function() {
+            if(!auth.currentUser) { 
+                alert("প্রথমে লগইন করুন!"); 
+                openAuthModal(); 
+                return; 
+            }
+            
+            const number = document.getElementById('withdrawNumber').value.trim();
+            const amount = document.getElementById('withdrawAmount').value.trim();
+
+            if(!number || !amount) {
+                alert("দয়া করে বিকাশ নম্বর এবং Amount দিন।");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "withdrawRequests"), {
+                    userId: auth.currentUser.uid,
+                    email: auth.currentUser.email,
+                    number: number,
+                    amount: Number(amount),
+                    status: "pending",
+                    timestamp: new Date()
+                });
+                alert("Withdraw request successfully admin panel-এ পাঠানো হয়েছে!");
+                document.getElementById('withdrawNumber').value = "";
+                document.getElementById('withdrawAmount').value = "";
+            } catch(error) {
+                alert("Error: " + error.message);
+            }
         }
     </script>
 </body>
