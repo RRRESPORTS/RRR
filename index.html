@@ -1,1 +1,458 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ZEG-G Tournament</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f6f8;color:#15171c;font-family:Arial,sans-serif}
+header{background:#fff;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px #0001}
+.nav{max-width:1150px;margin:auto;min-height:70px;display:flex;align-items:center;gap:18px;padding:10px 16px}
+.logo{font-size:25px;font-weight:900;color:#e50914}
+.logo span{color:#111}
+.links{display:flex;gap:20px;justify-content:center;flex:1;font-weight:bold;font-size:13px}
+.links a{color:#222;text-decoration:none}
+.wallet{background:#e50914;color:#fff;border:0;border-radius:22px;padding:11px 17px;font-weight:bold;cursor:pointer}
+.profile{border:0;border-radius:50%;width:42px;height:42px;background:#111;color:#fff;font-weight:bold}
+.container{max-width:1150px;margin:auto;padding:18px 16px}
+.notice{background:#e50914;color:#fff;padding:13px 16px;border-radius:8px;font-weight:bold;margin-bottom:18px}
+.hero{height:290px;border-radius:15px;overflow:hidden;background:linear-gradient(135deg,#b40000,#ff4040);display:flex;align-items:center;justify-content:center;color:white;text-align:center;margin-bottom:30px}
+.hero img{width:100%;height:100%;object-fit:cover}
+.heroText{font-size:42px;font-weight:900}
+h2{text-align:center;margin:30px 0 17px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.match{min-height:130px;border-radius:13px;padding:20px;color:#fff;background:#b60000;display:flex;align-items:center;gap:17px;cursor:pointer;box-shadow:0 4px 14px #0002;background-size:cover;background-position:center}
+.matchIcon{height:65px;width:65px;min-width:65px;border-radius:50%;background:#111c;display:grid;place-items:center;font-size:28px}
+.match h3{margin:0 0 7px}.match p{margin:3px 0}
+.muted{color:#777}
+.box{background:#fff;border-radius:14px;padding:22px;box-shadow:0 2px 12px #0001}
+.live iframe{width:100%;height:420px;border:0;border-radius:10px}
+.rules{line-height:1.7}
+footer{text-align:center;padding:35px;color:#777}
+.footerBtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.footerBtns a{border:1px solid #ddd;background:#fff;padding:11px 16px;border-radius:8px;text-decoration:none;color:#111}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:100;align-items:center;justify-content:center;padding:16px}
+.modal.show{display:flex}
+.modalBox{background:#fff;width:100%;max-width:560px;border-radius:15px;padding:23px;position:relative;max-height:90vh;overflow:auto}
+.close{position:absolute;right:12px;top:8px;background:none;border:0;font-size:30px}
+input,select{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;margin:6px 0 13px;font-size:15px}
+label{font-weight:bold;font-size:13px}
+.btn{width:100%;padding:12px;border:0;border-radius:8px;background:#e50914;color:#fff;font-weight:bold;cursor:pointer}
+.secondary{background:#eee;color:#111;margin-top:8px}
+.balance{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.balance div{background:#f6f6f7;padding:15px;border-radius:10px;text-align:center}
+@media(max-width:700px){
+.links{display:none}.grid{grid-template-columns:1fr}.hero{height:190px}
+.heroText{font-size:28px}.balance{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<nav class="nav">
+<div class="logo">ZEG-G <span>TOURNAMENT</span></div>
+
+<div class="links">
+<a href="#matches">MATCHES</a>
+<a href="#one">1 VS 1</a>
+<a href="#headshot">HEADSHOT</a>
+<a href="#live">LIVE</a>
+<a href="#rules">RULES</a>
+</div>
+
+<button class="wallet" id="walletBtn">৳ 0</button>
+<button class="profile" id="profileBtn">A</button>
+</nav>
+</header>
+
+<main class="container">
+
+<div class="notice" id="notice">
+Welcome to ZEG-G Tournament
+</div>
+
+<div class="hero">
+<img id="heroImg" style="display:none">
+<div class="heroText" id="heroText">
+ZEG-G<br>TOURNAMENT
+</div>
+</div>
+
+<section id="matches">
+<h2>FREE FIRE MATCHES</h2>
+<div class="grid" id="matchesGrid"></div>
+</section>
+
+<section id="one">
+<h2>FREE FIRE MATCH 1 VS 1</h2>
+<div class="grid" id="oneGrid"></div>
+</section>
+
+<section id="headshot">
+<h2>ONLY HEADSHOT</h2>
+<div class="grid" id="headGrid"></div>
+</section>
+
+<section id="live" class="box live">
+<h2>See Live Match Here</h2>
+<div id="liveArea" class="muted">
+No live match right now.
+</div>
+</section>
+
+<section id="rules" class="box rules">
+<h2>Rules & Conditions</h2>
+<div id="rulesText">
+Rules will appear here.
+</div>
+</section>
+
+</main>
+
+<footer>
+<div class="footerBtns">
+<a id="appLink" target="_blank">Download Our App</a>
+<a id="telegramLink" target="_blank">Giveaway & Offer Update</a>
+</div>
+
+<p>© <span id="year"></span> ZEG-G Tournament</p>
+</footer>
+
+<div class="modal" id="profileModal">
+<div class="modalBox">
+<button class="close" onclick="closeM('profileModal')">×</button>
+<div id="profileArea"></div>
+</div>
+</div>
+
+<div class="modal" id="walletModal">
+<div class="modalBox">
+<button class="close" onclick="closeM('walletModal')">×</button>
+<div id="walletArea"></div>
+</div>
+</div>
+
+<script type="module">
+
+import{initializeApp}from"https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut}from"https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import{getFirestore,doc,getDoc,collection,getDocs,addDoc,setDoc,serverTimestamp}from"https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+const firebaseConfig={
+apiKey:"YOUR_API_KEY",
+authDomain:"YOUR_PROJECT.firebaseapp.com",
+projectId:"YOUR_PROJECT_ID",
+storageBucket:"YOUR_PROJECT.appspot.com",
+messagingSenderId:"YOUR_SENDER_ID",
+appId:"YOUR_APP_ID"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+let user=null;
+let settings={};
+let matches=[];
+
+const $=x=>document.getElementById(x);
+
+$("year").textContent=new Date().getFullYear();
+
+function openM(id){
+$(id).classList.add("show");
+}
+
+function closeM(id){
+$(id).classList.remove("show");
+}
+
+window.closeM=closeM;
+
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#039;"
+}[c]));
+
+async function load(){
+
+let s=await getDoc(doc(db,"site","settings"));
+settings=s.exists()?s.data():{};
+
+$("notice").textContent=
+settings.notice||"Welcome to ZEG-G Tournament";
+
+$("heroText").innerHTML=
+esc(settings.heroText||"ZEG-G\nTOURNAMENT").replace(/\n/g,"<br>");
+
+if(settings.heroUrl){
+$("heroImg").src=settings.heroUrl;
+$("heroImg").style.display="block";
+$("heroText").style.display="none";
+}
+
+$("rulesText").innerHTML=
+esc(settings.rules||"No rules added yet.").replace(/\n/g,"<br>");
+
+$("appLink").href=settings.appLink||"#";
+$("telegramLink").href=settings.telegramLink||"#";
+
+$("liveArea").innerHTML=settings.liveUrl
+?`<iframe src="${esc(settings.liveUrl)}" allowfullscreen></iframe>`
+:"No live match right now.";
+
+let snap=await getDocs(collection(db,"matches"));
+
+matches=snap.docs
+.map(d=>({id:d.id,...d.data()}))
+.filter(m=>m.enabled!==false);
+
+render();
+}
+
+function card(m){
+
+return `
+<div class="match"
+style="${m.imageUrl
+?`background-image:linear-gradient(90deg,#850000dd,#85000044),url('${m.imageUrl}')`
+:""}"
+onclick="join('${m.id}')">
+
+<div class="matchIcon">🎮</div>
+
+<div>
+<h3>${esc(m.title||"Free Fire Match")}</h3>
+<p>${esc(m.count||"Matches Found")}</p>
+<p>Entry Fee: ৳${Number(m.entryFee||0)}</p>
+</div>
+
+</div>`;
+}
+
+function render(){
+
+let a=matches.filter(x=>!x.category||x.category==="normal");
+let b=matches.filter(x=>x.category==="1v1");
+let c=matches.filter(x=>x.category==="headshot");
+
+$("matchesGrid").innerHTML=
+a.map(card).join("")||
+'<p class="muted">No matches available.</p>';
+
+$("oneGrid").innerHTML=
+b.map(card).join("")||
+'<p class="muted">No matches available.</p>';
+
+$("headGrid").innerHTML=
+c.map(card).join("")||
+'<p class="muted">No matches available.</p>';
+}
+
+window.join=async id=>{
+
+if(!user){
+openM("profileModal");
+renderLogin();
+return;
+}
+
+let m=matches.find(x=>x.id===id);
+
+let u=(await getDoc(
+doc(db,"users",user.uid)
+)).data()||{};
+
+if(Number(m.entryFee||0)>Number(u.balance||0)){
+return alert("Insufficient balance.");
+}
+
+await addDoc(
+collection(db,"registrations"),
+{
+uid:user.uid,
+matchId:id,
+title:m.title,
+fee:Number(m.entryFee||0),
+status:"pending",
+createdAt:serverTimestamp()
+});
+
+alert("Join request submitted successfully.");
+};
+
+function renderLogin(){
+
+$("profileArea").innerHTML=`
+
+<h2>Login to ZEG-G</h2>
+
+<label>Email</label>
+<input id="email" type="email">
+
+<label>Password</label>
+<input id="pass" type="password">
+
+<button class="btn" onclick="login()">Login</button>
+
+<button class="btn secondary" onclick="signup()">
+Create Account
+</button>
+`;
+}
+
+window.login=async()=>{
+
+try{
+
+await signInWithEmailAndPassword(
+auth,
+$("email").value,
+$("pass").value
+);
+
+closeM("profileModal");
+
+}catch(e){
+alert(e.message);
+}
+
+};
+
+window.signup=async()=>{
+
+try{
+
+let x=await createUserWithEmailAndPassword(
+auth,
+$("email").value,
+$("pass").value
+);
+
+await setDoc(
+doc(db,"users",x.user.uid),
+{
+email:x.user.email,
+name:x.user.email.split("@")[0],
+balance:0,
+earnBalance:0,
+verified:false
+}
+);
+
+alert("Account created.");
+
+}catch(e){
+alert(e.message);
+}
+
+};
+
+async function profile(){
+
+if(!user){
+renderLogin();
+return;
+}
+
+let u=(await getDoc(
+doc(db,"users",user.uid)
+)).data()||{};
+
+$("profileArea").innerHTML=`
+
+<h2>
+${esc(u.name||"ZEG-G User")}
+${u.verified?"✓":""}
+</h2>
+
+<p>${esc(u.email||user.email)}</p>
+
+<div class="balance">
+
+<div>
+<small>Balance</small>
+<h2>৳${u.balance||0}</h2>
+</div>
+
+<div>
+<small>Earn Balance</small>
+<h2>৳${u.earnBalance||0}</h2>
+</div>
+
+</div>
+
+<button class="btn" onclick="logout()">
+Logout
+</button>
+`;
+}
+
+window.logout=async()=>{
+await signOut(auth);
+closeM("profileModal");
+};
+
+$("profileBtn").onclick=()=>{
+openM("profileModal");
+profile();
+};
+
+$("walletBtn").onclick=async()=>{
+
+openM("walletModal");
+
+if(!user){
+$("walletArea").innerHTML="<h2>Please login first.</h2>";
+return;
+}
+
+let u=(await getDoc(
+doc(db,"users",user.uid)
+)).data()||{};
+
+$("walletArea").innerHTML=`
+
+<h2>Wallet</h2>
+
+<div class="balance">
+
+<div>
+Balance
+<h2>৳${u.balance||0}</h2>
+</div>
+
+<div>
+Earn
+<h2>৳${u.earnBalance||0}</h2>
+</div>
+
+</div>
+
+<p>
+Withdrawal requests can be managed from your account.
+</p>
+`;
+};
+
+onAuthStateChanged(auth,u=>{
+user=u;
+$("profileBtn").textContent=u?"✓":"A";
+});
+
+load().catch(e=>{
+$("notice").textContent="Add Firebase configuration first.";
+console.error(e);
+});
+
+</script>
+
+</body>
+</html>
