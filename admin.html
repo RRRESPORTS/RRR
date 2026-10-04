@@ -17,39 +17,32 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; }
         
-        /* Login Box */
         .login-container { display: flex; justify-content: center; align-items: center; height: 100vh; }
         .login-box { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.3); padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 0 20px rgba(0,243,255,0.1); }
         .login-box h2 { color: var(--neon-cyan); margin-bottom: 20px; text-align: center; }
         
-        /* Dashboard Container */
         #adminDashboard { display: none; max-width: 1200px; margin: 0 auto; }
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid rgba(0,243,255,0.2); padding-bottom: 15px; }
         .dashboard-header h2 { color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0,243,255,0.4); }
         
-        /* Card Grid System */
         .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
         .admin-card { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.2); border-radius: 12px; padding: 20px; box-shadow: 0 0 15px rgba(0,243,255,0.05); }
         .admin-card h3 { font-size: 16px; color: var(--neon-pink); margin-bottom: 15px; border-bottom: 1px solid #374151; padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
         
-        /* Form Controls */
         .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; font-size: 14px; }
         .form-control:focus { border-color: var(--neon-cyan); outline: none; }
         
-        /* Buttons */
         .admin-btn { width: 100%; padding: 10px; background: var(--neon-cyan); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; transition: 0.3s; }
         .admin-btn:hover { box-shadow: 0 0 10px var(--neon-cyan); }
         
-        /* List Items inside Cards */
         .list-container { max-height: 250px; overflow-y: auto; margin-top: 10px; }
-        .list-item { background: #1f2937; padding: 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; border-left: 3px solid var(--neon-cyan); }
+        .list-item { background: #1f2937; padding: 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; border-left: 3px solid var(--neon-cyan); display: flex; justify-content: space-between; align-items: center; }
         .btn-approve { background: var(--neon-green); border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; color: #000; }
         .btn-fail { background: var(--neon-pink); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- Admin Login Screen -->
     <div class="login-container" id="loginContainer">
         <div class="login-box">
             <h2>Admin Login</h2>
@@ -59,7 +52,6 @@
         </div>
     </div>
 
-    <!-- Admin Dashboard (Cards View) -->
     <div id="adminDashboard">
         <div class="dashboard-header">
             <h2>ZEG-G ADMIN DASHBOARD</h2>
@@ -67,12 +59,10 @@
         </div>
 
         <div class="admin-grid">
-            
-            <!-- Card 1: Add Match Setting -->
             <div class="admin-card">
                 <h3>🎮 Match Create Setting</h3>
                 <input type="text" id="mCode" class="form-control" placeholder="Match Code (e.g. M01)">
-                <input type="text" id="mName" class="form-control" placeholder="Match Name (e.g. Solo Free Fire)">
+                <input type="text" id="mName" class="form-control" placeholder="Match Name">
                 <input type="number" id="mFee" class="form-control" placeholder="Entry Fee (৳)">
                 <input type="text" id="mFirstPrize" class="form-control" placeholder="First Prize">
                 <input type="text" id="mSecondPrize" class="form-control" placeholder="Second Prize">
@@ -81,51 +71,32 @@
                 <button class="admin-btn" onclick="addNewMatchToDB()">Create Match</button>
             </div>
 
-            <!-- Card 2: User Add Balance Requests -->
             <div class="admin-card">
                 <h3>💳 Add Balance Requests</h3>
                 <div class="list-container" id="addBalanceRequestsList">
-                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono add balance request nei.</p>
+                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Loading...</p>
                 </div>
             </div>
 
-            <!-- Card 3: Withdraw Request Control -->
             <div class="admin-card">
                 <h3>💸 Withdraw Requests</h3>
                 <div class="list-container" id="withdrawRequestsList">
-                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono withdraw request nei.</p>
+                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Loading...</p>
                 </div>
             </div>
 
-            <!-- Card 4: User Block / Ban Setting -->
-            <div class="admin-card">
-                <h3>🚫 User Block / Ban Setting</h3>
-                <input type="text" id="blockUserEmail" class="form-control" placeholder="User Email">
-                <button class="admin-btn" style="background: var(--neon-pink); color: #fff;" onclick="alert('Feature ready')">Ban / Block User</button>
-            </div>
-
-            <!-- Card 5: Website Notice & Banner Control -->
-            <div class="admin-card">
-                <h3>📢 Notice Setting</h3>
-                <textarea id="noticeText" class="form-control" placeholder="Update Website Notice..." rows="3"></textarea>
-                <button class="admin-btn" onclick="alert('Notice updated')">Update Notice</button>
-            </div>
-
-            <!-- Card 6: Room ID & Match Control -->
             <div class="admin-card">
                 <h3>🔑 Room ID & Match Control</h3>
                 <div class="list-container" id="adminMatchList">
-                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono match paowa jayni.</p>
+                    <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Loading...</p>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
@@ -183,18 +154,47 @@
 
             try {
                 await setDoc(doc(db, "matches", code), {
-                    matchCode: code,
-                    matchName: name,
-                    entryFee: fee,
-                    firstPrize: firstPrize,
-                    secondPrize: secondPrize,
-                    matchTime: time,
-                    totalSlots: slots,
-                    roomId: "",
-                    roomPass: ""
+                    matchCode: code, matchName: name, entryFee: fee,
+                    firstPrize: firstPrize, secondPrize: secondPrize,
+                    matchTime: time, totalSlots: slots, roomId: "", roomPass: ""
                 });
                 alert("Match successfully create hoyeche!");
                 location.reload();
+            } catch(e) { alert("Error: " + e.message); }
+        }
+
+        // Accept Add Balance and Add money to User Account
+        window.approveAddBalance = async function(reqId, userId, amount) {
+            try {
+                const userRef = doc(db, "users", userId);
+                const userSnap = await getDoc(userRef);
+                
+                let currentBal = 0;
+                if(userSnap.exists()) {
+                    currentBal = Number(userSnap.data().balance || 0);
+                }
+
+                // Update user balance
+                await updateDoc(userRef, {
+                    balance: currentBal + Number(amount)
+                });
+
+                // Delete request so it disappears
+                await deleteDoc(doc(db, "addBalanceRequests", reqId));
+
+                alert("Balance successfully added to user account!");
+                loadAdminData();
+            } catch(e) {
+                alert("Error: " + e.message);
+            }
+        }
+
+        // Approve Withdraw
+        window.approveWithdraw = async function(reqId) {
+            try {
+                await deleteDoc(doc(db, "withdrawRequests", reqId));
+                alert("Withdraw request approved and removed!");
+                loadAdminData();
             } catch(e) {
                 alert("Error: " + e.message);
             }
@@ -203,79 +203,77 @@
         window.setRoomCreds = async function(matchId) {
             const rId = document.getElementById(`rid_${matchId}`).value.trim();
             const rPass = document.getElementById(`rpass_${matchId}`).value.trim();
-
             try {
-                await updateDoc(doc(db, "matches", matchId), {
-                    roomId: rId,
-                    roomPass: rPass
-                });
-                alert("Room ID & Password successfully update kora hoyeche!");
-            } catch(e) {
-                alert("Error: " + e.message);
-            }
+                await updateDoc(doc(db, "matches", matchId), { roomId: rId, roomPass: rPass });
+                alert("Room ID & Password updated!");
+            } catch(e) { alert("Error: " + e.message); }
         }
 
         window.deleteMatch = async function(matchId) {
-            if(confirm("Apni ki nischit bhabe ei match ti delete korte chan?")) {
+            if(confirm("Delete match?")) {
                 try {
                     await deleteDoc(doc(db, "matches", matchId));
-                    alert("Match successfully delete kora hoyeche!");
                     loadAdminData();
-                } catch(e) {
-                    alert("Error: " + e.message);
-                }
+                } catch(e) { alert("Error: " + e.message); }
             }
         }
 
         async function loadAdminData() {
+            // Add Balance Requests
             const addBalContainer = document.getElementById("addBalanceRequestsList");
             try {
                 const snap = await getDocs(collection(db, "addBalanceRequests"));
-                if(!snap.empty) {
+                if(snap.empty) {
+                    addBalContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono request nei.</p>`;
+                } else {
                     addBalContainer.innerHTML = "";
                     snap.forEach((d) => {
                         const data = d.data();
                         addBalContainer.innerHTML += `
                             <div class="list-item">
-                                <span>Trx: ${data.trxId || 'N/A'} | ৳${data.amount || 0}</span>
-                                <button class="btn-approve" onclick="alert('Accepted')">Accept</button>
+                                <span>Trx: ${data.trxId} | ৳${data.amount}</span>
+                                <button class="btn-approve" onclick="approveAddBalance('${d.id}', '${data.userId}', ${data.amount})">Accept</button>
                             </div>`;
                     });
                 }
             } catch(e) {}
 
+            // Withdraw Requests
             const withdrawContainer = document.getElementById("withdrawRequestsList");
             try {
                 const snap = await getDocs(collection(db, "withdrawRequests"));
-                if(!snap.empty) {
+                if(snap.empty) {
+                    withdrawContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono request nei.</p>`;
+                } else {
                     withdrawContainer.innerHTML = "";
                     snap.forEach((d) => {
                         const data = d.data();
                         withdrawContainer.innerHTML += `
                             <div class="list-item">
-                                <span>${data.number || 'N/A'} | ৳${data.amount || 0}</span>
-                                <button class="btn-approve" onclick="alert('Approved')">Approve</button>
+                                <span>${data.number} | ৳${data.amount}</span>
+                                <button class="btn-approve" onclick="approveWithdraw('${d.id}')">Approve</button>
                             </div>`;
                     });
                 }
             } catch(e) {}
 
+            // Match List
             const matchListContainer = document.getElementById("adminMatchList");
             try {
                 const snap = await getDocs(collection(db, "matches"));
                 if(snap.empty) {
-                    matchListContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono match paowa jayni.</p>`;
+                    matchListContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Kono match nei.</p>`;
                 } else {
                     matchListContainer.innerHTML = "";
                     snap.forEach((d) => {
                         const m = d.data();
                         matchListContainer.innerHTML += `
                             <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
-                                <strong style="color: var(--neon-cyan);">${m.matchName} (Code: ${m.matchCode})</strong>
+                                <strong style="color: var(--neon-cyan);">${m.matchName} (${m.matchCode})</strong>
                                 <input type="text" id="rid_${m.matchCode}" class="form-control" placeholder="Room ID" value="${m.roomId || ''}" style="margin: 2px 0; padding: 6px;">
                                 <input type="text" id="rpass_${m.matchCode}" class="form-control" placeholder="Password" value="${m.roomPass || ''}" style="margin: 2px 0; padding: 6px;">
                                 <div style="display: flex; gap: 5px; width: 100%; margin-top: 5px;">
-                                    <button class="btn-approve" style="flex: 1;" onclick="setRoomCreds('${m.matchCode}')">Save Room ID</button>
+                                    <button class="btn-approve" style="flex: 1;" onclick="setRoomCreds('${m.matchCode}')">Save</button>
                                     <button class="btn-fail" onclick="deleteMatch('${m.matchCode}')">Delete</button>
                                 </div>
                             </div>`;
