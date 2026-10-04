@@ -58,7 +58,7 @@
         .drawer.open { right: 0; }
         .drawer-close { font-size: 20px; cursor: pointer; text-align: right; margin-bottom: 20px; color: var(--neon-pink); }
         .drawer-links { list-style: none; }
-        .drawer-links li { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .drawer-links li { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; font-size: 14px; }
         .drawer-links li:hover { color: var(--neon-cyan); }
 
         /* Auth Modal Overlay */
@@ -160,6 +160,12 @@
             <li onclick="switchTab('addBalance'); toggleDrawer();">Add Balance</li>
             <li onclick="switchTab('withdraw'); toggleDrawer();">Withdraw</li>
             <li id="drawerAuthItem" onclick="openAuthModal(); toggleDrawer();">Login / Register</li>
+            <li style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; padding-top: 12px; color: var(--neon-cyan);">
+                <strong>সহায়তা কেন্দ্র</strong><br>
+                <span style="font-size: 12px; color: var(--text-muted);">WhatsApp - 01902009133</span><br>
+                <span style="font-size: 12px; color: var(--text-muted);">Telegram - Aveen_Reed</span>
+            </li>
+            <li onclick="window.location.href='admin.html'" style="color: var(--neon-pink); font-weight: bold;">Admin Panel</li>
         </ul>
     </div>
 
@@ -289,7 +295,6 @@
             }
         });
 
-        // Load Matches on Web Homepage from Firestore
         async function loadWebMatches() {
             const container = document.getElementById('matchListContainer');
             try {
@@ -320,10 +325,8 @@
             }
         }
 
-        // Run match load on startup
         loadWebMatches();
 
-        // Submit Add Balance Request to Firestore
         window.submitAddBalance = async function() {
             if(!auth.currentUser) { 
                 alert("প্রথমে লগইন করুন!"); 
@@ -356,7 +359,6 @@
             }
         }
 
-        // Submit Withdraw Request to Firestore
         window.submitWithdraw = async function() {
             if(!auth.currentUser) { 
                 alert("প্রথমে লগইন করুন!"); 
