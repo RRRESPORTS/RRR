@@ -99,6 +99,7 @@
         <div id="addBalanceSection" class="section">
             <h3 style="color: var(--neon-green);">Add Balance via bKash</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0;">Send Money: <strong style="color: #fff;">01902009133</strong></p>
+            <p style="font-size: 12px; color: var(--neon-pink); margin-bottom: 5px;">Limit: Minimum ৳5 - Maximum ৳100</p>
             <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #374151; margin-top: 10px;">
                 <input type="text" id="bkashTrxID" class="form-control" placeholder="Transaction ID (TrxID)">
                 <input type="number" id="addAmount" class="form-control" placeholder="Amount (৳)">
@@ -109,6 +110,7 @@
         <div id="withdrawSection" class="section">
             <h3 style="color: var(--neon-pink);">Withdraw Funds</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0;">শুধু বিকাশ পার্সোনাল নাম্বার।</p>
+            <p style="font-size: 12px; color: var(--neon-pink); margin-bottom: 5px;">Limit: Minimum ৳30 - Maximum ৳200</p>
             <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #374151; margin-top: 10px;">
                 <input type="text" id="withdrawNumber" class="form-control" placeholder="bKash Number">
                 <input type="number" id="withdrawAmount" class="form-control" placeholder="Amount (৳)">
@@ -241,7 +243,41 @@
                 document.getElementById('userBalance').innerText = "৳0.00";
             }
             loadWebMatches();
+            loadMyMatches();
         });
+
+        // Countdown Timer Function
+        function startCountdown(matchTimeStr, elementId) {
+            const countDownDate = new Date(matchTimeStr).getTime();
+            if(isNaN(countDownDate)) {
+                document.getElementById(elementId).innerText = "Time Expired / Invalid";
+                return;
+            }
+
+            const x = setInterval(function() {
+                const now = new Date().getTime();
+                const distance = countDownDate - now;
+
+                if (distance < 0) {
+                    clearInterval(x);
+                    document.getElementById(elementId).innerText = "Match Started / Running";
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                let timeStr = "";
+                if(days > 0) timeStr += days + "d ";
+                timeStr += hours + "h " + minutes + "m " + seconds + "s";
+                
+                const el = document.getElementById(elementId);
+                if(el) el.innerText = timeStr;
+                else clearInterval(x);
+            }, 1000);
+        }
 
         async function loadWebMatches() {
             const container = document.getElementById('matchListContainer');
@@ -257,12 +293,12 @@
                         const total = m.totalSlots || 0;
                         const isFull = joined >= total;
 
-                        // Room ID & Pass condition: Only show if admin has added them
                         const roomInfoHtml = (m.roomId && m.roomId.trim() !== "") ? 
                             `<div style="margin-top: 8px; padding: 8px; background: rgba(0,255,102,0.1); border-radius: 5px; color: var(--neon-green);">
                                 <strong>Room ID:</strong> ${m.roomId} | <strong>Pass:</strong> ${m.roomPass || 'N/A'}
                              </div>` : "";
 
+                        const timerId = `timer_${m.matchCode}`;
                         container.innerHTML += `
                             <div class="match-card">
                                 <h4>${m.matchName} (Code: ${m.matchCode})</h4>
@@ -272,16 +308,19 @@
                                 </div>
                                 <div class="match-details">
                                     <span>Slots: ${joined}/${total}</span>
-                                    <span style="color: var(--neon-cyan);">${isFull ? 'Match Full' : 'Slots Available'}</span>
+                                    <span style="color: var(--neon-cyan);">Starts In: <strong id="${timerId}" style="color: var(--neon-pink);">Calculating...</strong></span>
                                 </div>
                                 ${roomInfoHtml}
                                 <button class="join-btn" ${isFull ? 'style="background: gray; cursor: not-allowed;"' : ''} onclick="${isFull ? '' : `openJoinModal('${m.matchCode}', '${m.matchName}',${m.entryFee})`}">${isFull ? 'Match Full' : 'Join Match'}</button>
                             </div>`;
+                        
+                        if(m.matchTime) {
+                            startCountdown(m.matchTime, timerId);
+                        }
                     });
                 }
             } catch(e) {}
         }
-        loadWebMatches();
 
         window.openJoinModal = function(code, name, fee) {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
@@ -310,7 +349,7 @@
             }
 
             try {
-                // Deduct fee and increment slots
+                // Deduct fee properly from user balance
                 await updateDoc(userRef, { balance: userBal - selectedMatchForJoin.fee });
 
                 const matchRef = doc(db, "matches", selectedMatchForJoin.code);
@@ -331,6 +370,7 @@
                 alert("Successfully joined the match!");
                 closeJoinModal();
                 loadWebMatches();
+                loadMyMatches();
             } catch(e) { alert("Error: " + e.message); }
         }
 
@@ -344,7 +384,7 @@
                 const q = query(collection(db, "matchRegistrations"), where("userId", "==", auth.currentUser.uid));
                 const snap = await getDocs(q);
                 if(snap.empty) {
-                    container.innerHTML = `<p style="color: var(--text-muted);">You haven't joined any matches yet.</p>";`;
+                    container.innerHTML = `<p style="color: var(--text-muted);">You haven't joined any matches yet.</p>`;
                 } else {
                     container.innerHTML = "";
                     snap.forEach(d => {
@@ -353,8 +393,8 @@
                             <div class="match-card">
                                 <h4>${reg.matchName} (Code: ${reg.matchCode})</h4>
                                 <div class="match-details">
-                                    <span>Name: ${reg.playerName}</span>
-                                    <span>ID: ${reg.playerID}</span>
+                                    <span>Game Name: ${reg.playerName}</span>
+                                    <span>Game ID: ${reg.playerID}</span>
                                 </div>
                                 <p style="color: var(--neon-green); font-size: 13px;">Status: Joined Successfully</p>
                             </div>`;
@@ -366,12 +406,19 @@
         window.submitAddBalance = async function() {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
             const trxId = document.getElementById('bkashTrxID').value.trim();
-            const amount = document.getElementById('addAmount').value.trim();
+            const amount = Number(document.getElementById('addAmount').value);
+
             if(!trxId || !amount) { alert("TrxID ebong Amount দিন।"); return; }
+            
+            if(amount < 5 || amount > 100) {
+                alert("Add Balance minimum ৳5 ebong maximum ৳100 hote hobe.");
+                return;
+            }
+
             try {
                 await addDoc(collection(db, "addBalanceRequests"), {
                     userId: auth.currentUser.uid, email: auth.currentUser.email,
-                    trxId: trxId, amount: Number(amount), timestamp: new Date()
+                    trxId: trxId, amount: amount, timestamp: new Date()
                 });
                 alert("Request sent!");
                 document.getElementById('bkashTrxID').value = ""; document.getElementById('addAmount').value = "";
@@ -381,16 +428,36 @@
         window.submitWithdraw = async function() {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
             const number = document.getElementById('withdrawNumber').value.trim();
-            const amount = document.getElementById('withdrawAmount').value.trim();
+            const amount = Number(document.getElementById('withdrawAmount').value);
+
             if(!number || !amount) { alert("Number ebong Amount দিন।"); return; }
+
+            if(amount < 30 || amount > 200) {
+                alert("Withdraw limit: Minimum ৳30 ebong Maximum ৳200");
+                return;
+            }
+
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            const userSnap = await getDoc(userRef);
+            const currentBal = Number(userSnap.data().balance || 0);
+
+            if(currentBal < amount) {
+                alert("আপনার পর্যাপ্ত ব্যালেন্স নেই।");
+                return;
+            }
+
             try {
+                // Deduct balance instantly and send request
+                await updateDoc(userRef, { balance: currentBal - amount });
+
                 await addDoc(collection(db, "withdrawRequests"), {
                     userId: auth.currentUser.uid, email: auth.currentUser.email,
-                    number: number, amount: Number(amount), timestamp: new Date()
+                    number: number, amount: amount, timestamp: new Date()
                 });
-                alert("Withdraw request sent!");
+
+                alert("উইথড্র রিকুয়েষ্ট গ্রহন করা হলো।");
                 document.getElementById('withdrawNumber').value = ""; document.getElementById('withdrawAmount').value = "";
-            } catch(e) {}
+            } catch(e) { alert("Error: " + e.message); }
         }
     </script>
 </body>
