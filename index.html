@@ -45,6 +45,13 @@
         .match-card { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px; }
         .match-card h4 { color: var(--neon-cyan); font-size: 16px; margin-bottom: 5px; }
         .match-details { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
+        
+        /* প্রোগ্রেস বার স্টাইল */
+        .slot-progress-container { margin: 10px 0; }
+        .progress-bar { width: 100%; height: 12px; background-color: #1f2937; border-radius: 6px; overflow: hidden; margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.05); }
+        .progress-fill { height: 100%; background-color: var(--neon-pink); border-radius: 6px 0 0 6px; transition: width 0.3s ease; }
+        .slot-text-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); font-weight: 600; }
+
         .join-btn { background: var(--neon-green); color: #000; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 8px; }
         .view-players-btn { background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 6px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 6px; }
 
@@ -479,8 +486,12 @@
                         const m = d.data();
                         const joined = m.joinedCount || 0;
                         const total = m.totalSlots || 0;
+                        const available = Math.max(0, total - joined);
                         const isFull = joined >= total;
                         const hasAlreadyJoined = userJoinedMatchCodes.includes(m.matchCode);
+
+                        // প্রোগ্রেস বারের পার্সেন্টেজ হিসাব (Joined এর ওপর ভিত্তি করে লাল অংশ বড় হবে)
+                        const percentage = total > 0 ? (joined / total) * 100 : 0;
 
                         let roomInfoHtml = "";
                         if (hasAlreadyJoined) {
@@ -510,7 +521,6 @@
                         const viewBtnId = `viewBtn_${m.matchCode}`;
                         const timerId = `timer_${m.matchCode}`;
 
-                        // Prize display logic (Total Prize & Per Kill support)
                         let prizeDisplayHtml = "";
                         if (m.type === 'perkill') {
                             prizeDisplayHtml = `
@@ -532,8 +542,19 @@
                                 <div class="match-details" style="font-weight: bold; color: var(--neon-green);">
                                     ${prizeDisplayHtml}
                                 </div>
-                                <div class="match-details">
-                                    <span>Slots: ${joined}/${total}</span>
+                                
+                                <!-- স্লট প্রোগ্রেস বার সেকশন -->
+                                <div class="slot-progress-container">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${percentage}%;"></div>
+                                    </div>
+                                    <div class="slot-text-info">
+                                        <span>${joined} Joined</span>
+                                        <span>${available} Available</span>
+                                    </div>
+                                </div>
+
+                                <div class="match-details" style="margin-top: 8px;">
                                     <span style="color: var(--neon-cyan);">Status / Time: <strong id="${timerId}" style="color: var(--neon-pink);">Calculating...</strong></span>
                                 </div>
                                 ${roomInfoHtml}
