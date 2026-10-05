@@ -558,23 +558,65 @@
             });
         }
 
+        // অটোমেটেড ব্যালেন্স অ্যাড ফাংশন (আব্বুর ফোনের SMS Forwarder ডাটাবেজের সাথে মিল করে ব্যালেন্স যোগ করবে)
         async function submitAddBalance() {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
-            const trxId = document.getElementById('bkashTrxID').value.trim();
-            const amount = Number(document.getElementById('addAmount').value);
+            
+            const trxIdInput = document.getElementById('bkashTrxID').value.trim();
+            const amountInput = Number(document.getElementById('addAmount').value);
 
-            if(!trxId || !amount) { alert("TrxID ebong Amount দিন।"); return; }
-            if(amount < 5 || amount > 100) { alert("Add Balance minimum ৳5 ebong maximum ৳100 hote hobe."); return; }
+            if(!trxIdInput || !amountInput) { alert("TrxID এবং Amount দিন।"); return; }
+            if(amountInput < 5 || amountInput > 100) { alert("Add Balance minimum ৳5 এবং maximum ৳100 হতে হবে।"); return; }
 
             try {
-                await addDoc(collection(db, "addBalanceRequests"), {
-                    userId: auth.currentUser.uid, email: auth.currentUser.email,
-                    trxId: trxId, amount: amount, status: 'Pending', timestamp: new Date()
+                // ১. ফায়ারবেসের incomingSMS কালেকশন চেক করা (আব্বুর ফোনের অ্যাপ থেকে আসা মেসেজের সাথে মিলছে কি না)
+                const smsQuery = query(
+                    collection(db, "incomingSMS"), 
+                    where("trxId", "==", trxIdInput), 
+                    where("amount", "==", amountInput),
+                    where("used", "==", false)
+                );
+                
+                const smsSnapshot = await getDocs(smsQuery);
+
+                if(smsSnapshot.empty) {
+                    alert("দুঃখিত! এই TrxID বা অ্যামাউন্টের কোনো পেমেন্ট পাওয়া যায়নি অথবা এটি ইতিমধ্যে ব্যবহৃত হয়েছে।");
+                    return;
+                }
+
+                // ২. পাওয়া গেলে SMS টি 'used: true' করে দেওয়া যাতে কেউ ডাবল ইউজ করতে না পারে
+                let smsDocId = null;
+                smsSnapshot.forEach((docSnap) => {
+                    smsDocId = docSnap.id;
                 });
-                alert("Request sent!");
-                document.getElementById('bkashTrxID').value = ""; document.getElementById('addAmount').value = "";
+
+                await updateDoc(doc(db, "incomingSMS", smsDocId), { used: true });
+
+                // ৩. ইউজারের বর্তমান ব্যালেন্সের সাথে টাকা যোগ করা
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                const userSnap = await getDoc(userRef);
+                let currentBal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
+
+                await updateDoc(userRef, { balance: currentBal + amountInput });
+
+                // ৪. হিস্ট্রিতে Approved স্ট্যাটাস দিয়ে সেভ করা
+                await addDoc(collection(db, "addBalanceRequests"), {
+                    userId: auth.currentUser.uid, 
+                    email: auth.currentUser.email,
+                    trxId: trxIdInput, 
+                    amount: amountInput, 
+                    status: 'Approved', 
+                    timestamp: new Date()
+                });
+
+                alert(`সফল! আপনার অ্যাকাউন্টে অটোমেটিক ৳${amountInput} যোগ করা হয়েছে।`);
+                document.getElementById('bkashTrxID').value = ""; 
+                document.getElementById('addAmount').value = "";
                 loadUserHistory();
-            } catch(e) {}
+
+            } catch(e) { 
+                alert("Error: " + e.message); 
+            }
         }
 
         async function submitWithdraw() {
