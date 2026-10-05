@@ -15,13 +15,19 @@
             --text-muted: #9ca3af;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 70px; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 90px; }
         
         header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--card-bg); border-bottom: 1px solid rgba(0, 243, 255, 0.2); position: sticky; top: 0; z-index: 100; }
         .logo { font-size: 20px; font-weight: bold; color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0,243,255,0.5); }
         .header-right { display: flex; align-items: center; gap: 15px; }
         .login-btn { background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 5px 15px; border-radius: 5px; cursor: pointer; }
         .menu-icon { font-size: 24px; cursor: pointer; color: var(--neon-pink); }
+
+        /* Notice Bar Styling */
+        .notice-bar { background: linear-gradient(90deg, #1f2937, #111827); border-bottom: 1px solid rgba(0, 255, 102, 0.3); padding: 10px 15px; display: flex; align-items: center; overflow: hidden; white-space: nowrap; }
+        .notice-title { background: var(--neon-green); color: #000; font-weight: bold; padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-right: 10px; text-transform: uppercase; flex-shrink: 0; }
+        .notice-content { color: var(--neon-cyan); font-size: 13px; display: inline-block; animation: marquee 15s linear infinite; }
+        @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
         .balance-container { background: linear-gradient(135deg, #1f2937, #111827); margin: 15px; padding: 20px; border-radius: 12px; border: 1px solid rgba(0,255,102,0.3); display: flex; justify-content: space-between; align-items: center; }
         .bal-info h4 { color: var(--text-muted); font-size: 14px; }
@@ -53,6 +59,10 @@
         .btn-fb { background: #1877f2; color: #fff; }
         .btn-tg { background: #0088cc; color: #fff; }
 
+        /* Powered By Footer */
+        .powered-footer { text-align: center; padding: 15px; font-size: 12px; color: var(--text-muted); background: #080b11; border-top: 1px solid rgba(255,255,255,0.05); }
+        .powered-footer span { color: var(--neon-cyan); font-weight: bold; }
+
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100; }
         .nav-item { text-align: center; color: var(--text-muted); font-size: 12px; cursor: pointer; }
         .nav-item.active { color: var(--neon-cyan); }
@@ -83,6 +93,12 @@
             <div class="menu-icon" id="menuToggleBtn">☰</div>
         </div>
     </header>
+
+    <!-- Dynamic Notice Bar -->
+    <div class="notice-bar" id="noticeBarContainer" style="display: none;">
+        <div class="notice-title">Notice</div>
+        <div class="notice-content" id="noticeTextDisplay">Loading notice...</div>
+    </div>
 
     <div class="balance-container">
         <div class="bal-info">
@@ -150,6 +166,11 @@
         </div>
     </div>
 
+    <!-- Powered By Footer -->
+    <div class="powered-footer">
+        powered by <span>ZEG-G</span>
+    </div>
+
     <div class="modal-overlay" id="joinModal" style="display: none;">
         <div class="modal-card">
             <h3>Join Match</h3>
@@ -162,7 +183,7 @@
         </div>
     </div>
 
-    <!-- Auth Modal (強制 Login/Register on Load) -->
+    <!-- Auth Modal (Forced Login/Register) -->
     <div class="modal-overlay" id="authModal" style="display: flex;">
         <div class="modal-card" onclick="event.stopPropagation()">
             <h3 id="modalTitle">Login to ZEG-G</h3>
@@ -301,6 +322,23 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
+        // Real-time Notice Bar Listener
+        onSnapshot(doc(db, "settings", "notice"), (docSnap) => {
+            const noticeBar = document.getElementById('noticeBarContainer');
+            const noticeText = document.getElementById('noticeTextDisplay');
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.active && data.text && data.text.trim() !== "") {
+                    noticeText.innerText = data.text;
+                    noticeBar.style.display = "flex";
+                } else {
+                    noticeBar.style.display = "none";
+                }
+            } else {
+                noticeBar.style.display = "none";
+            }
+        });
+
         onAuthStateChanged(auth, async (user) => {
             const authNavBtn = document.getElementById('authNavBtn');
             const drawerAuthItem = document.getElementById('drawerAuthItem');
@@ -328,7 +366,7 @@
                 drawerAuthItem.innerText = "Login / Register"; 
                 drawerAuthItem.onclick = openAuthModal;
                 document.getElementById('userBalance').innerText = "৳0.00";
-                openAuthModal(); // ইউজার লগআউট অবস্থায় থাকলে বা না থাকলে পপআপ ওপেন রাখবে
+                openAuthModal();
             }
             loadWebMatches();
             loadMyMatches();
