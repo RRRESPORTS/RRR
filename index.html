@@ -34,12 +34,9 @@
         .section { display: none; }
         .section.active { display: block; }
         
-        /* Notice Bar */
-        .notice-box { background: rgba(0,243,255,0.05); border-left: 4px solid var(--neon-cyan); padding: 12px; margin: 15px; font-size: 14px; border-radius: 0 6px 6px 0; color: #fff; }
-
-        /* Gift Code Section (3 Lines structure) */
-        .gift-box { background: var(--card-bg); border: 1px solid var(--neon-pink); border-radius: 10px; padding: 15px; margin: 15px 0; }
-        .gift-box h4 { color: var(--neon-pink); font-size: 15px; margin-bottom: 10px; text-align: center; }
+        /* 3 Lines Gift Code Box inside Match Section */
+        .gift-box-3line { background: var(--card-bg); border: 1px solid var(--neon-pink); border-radius: 10px; padding: 15px; margin-bottom: 20px; }
+        .gift-box-3line h4 { color: var(--neon-pink); font-size: 15px; margin-bottom: 10px; text-align: center; }
 
         .match-card { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px; }
         .match-card h4 { color: var(--neon-cyan); font-size: 16px; margin-bottom: 5px; }
@@ -100,14 +97,11 @@
         </div>
     </div>
 
-    <!-- Dynamic Notice Bar from Admin -->
-    <div class="notice-box" id="siteNoticeBar">Loading notice...</div>
-
     <div class="container">
         <div id="matchSection" class="section active">
             
-            <!-- 3 Lines Gift Code Bar -->
-            <div class="gift-box">
+            <!-- 3 Lines Gift Code Section -->
+            <div class="gift-box-3line">
                 <h4>🎁 Redeem Gift Code</h4>
                 <input type="text" id="redeemCodeInput" class="form-control" placeholder="Enter Gift Code">
                 <button class="submit-btn" style="background: var(--neon-pink); color: #fff;" onclick="claimGiftCode()">Claim Bonus</button>
@@ -159,11 +153,15 @@
         </div>
     </div>
 
-    <!-- Join Match Modal -->
+    <!-- Join Match Modal (With Match Notice Display) -->
     <div class="modal-overlay" id="joinModal" style="display: none;">
         <div class="modal-card">
             <h3>Join Match</h3>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;" id="joinMatchInfo"></p>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;" id="joinMatchInfo"></p>
+            
+            <!-- Notice Box inside Join Modal -->
+            <div id="modalMatchNoticeBox" style="background: rgba(0,243,255,0.1); border-left: 3px solid var(--neon-cyan); padding: 8px; font-size: 12px; margin-bottom: 12px; border-radius: 0 4px 4px 0; display: none;"></div>
+
             <input type="text" id="gamePlayerName" class="form-control" placeholder="Game Player Name">
             <input type="text" id="gamePlayerID" class="form-control" placeholder="Game Player ID / UID">
             <button class="submit-btn" onclick="confirmJoinMatch()">Confirm & Pay Entry Fee</button>
@@ -215,7 +213,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, query, where, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
@@ -276,29 +274,12 @@
                     const cred = await createUserWithEmailAndPassword(auth, email, password);
                     
                     await setDoc(doc(db, "users", cred.user.uid), { 
-                        email: email, 
-                        balance: 0.00,
-                        playerName: playerName,
-                        playerUID: playerUID 
+                        email: email, balance: 0.00, playerName: playerName, playerUID: playerUID 
                     });
                     alert("Account Created & Saved!");
                     closeAuthModal();
                 }
             } catch (e) { alert("Error: " + e.message); }
-        }
-
-        // Load Live Notice from Firestore
-        async function loadNoticeBar() {
-            try {
-                const noticeDoc = await getDoc(doc(db, "settings", "notice"));
-                if(noticeDoc.exists() && noticeDoc.data().text) {
-                    document.getElementById('siteNoticeBar').innerText = noticeDoc.data().text;
-                } else {
-                    document.getElementById('siteNoticeBar').innerText = "Welcome to ZEG-G Tournament Platform!";
-                }
-            } catch(e) {
-                document.getElementById('siteNoticeBar').innerText = "Welcome to ZEG-G Tournament Platform!";
-            }
         }
 
         // Claim Gift Code Logic
@@ -311,21 +292,13 @@
                 const codeRef = doc(db, "giftCodes", codeInput);
                 const codeSnap = await getDoc(codeRef);
 
-                if(!codeSnap.exists()) {
-                    alert("ভুল বা মেয়াদোত্তীর্ণ গিফট কোড!");
-                    return;
-                }
+                if(!codeSnap.exists()) { alert("ভুল বা মেয়াদোত্তীর্ণ গিফট কোড!"); return; }
 
                 const codeData = codeSnap.data();
-                if(codeData.isUsed) {
-                    alert("এই কোডটি ইতিমধ্যে ব্যবহার করা হয়েছে!");
-                    return;
-                }
+                if(codeData.isUsed) { alert("এই কোডটি ইতিমধ্যে ব্যবহার করা হয়েছে!"); return; }
 
-                // Mark code as used
                 await updateDoc(codeRef, { isUsed: true, usedBy: auth.currentUser.uid });
 
-                // Add bonus to user balance
                 const userRef = doc(db, "users", auth.currentUser.uid);
                 const userSnap = await getDoc(userRef);
                 let currentBal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
@@ -342,8 +315,6 @@
             const drawerAuthItem = document.getElementById('drawerAuthItem');
             userJoinedMatchCodes = [];
 
-            loadNoticeBar();
-
             if(user) {
                 authNavBtn.innerText = "Logout"; authNavBtn.onclick = () => signOut(auth);
                 drawerAuthItem.innerText = "Logout"; drawerAuthItem.onclick = () => signOut(auth);
@@ -354,9 +325,7 @@
 
                 const qReg = query(collection(db, "matchRegistrations"), where("userId", "==", user.uid));
                 const snapReg = await getDocs(qReg);
-                snapReg.forEach(d => {
-                    userJoinedMatchCodes.push(d.data().matchCode);
-                });
+                snapReg.forEach(d => { userJoinedMatchCodes.push(d.data().matchCode); });
 
                 loadUserHistory();
                 closeAuthModal();
@@ -435,7 +404,9 @@
                         } else if (isFull) {
                             btnHtml = `<button class="join-btn" style="background: gray; cursor: not-allowed;" disabled>Match Full</button>`;
                         } else {
-                            btnHtml = `<button class="join-btn" onclick="openJoinModal('${m.matchCode}', '${m.matchName}', ${m.entryFee})">Join Match</button>`;
+                            // Escape single quotes for match notice safely
+                            const safeNotice = (m.matchNotice || "").replace(/'/g, "\\'");
+                            btnHtml = `<button class="join-btn" onclick="openJoinModal('${m.matchCode}', '${m.matchName}', ${m.entryFee}, '${safeNotice}')">Join Match</button>`;
                         }
 
                         const timerId = `timer_${m.matchCode}`;
@@ -460,11 +431,20 @@
             } catch(e) {}
         }
 
-        window.openJoinModal = async function(code, name, fee) {
+        window.openJoinModal = async function(code, name, fee, notice) {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
             selectedMatchForJoin = { code, name, fee };
             document.getElementById('joinMatchInfo').innerText = `${name} (Fee: ৳${fee})`;
             
+            // Show match-specific notice in Join Modal if available
+            const noticeBox = document.getElementById('modalMatchNoticeBox');
+            if(notice && notice.trim() !== "") {
+                noticeBox.innerText = `Notice: ${notice}`;
+                noticeBox.style.display = "block";
+            } else {
+                noticeBox.style.display = "none";
+            }
+
             const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
             if(userSnap.exists()) {
                 document.getElementById('gamePlayerName').value = userSnap.data().playerName || "";
@@ -611,10 +591,7 @@
             const userSnap = await getDoc(userRef);
             const currentBal = Number(userSnap.data().balance || 0);
 
-            if(currentBal < amount) {
-                alert("আপনার পর্যাপ্ত ব্যালেন্স নেই।");
-                return;
-            }
+            if(currentBal < amount) { alert("আপনার পর্যাপ্ত ব্যালেন্স নেই।"); return; }
 
             try {
                 await updateDoc(userRef, { balance: currentBal - amount });
