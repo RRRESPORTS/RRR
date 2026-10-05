@@ -35,10 +35,10 @@
         .admin-btn { width: 100%; padding: 10px; background: var(--neon-cyan); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
         
         .list-container { max-height: 250px; overflow-y: auto; margin-top: 10px; }
-        .list-item { background: #1f2937; padding: 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; border-left: 3px solid var(--neon-cyan); display: flex; flex-direction: column; gap: 8px; }
-        .action-btns { display: flex; gap: 5px; }
-        .btn-approve { background: var(--neon-green); border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; color: #000; flex: 1; }
-        .btn-fail { background: var(--neon-pink); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; flex: 1; }
+        .list-item { background: #1f2937; padding: 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; border-left: 3px solid var(--neon-cyan); display: flex; justify-content: space-between; align-items: center; }
+        .btn-group { display: flex; gap: 5px; }
+        .btn-approve { background: var(--neon-green); border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; color: #000; }
+        .btn-fail { background: var(--neon-pink); color: #fff; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -145,7 +145,8 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        window.updateAddBalanceStatus = async function(reqId, userId, amount, status) {
+        // Add Balance Actions
+        window.processAddBalance = async function(reqId, userId, amount, status) {
             try {
                 const reqRef = doc(db, "addBalanceRequests", reqId);
                 if(status === 'Approved') {
@@ -153,25 +154,34 @@
                     const userSnap = await getDoc(userRef);
                     let currentBal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
                     await updateDoc(userRef, { balance: currentBal + Number(amount) });
+                    await updateDoc(reqRef, { status: 'Approved' });
+                    alert("Add Balance Approved!");
+                } else {
+                    await updateDoc(reqRef, { status: 'Fail' });
+                    alert("Add Balance marked as Fail.");
                 }
-                await updateDoc(reqRef, { status: status });
-                alert(`Request ${status}!`);
                 loadAdminData();
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        window.updateWithdrawStatus = async function(reqId, userId, amount, status) {
+        // Withdraw Actions
+        window.processWithdraw = async function(reqId, userId, amount, status) {
             try {
                 const reqRef = doc(db, "withdrawRequests", reqId);
-                if(status === 'Fail') {
-                    // Refund balance if withdraw failed
+                if(status === 'Approved') {
+                    await updateDoc(reqRef, { status: 'Approved' });
+                    alert("Withdraw Approved!");
+                } else {
+                    // Refund balance to user since it was deducted earlier
                     const userRef = doc(db, "users", userId);
                     const userSnap = await getDoc(userRef);
-                    let currentBal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
-                    await updateDoc(userRef, { balance: currentBal + Number(amount) });
+                    if(userSnap.exists()) {
+                        let currentBal = Number(userSnap.data().balance || 0);
+                        await updateDoc(userRef, { balance: currentBal + Number(amount) });
+                    }
+                    await updateDoc(reqRef, { status: 'Fail' });
+                    alert("Withdraw Failed & Amount refunded to user.");
                 }
-                await updateDoc(reqRef, { status: status });
-                alert(`Withdraw ${status}!`);
                 loadAdminData();
             } catch(e) { alert("Error: " + e.message); }
         }
@@ -195,16 +205,15 @@
             addBalContainer.innerHTML = snapBal.empty ? `<p style="color:var(--text-muted); text-align:center;">Kono request nei.</p>` : "";
             snapBal.forEach(d => {
                 const data = d.data();
-                if(data.status === "Pending") {
-                    addBalContainer.innerHTML += `
-                        <div class="list-item">
-                            <span>Trx: ${data.trxId} | ৳${data.amount}</span>
-                            <div class="action-btns">
-                                <button class="btn-approve" onclick="updateAddBalanceStatus('${d.id}', '${data.userId}', ${data.amount}, 'Approved')">Approve</button>
-                                <button class="btn-fail" onclick="updateAddBalanceStatus('${d.id}', '${data.userId}', ${data.amount}, 'Fail')">Fail</button>
-                            </div>
-                        </div>`;
-                }
+                const statusColor = data.status === 'Approved' ? 'var(--neon-green)' : (data.status === 'Fail' ? 'var(--neon-pink)' : 'var(--neon-cyan)');
+                addBalContainer.innerHTML += `
+                    <div class="list-item">
+                        <div>Trx: ${data.trxId} | ৳${data.amount}<br><span style="font-size:11px; color:${statusColor};">Status: ${data.status}</span></div>
+                        <div class="btn-group">
+                            <button class="btn-approve" onclick="processAddBalance('${d.id}', '${data.userId}', ${data.amount}, 'Approved')">Approve</button>
+                            <button class="btn-fail" onclick="processAddBalance('${d.id}', '${data.userId}', ${data.amount}, 'Fail')">Fail</button>
+                        </div>
+                    </div>`;
             });
 
             const withdrawContainer = document.getElementById("withdrawRequestsList");
@@ -212,16 +221,15 @@
             withdrawContainer.innerHTML = snapWith.empty ? `<p style="color:var(--text-muted); text-align:center;">Kono request nei.</p>` : "";
             snapWith.forEach(d => {
                 const data = d.data();
-                if(data.status === "Pending") {
-                    withdrawContainer.innerHTML += `
-                        <div class="list-item">
-                            <span>No: ${data.number} | ৳${data.amount}</span>
-                            <div class="action-btns">
-                                <button class="btn-approve" onclick="updateWithdrawStatus('${d.id}', '${data.userId}', ${data.amount}, 'Approved')">Approve</button>
-                                <button class="btn-fail" onclick="updateWithdrawStatus('${d.id}', '${data.userId}', ${data.amount}, 'Fail')">Fail</button>
-                            </div>
-                        </div>`;
-                }
+                const statusColor = data.status === 'Approved' ? 'var(--neon-green)' : (data.status === 'Fail' ? 'var(--neon-pink)' : 'var(--neon-cyan)');
+                withdrawContainer.innerHTML += `
+                    <div class="list-item">
+                        <div>${data.number} | ৳${data.amount}<br><span style="font-size:11px; color:${statusColor};">Status: ${data.status}</span></div>
+                        <div class="btn-group">
+                            <button class="btn-approve" onclick="processWithdraw('${d.id}', '${data.userId}', ${data.amount}, 'Approved')">Approve</button>
+                            <button class="btn-fail" onclick="processWithdraw('${d.id}', '${data.userId}', ${data.amount}, 'Fail')">Fail</button>
+                        </div>
+                    </div>`;
             });
 
             const matchListContainer = document.getElementById("adminMatchList");
@@ -230,12 +238,12 @@
             snapMatch.forEach(d => {
                 const m = d.data();
                 matchListContainer.innerHTML += `
-                    <div class="list-item" style="align-items: flex-start;">
+                    <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
                         <strong style="color: var(--neon-cyan);">${m.matchName} (${m.matchCode}) - Slots: ${m.joinedCount || 0}/${m.totalSlots}</strong>
                         <input type="text" id="rid_${m.matchCode}" class="form-control" placeholder="Room ID" value="${m.roomId || ''}" style="margin:2px 0; padding:6px;">
                         <input type="text" id="rpass_${m.matchCode}" class="form-control" placeholder="Password" value="${m.roomPass || ''}" style="margin:2px 0; padding:6px;">
                         <div style="display: flex; gap: 5px; width: 100%; margin-top: 5px;">
-                            <button class="btn-approve" onclick="setRoomCreds('${m.matchCode}')">Save</button>
+                            <button class="btn-approve" style="flex:1;" onclick="setRoomCreds('${m.matchCode}')">Save</button>
                             <button class="btn-fail" onclick="deleteMatch('${m.matchCode}')">Delete</button>
                         </div>
                     </div>`;
