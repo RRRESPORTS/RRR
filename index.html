@@ -56,7 +56,7 @@
         .drawer-links li { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; font-size: 14px; }
         .drawer-links li:hover { color: var(--neon-cyan); }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .modal-card { background: var(--card-bg); border: 1px solid var(--neon-cyan); padding: 25px; border-radius: 12px; width: 90%; max-width: 350px; }
         .modal-card h3 { color: var(--neon-cyan); margin-bottom: 15px; text-align: center; }
         .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; }
@@ -96,7 +96,7 @@
 
         <div id="myMatchSection" class="section">
             <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">My Registered Matches</h3>
-            <div id="myMatchListContainer"><p style="color: var(--text-muted);">Please login to view your joined matches.</p></div>
+            <div id="myMatchListContainer"><p style="color: var(--text-muted);">Loading joined matches...</p></div>
         </div>
 
         <div id="addBalanceSection" class="section">
@@ -127,7 +127,7 @@
     </div>
 
     <!-- Join Match Modal -->
-    <div class="modal-overlay" id="joinModal">
+    <div class="modal-overlay" id="joinModal" style="display: none;">
         <div class="modal-card">
             <h3>Join Match</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;" id="joinMatchInfo"></p>
@@ -138,15 +138,20 @@
         </div>
     </div>
 
-    <!-- Auth Modal -->
+    <!-- Auth Modal (Forces Login on start) -->
     <div class="modal-overlay" id="authModal">
         <div class="modal-card">
             <h3 id="modalTitle">Login to ZEG-G</h3>
             <input type="email" id="authEmail" class="form-control" placeholder="Email Address">
             <input type="password" id="authPassword" class="form-control" placeholder="Password">
+            
+            <div id="registerExtraFields" style="display: none;">
+                <input type="text" id="regPlayerName" class="form-control" placeholder="Game Player Name">
+                <input type="text" id="regPlayerUID" class="form-control" placeholder="Game Player UID">
+            </div>
+
             <button class="submit-btn" id="authSubmitBtn" onclick="handleAuth()">Login</button>
             <div class="switch-text" id="switchText" onclick="toggleAuthMode()">Don't have an account? <span>Register</span></div>
-            <div class="switch-text" style="color: var(--text-muted); margin-top: 10px;" onclick="closeAuthModal()">Cancel</div>
         </div>
     </div>
 
@@ -195,7 +200,7 @@
 
         let isLoginMode = true;
         let selectedMatchForJoin = null;
-        let userJoinedMatchCodes = []; // ইউজারের জয়েন করা ম্যাচগুলোর কোড ট্র্যাক রাখার জন্য
+        let userJoinedMatchCodes = [];
 
         window.switchTab = function(tabId) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -217,29 +222,42 @@
             document.getElementById('modalTitle').innerText = isLoginMode ? "Login to ZEG-G" : "Register New Account";
             document.getElementById('authSubmitBtn').innerText = isLoginMode ? "Login" : "Sign Up";
             document.getElementById('switchText').innerHTML = isLoginMode ? "Don't have an account? <span>Register</span>" : "Already have an account? <span>Login</span>";
+            document.getElementById('registerExtraFields').style.display = isLoginMode ? 'none' : 'block';
         }
 
         window.handleAuth = async function() {
             const email = document.getElementById('authEmail').value;
             const password = document.getElementById('authPassword').value;
             if(!email || !password) { alert("সব তথ্য পূরণ করুন।"); return; }
+            
             try {
                 if(isLoginMode) {
                     await signInWithEmailAndPassword(auth, email, password);
                     alert("Logged In Successfully!");
+                    closeAuthModal();
                 } else {
+                    const playerName = document.getElementById('regPlayerName').value.trim();
+                    const playerUID = document.getElementById('regPlayerUID').value.trim();
+                    if(!playerName || !playerUID) { alert("Game Name এবং UID দিন।"); return; }
+
                     const cred = await createUserWithEmailAndPassword(auth, email, password);
-                    await setDoc(doc(db, "users", cred.user.uid), { email: email, balance: 0.00 });
-                    alert("Account Created!");
+                    
+                    await setDoc(doc(db, "users", cred.user.uid), { 
+                        email: email, 
+                        balance: 0.00,
+                        playerName: playerName,
+                        playerUID: playerUID 
+                    });
+                    alert("Account Created & Saved!");
+                    closeAuthModal();
                 }
-                closeAuthModal();
             } catch (e) { alert("Error: " + e.message); }
         }
 
         onAuthStateChanged(auth, async (user) => {
             const authNavBtn = document.getElementById('authNavBtn');
             const drawerAuthItem = document.getElementById('drawerAuthItem');
-            userJoinedMatchCodes = []; // রিফ্রেশ বা লগইন পরিবর্তনের সময় রিসেট করা
+            userJoinedMatchCodes = [];
 
             if(user) {
                 authNavBtn.innerText = "Logout"; authNavBtn.onclick = () => signOut(auth);
@@ -249,7 +267,6 @@
                     if(docSnap.exists()) document.getElementById('userBalance').innerText = `৳${docSnap.data().balance || 0.00}`;
                 });
 
-                // ইউজারের জয়েন করা ম্যাচগুলোর কোড ফেচ করে নেওয়া
                 const qReg = query(collection(db, "matchRegistrations"), where("userId", "==", user.uid));
                 const snapReg = await getDocs(qReg);
                 snapReg.forEach(d => {
@@ -257,10 +274,12 @@
                 });
 
                 loadUserHistory();
+                closeAuthModal();
             } else {
                 authNavBtn.innerText = "Login"; authNavBtn.onclick = openAuthModal;
                 drawerAuthItem.innerText = "Login / Register"; drawerAuthItem.onclick = openAuthModal;
                 document.getElementById('userBalance').innerText = "৳0.00";
+                openAuthModal();
             }
             loadWebMatches();
             loadMyMatches();
@@ -310,7 +329,6 @@
                         const isFull = joined >= total;
                         const hasAlreadyJoined = userJoinedMatchCodes.includes(m.matchCode);
 
-                        // রুম আইডি ও পাসওয়ার্ড দেখানোর লজিক (শুধুমাত্র যারা জয়েন করেছে তারা দেখতে পাবে)
                         let roomInfoHtml = "";
                         if (hasAlreadyJoined) {
                             if (m.roomId && m.roomId.trim() !== "") {
@@ -326,7 +344,6 @@
                             }
                         }
 
-                        // বাটন স্ট্যাটাস নির্ধারণ
                         let btnHtml = "";
                         if (hasAlreadyJoined) {
                             btnHtml = `<button class="join-btn" style="background: #374151; color: var(--neon-green); cursor: not-allowed;" disabled>Already Joined</button>`;
@@ -358,12 +375,17 @@
             } catch(e) {}
         }
 
-        window.openJoinModal = function(code, name, fee) {
+        window.openJoinModal = async function(code, name, fee) {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
             selectedMatchForJoin = { code, name, fee };
             document.getElementById('joinMatchInfo').innerText = `${name} (Fee: ৳${fee})`;
-            document.getElementById('gamePlayerName').value = "";
-            document.getElementById('gamePlayerID').value = "";
+            
+            const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+            if(userSnap.exists()) {
+                document.getElementById('gamePlayerName').value = userSnap.data().playerName || "";
+                document.getElementById('gamePlayerID').value = userSnap.data().playerUID || "";
+            }
+
             document.getElementById('joinModal').style.display = 'flex';
         }
 
@@ -371,7 +393,7 @@
             const playerName = document.getElementById('gamePlayerName').value.trim();
             const playerID = document.getElementById('gamePlayerID').value.trim();
 
-            if(!playerName || !playerID) { alert("Game Name ebong ID দিন।"); return; }
+            if(!playerName || !playerID) { alert("Game Name এবং ID দিন।"); return; }
 
             const userRef = doc(db, "users", auth.currentUser.uid);
             const userSnap = await getDoc(userRef);
@@ -401,7 +423,6 @@
                     timestamp: new Date()
                 });
 
-                // লোকাল অ্যারেতে যুক্ত করা যাতে ইনস্ট্যান্ট আপডেট দেখায়
                 userJoinedMatchCodes.push(selectedMatchForJoin.code);
 
                 alert("Successfully joined the match!");
