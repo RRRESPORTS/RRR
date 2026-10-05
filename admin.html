@@ -27,14 +27,12 @@
         
         .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         .admin-card { background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: 12px; padding: 20px; box-shadow: 0 0 15px rgba(0,255,102,0.1); transition: 0.3s; }
-        .admin-card:hover { box-shadow: 0 0 25px rgba(0,255,102,0.3); }
         .admin-card h3 { font-size: 16px; color: var(--neon-cyan); margin-bottom: 15px; text-align: center; border-bottom: 1px dashed #374151; padding-bottom: 8px; }
         
         .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; font-size: 14px; }
         .form-control:focus { border-color: var(--neon-cyan); outline: none; }
         
         .admin-btn { width: 100%; padding: 10px; background: var(--neon-green); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
-        .admin-btn:hover { opacity: 0.9; }
         
         .list-container { max-height: 250px; overflow-y: auto; margin-top: 10px; }
         .list-item { background: #1f2937; padding: 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; border-left: 3px solid var(--neon-cyan); display: flex; justify-content: space-between; align-items: center; }
@@ -62,13 +60,6 @@
 
         <div class="admin-grid">
             
-            <!-- Notice Control Card -->
-            <div class="admin-card" style="border-color: var(--neon-cyan);">
-                <h3>Update Notice Bar</h3>
-                <textarea id="noticeInput" class="form-control" placeholder="Write site notice here..." rows="3"></textarea>
-                <button class="admin-btn" style="background: var(--neon-cyan);" onclick="updateSiteNotice()">Update Notice</button>
-            </div>
-
             <!-- Gift Code Creation Card -->
             <div class="admin-card" style="border-color: var(--neon-pink);">
                 <h3>Create Gift Code</h3>
@@ -83,7 +74,7 @@
                 <div class="list-container" id="roomControlList"><p style="color: var(--text-muted); text-align: center;">Loading matches...</p></div>
             </div>
 
-            <!-- 2. Add Match -->
+            <!-- 2. Add Match (With Notice Option) -->
             <div class="admin-card">
                 <h3>Add Match</h3>
                 <input type="text" id="mCode" class="form-control" placeholder="Match Code (e.g. M01)">
@@ -92,6 +83,7 @@
                 <input type="text" id="mFirstPrize" class="form-control" placeholder="First Prize">
                 <input type="datetime-local" id="mTime" class="form-control">
                 <input type="number" id="mSlots" class="form-control" placeholder="Total Slots (e.g. 48)">
+                <textarea id="mNotice" class="form-control" placeholder="Match Notice (Show when joining)" rows="2"></textarea>
                 <button class="admin-btn" onclick="addNewMatchToDB()">Create Match</button>
             </div>
 
@@ -162,15 +154,6 @@
 
         window.logoutAdmin = function() { sessionStorage.removeItem("isAdminLoggedIn"); location.reload(); }
 
-        // Notice Update Function
-        window.updateSiteNotice = async function() {
-            const noticeText = document.getElementById("noticeInput").value.trim();
-            try {
-                await setDoc(doc(db, "settings", "notice"), { text: noticeText });
-                alert("নোটিশ সফলভাবে আপডেট হয়েছে!");
-            } catch(e) { alert("Error: " + e.message); }
-        }
-
         // Gift Code Create Function
         window.createGiftCode = async function() {
             const code = document.getElementById("giftCodeText").value.trim();
@@ -178,10 +161,7 @@
             if(!code || !amount) { alert("কোড এবং অ্যামাউন্ট দিন।"); return; }
             try {
                 await setDoc(doc(db, "giftCodes", code), {
-                    code: code,
-                    amount: amount,
-                    isUsed: false,
-                    createdAt: new Date()
+                    code: code, amount: amount, isUsed: false, createdAt: new Date()
                 });
                 alert("গিফট কোড সফলভাবে তৈরি হয়েছে!");
                 document.getElementById("giftCodeText").value = "";
@@ -189,12 +169,13 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // 1. Match Create
+        // 1. Match Create with Notice
         window.addNewMatchToDB = async function() {
             const code = document.getElementById("mCode").value.trim();
             const name = document.getElementById("mName").value.trim();
             const fee = Number(document.getElementById("mFee").value);
             const slots = Number(document.getElementById("mSlots").value);
+            const notice = document.getElementById("mNotice").value.trim();
 
             if(!code || !name) { alert("কোড এবং নাম দিন।"); return; }
 
@@ -203,14 +184,14 @@
                     matchCode: code, matchName: name, entryFee: fee,
                     firstPrize: document.getElementById("mFirstPrize").value.trim(),
                     matchTime: document.getElementById("mTime").value,
-                    totalSlots: slots, joinedCount: 0, roomId: "", roomPass: ""
+                    totalSlots: slots, joinedCount: 0, roomId: "", roomPass: "",
+                    matchNotice: notice
                 });
                 alert("ম্যাচ সফলভাবে তৈরি হয়েছে!");
                 location.reload();
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // 2. Room ID & Pass Update
         window.setRoomCreds = async function(matchId) {
             const rId = document.getElementById(`rid_${matchId}`).value.trim();
             const rPass = document.getElementById(`rpass_${matchId}`).value.trim();
@@ -224,7 +205,6 @@
             if(confirm("ম্যাচটি ডিলিট করতে চান?")) { await deleteDoc(doc(db, "matches", matchId)); loadAdminData(); }
         }
 
-        // 3. Add Balance Request Processing
         window.processAddBalance = async function(reqId, userId, amount, status) {
             try {
                 const reqRef = doc(db, "addBalanceRequests", reqId);
@@ -243,7 +223,6 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // 4. Withdraw Request Processing
         window.processWithdraw = async function(reqId, userId, amount, status) {
             try {
                 const reqRef = doc(db, "withdrawRequests", reqId);
@@ -264,7 +243,6 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // 5. Direct Add/Cut User Balance by UID
         window.modifyUserBalance = async function() {
             const uid = document.getElementById("targetUserUID").value.trim();
             const amount = Number(document.getElementById("bonusAmount").value);
@@ -284,7 +262,6 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // 6. Search User & Block / Unblock
         window.searchUserByUID = async function() {
             const uid = document.getElementById("searchUidInput").value.trim();
             const resultBox = document.getElementById("searchResultBox");
@@ -328,17 +305,7 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // Load All Admin Lists
         async function loadAdminData() {
-            // Load existing notice into textarea
-            try {
-                const noticeDoc = await getDoc(doc(db, "settings", "notice"));
-                if(noticeDoc.exists()) {
-                    document.getElementById("noticeInput").value = noticeDoc.data().text || "";
-                }
-            } catch(e) {}
-
-            // Room Control List
             const roomListContainer = document.getElementById("roomControlList");
             const snapMatch = await getDocs(collection(db, "matches"));
             roomListContainer.innerHTML = snapMatch.empty ? `<p style="color:var(--text-muted); text-align:center;">কোনো ম্যাচ নেই।</p>` : "";
@@ -356,7 +323,6 @@
                     </div>`;
             });
 
-            // Add Balance Requests
             const addBalContainer = document.getElementById("addBalanceRequestsList");
             const snapBal = await getDocs(collection(db, "addBalanceRequests"));
             addBalContainer.innerHTML = snapBal.empty ? `<p style="color:var(--text-muted); text-align:center;">কোনো রিকুয়েষ্ট নেই।</p>` : "";
@@ -374,7 +340,6 @@
                 }
             });
 
-            // Withdraw Requests
             const withdrawContainer = document.getElementById("withdrawRequestsList");
             const snapWith = await getDocs(collection(db, "withdrawRequests"));
             withdrawContainer.innerHTML = snapWith.empty ? `<p style="color:var(--text-muted); text-align:center;">কোনো রিকুয়েষ্ট নেই।</p>` : "";
