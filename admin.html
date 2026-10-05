@@ -27,25 +27,36 @@
         
         .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         
-        /* Clickable Main Menu Cards */
-        .admin-card { background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: 12px; padding: 25px; box-shadow: 0 0 15px rgba(0,255,102,0.1); transition: 0.3s; cursor: pointer; text-align: center; }
-        .admin-card:hover { transform: translateY(-5px); box-shadow: 0 0 25px rgba(0,243,255,0.3); border-color: var(--neon-cyan); }
-        .admin-card h3 { font-size: 18px; color: var(--neon-cyan); margin-bottom: 10px; }
-        .admin-card p { font-size: 13px; color: var(--text-muted); }
+        /* Dashboard Home Cards (Clickable) */
+        .dash-card { background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: 12px; padding: 25px; box-shadow: 0 0 15px rgba(0,255,102,0.1); transition: 0.3s; cursor: pointer; text-align: center; position: relative; }
+        .dash-card:hover { transform: translateY(-5px); box-shadow: 0 0 25px rgba(0,243,255,0.3); border-color: var(--neon-cyan); }
+        .dash-card h3 { font-size: 18px; color: var(--neon-cyan); margin-bottom: 10px; }
+        .dash-card p { font-size: 13px; color: var(--text-muted); }
 
-        /* Section View Style */
-        .admin-section { display: none; background: var(--card-bg); border: 1px solid rgba(0,243,255,0.3); border-radius: 12px; padding: 25px; box-shadow: 0 0 20px rgba(0,243,255,0.1); }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #374151; padding-bottom: 10px; }
-        .section-header h3 { color: var(--neon-cyan); }
-        .back-btn { background: #374151; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .back-btn:hover { background: #4b5563; }
+        /* Badge for pending requests counter on cards */
+        .card-badge { position: absolute; top: 12px; right: 12px; background: var(--neon-pink); color: #fff; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 10px; display: none; }
+
+        /* Inner Work Sections (Initially Hidden) */
+        .admin-section { display: none; background: var(--card-bg); border: 2px solid var(--neon-cyan); border-radius: 12px; padding: 25px; box-shadow: 0 0 20px rgba(0,243,255,0.1); }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px dashed #374151; padding-bottom: 12px; }
+        .section-header h3 { font-size: 18px; color: var(--neon-cyan); }
+        
+        .back-btn { background: var(--neon-pink); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .back-btn:hover { opacity: 0.8; }
 
         .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; font-size: 14px; }
         .form-control:focus { border-color: var(--neon-cyan); outline: none; }
         
         .admin-btn { width: 100%; padding: 10px; background: var(--neon-green); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
         
-        .list-container { max-height: 350px; overflow-y: auto; margin-top: 10px; }
+        .list-container { max-height: 400px; overflow-y: auto; margin-top: 10px; padding-right: 5px; }
+        
+        /* Gichano / Structured Room Control Box Design */
+        .room-item-box { background: #161e2e; border: 1px solid #374151; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid var(--neon-cyan); }
+        .room-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .room-grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+        .room-actions { display: flex; gap: 8px; }
+
         .list-item { background: #1f2937; padding: 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; border-left: 3px solid var(--neon-cyan); display: flex; justify-content: space-between; align-items: center; }
         .btn-group { display: flex; gap: 5px; }
         .btn-approve { background: var(--neon-green); border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; color: #000; }
@@ -71,56 +82,64 @@
             <button onclick="logoutAdmin()" style="background: var(--neon-pink); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">Logout</button>
         </div>
 
-        <!-- Home Grid Menu Cards -->
-        <div class="admin-grid" id="mainMenuGrid">
-            <div class="admin-card" style="border-color: var(--neon-cyan);" onclick="openSection('sectionNotice')">
+        <!-- 1. Home Dashboard Menu Cards -->
+        <div class="admin-grid" id="dashboardHome">
+            <div class="dash-card" style="border-color: var(--neon-cyan);" onclick="openCardSection('cardNotice')">
                 <h3>Notice Bar Setting</h3>
-                <p>Manage site-wide announcement banner</p>
+                <p>সাইটের নোটিশ বার ও টেক্সট পরিবর্তন করুন</p>
             </div>
 
-            <div class="admin-card" style="border-color: var(--neon-pink);" onclick="openSection('sectionGiftCode')">
+            <div class="dash-card" style="border-color: var(--neon-pink);" onclick="openCardSection('cardGiftCode')">
                 <h3>Create Gift Code</h3>
-                <p>Generate bonus codes for users</p>
+                <p>ব্যবহারকারীদের জন্য নতুন গিফট কোড তৈরি করুন</p>
             </div>
 
-            <div class="admin-card" onclick="openSection('sectionRoomControl')">
+            <div class="dash-card" onclick="openCardSection('cardRoomControl')">
                 <h3>Input Match Id & Password</h3>
-                <p>Manage room credentials for active matches</p>
+                <p>ম্যাচের রুম আইডি ও পাসওয়ার্ড সেট করুন</p>
             </div>
 
-            <div class="admin-card" onclick="openSection('sectionAddMatch')">
-                <h3>Add Match</h3>
-                <p>Create new tournaments and matches</p>
+            <div class="dash-card" onclick="openCardSection('cardAddMatch')">
+                <h3>Add Normal Match</h3>
+                <p>সাধারণ টুর্নামেন্ট বা ম্যাচ যুক্ত করুন</p>
             </div>
 
-            <div class="admin-card" onclick="openSection('sectionAddBalance')">
+            <!-- New Per Kill Match Card -->
+            <div class="dash-card" style="border-color: var(--neon-cyan);" onclick="openCardSection('cardAddPerKillMatch')">
+                <h3>Add Per Kill Match</h3>
+                <p>প্রাইজ পুল ও পার কিল অ্যামাউন্ট সহ ম্যাচ যুক্ত করুন</p>
+            </div>
+
+            <div class="dash-card" onclick="openCardSection('cardAddBalance')">
+                <span class="card-badge" id="badgeAddBal">0</span>
                 <h3>Add Balance Request</h3>
-                <p>Approve or reject user deposit requests</p>
+                <p>টাকা ডিপোজিট রিকুয়েষ্ট চেক ও এপ্রুভ করুন</p>
             </div>
 
-            <div class="admin-card" onclick="openSection('sectionWithdraw')">
+            <div class="dash-card" onclick="openCardSection('cardWithdraw')">
+                <span class="card-badge" id="badgeWithdraw">0</span>
                 <h3>Withdraw Request</h3>
-                <p>Process user cash-out requests</p>
+                <p>ইউজারদের উইথড্র রিকুয়েষ্ট প্রসেস করুন</p>
             </div>
 
-            <div class="admin-card" onclick="openSection('sectionUserBalance')">
+            <div class="dash-card" onclick="openCardSection('cardUserBalance')">
                 <h3>Add User Balance</h3>
-                <p>Manually add or deduct user balance via UID</p>
+                <p>ইউজারের UID দিয়ে ব্যালেন্স যোগ বা কাটুন</p>
             </div>
 
-            <div class="admin-card" onclick="openSection('sectionSearchUser')">
+            <div class="dash-card" onclick="openCardSection('cardSearchUser')">
                 <h3>Search User & Block/Unblock</h3>
-                <p>Find user profiles and manage security status</p>
+                <p>ইউজার সার্চ করুন এবং ব্লক/আনব্লক করুন</p>
             </div>
         </div>
 
-        <!-- ================= INDIVIDUAL SECTIONS ================= -->
-
-        <!-- 1. Notice Bar Setting Section -->
-        <div id="sectionNotice" class="admin-section">
+        <!-- 2. Individual Functional Sections -->
+        
+        <!-- Notice Bar Section -->
+        <div id="cardNotice" class="admin-section">
             <div class="section-header">
                 <h3>Notice Bar Setting</h3>
-                <button class="back-btn" onclick="closeSections()">← Back</button>
+                <button class="back-btn" onclick="goBackHome()">← Back</button>
             </div>
             <textarea id="adminNoticeText" class="form-control" placeholder="Enter notice text here..." rows="3"></textarea>
             <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 14px;">
@@ -130,31 +149,31 @@
             <button class="admin-btn" style="background: var(--neon-cyan); color: #000;" onclick="updateNoticeSettings()">Save Notice</button>
         </div>
 
-        <!-- 2. Gift Code Section -->
-        <div id="sectionGiftCode" class="admin-section">
+        <!-- Gift Code Section -->
+        <div id="cardGiftCode" class="admin-section">
             <div class="section-header">
                 <h3>Create Gift Code</h3>
-                <button class="back-btn" onclick="closeSections()">← Back</button>
+                <button class="back-btn" onclick="goBackHome()">← Back</button>
             </div>
             <input type="text" id="giftCodeText" class="form-control" placeholder="Gift Code (e.g., ZEG50)">
             <input type="number" id="giftCodeAmount" class="form-control" placeholder="Bonus Amount (৳)">
             <button class="admin-btn" style="background: var(--neon-pink); color: #fff;" onclick="createGiftCode()">Create Code</button>
         </div>
 
-        <!-- 3. Room Control Section -->
-        <div id="sectionRoomControl" class="admin-section">
+        <!-- Room Control Section (Gichano & Clean Layout) -->
+        <div id="cardRoomControl" class="admin-section">
             <div class="section-header">
                 <h3>Input Match Id & Password</h3>
-                <button class="back-btn" onclick="closeSections()">← Back</button>
+                <button class="back-btn" onclick="goBackHome()">← Back</button>
             </div>
             <div class="list-container" id="roomControlList"><p style="color: var(--text-muted); text-align: center;">Loading matches...</p></div>
         </div>
 
-        <!-- 4. Add Match Section -->
-        <div id="sectionAddMatch" class="admin-section">
+        <!-- Add Normal Match Section -->
+        <div id="cardAddMatch" class="admin-section">
             <div class="section-header">
-                <h3>Add Match</h3>
-                <button class="back-btn" onclick="closeSections()">← Back</button>
+                <h3>Add Normal Match</h3>
+                <button class="back-btn" onclick="goBackHome()">← Back</button>
             </div>
             <input type="text" id="mCode" class="form-control" placeholder="Match Code (e.g. M01)">
             <input type="text" id="mName" class="form-control" placeholder="Match Name">
@@ -163,43 +182,60 @@
             <input type="datetime-local" id="mTime" class="form-control">
             <input type="number" id="mSlots" class="form-control" placeholder="Total Slots (e.g. 48)">
             <textarea id="mNotice" class="form-control" placeholder="Match Notice (Show when joining)" rows="2"></textarea>
-            <button class="admin-btn" onclick="addNewMatchToDB()">Create Match</button>
+            <button class="admin-btn" onclick="addNewMatchToDB('normal')">Create Normal Match</button>
         </div>
 
-        <!-- 5. Add Balance Request Section -->
-        <div id="sectionAddBalance" class="admin-section">
+        <!-- Add Per Kill Match Section -->
+        <div id="cardAddPerKillMatch" class="admin-section">
+            <div class="section-header">
+                <h3>Add Per Kill Match</h3>
+                <button class="back-btn" onclick="goBackHome()">← Back</button>
+            </div>
+            <input type="text" id="pkCode" class="form-control" placeholder="Match Code (e.g. PK01)">
+            <input type="text" id="pkName" class="form-control" placeholder="Match Name (e.g. Free Fire Per Kill)">
+            <input type="number" id="pkFee" class="form-control" placeholder="Entry Fee (৳)">
+            <input type="text" id="pkPrizePool" class="form-control" placeholder="Total Prize Pool (e.g. 500 BDT)">
+            <input type="number" id="pkPerKill" class="form-control" placeholder="Per Kill Amount (৳)">
+            <input type="datetime-local" id="pkTime" class="form-control">
+            <input type="number" id="pkSlots" class="form-control" placeholder="Total Slots (e.g. 48)">
+            <textarea id="pkNotice" class="form-control" placeholder="Match Notice" rows="2"></textarea>
+            <button class="admin-btn" style="background: var(--neon-cyan); color: #000;" onclick="addNewMatchToDB('perkill')">Create Per Kill Match</button>
+        </div>
+
+        <!-- Add Balance Request Section -->
+        <div id="cardAddBalance" class="admin-section">
             <div class="section-header">
                 <h3>Add Balance Request</h3>
-                <button class="back-btn" onclick="closeSections()">← Back</button>
+                <button class="back-btn" onclick="goBackHome()">← Back</button>
             </div>
             <div class="list-container" id="addBalanceRequestsList"><p style="color: var(--text-muted); text-align: center;">Loading...</p></div>
         </div>
 
-        <!-- 6. Withdraw Request Section -->
-        <div id="sectionWithdraw" class="admin-section">
+        <!-- Withdraw Request Section -->
+        <div id="cardWithdraw" class="admin-section">
             <div class="section-header">
                 <h3>Withdraw Request</h3>
-                <button class="back-btn" onclick="closeSections()">← Back</button>
+                <button class="back-btn" onclick="goBackHome()">← Back</button>
             </div>
             <div class="list-container" id="withdrawRequestsList"><p style="color: var(--text-muted); text-align: center;">Loading...</p></div>
         </div>
 
-        <!-- 7. Add User Balance Section -->
-        <div id="sectionUserBalance" class="admin-section">
+        <!-- Add User Balance Section -->
+        <div id="cardUserBalance" class="admin-section">
             <div class="section-header">
                 <h3>Add User Balance</h3>
-                <button class="back-btn" onclick="closeSections()">← Back</button>
+                <button class="back-btn" onclick="goBackHome()">← Back</button>
             </div>
             <input type="text" id="targetUserUID" class="form-control" placeholder="Enter User Game UID">
             <input type="number" id="bonusAmount" class="form-control" placeholder="Amount (৳) [Use minus for cut]">
             <button class="admin-btn" onclick="modifyUserBalance()">Update Balance</button>
         </div>
 
-        <!-- 8. Search & Block User Section -->
-        <div id="sectionSearchUser" class="admin-section">
+        <!-- Search & Block User Section -->
+        <div id="cardSearchUser" class="admin-section">
             <div class="section-header">
                 <h3>Search User & Block/Unblock</h3>
-                <button class="back-btn" onclick="closeSections()">← Back</button>
+                <button class="back-btn" onclick="goBackHome()">← Back</button>
             </div>
             <input type="text" id="searchUidInput" class="form-control" placeholder="Enter Game UID">
             <button class="admin-btn" onclick="searchUserByUID()">Search User</button>
@@ -244,16 +280,16 @@
 
         window.logoutAdmin = function() { sessionStorage.removeItem("isAdminLoggedIn"); location.reload(); }
 
-        // Navigation Switch Functions
-        window.openSection = function(sectionId) {
-            document.getElementById("mainMenuGrid").style.display = "none";
+        // Card navigation system
+        window.openCardSection = function(sectionId) {
+            document.getElementById("dashboardHome").style.display = "none";
             document.querySelectorAll(".admin-section").forEach(sec => sec.style.display = "none");
             document.getElementById(sectionId).style.display = "block";
         }
 
-        window.closeSections = function() {
+        window.goBackHome = function() {
             document.querySelectorAll(".admin-section").forEach(sec => sec.style.display = "none");
-            document.getElementById("mainMenuGrid").style.display = "grid";
+            document.getElementById("dashboardHome").style.display = "grid";
             loadAdminData();
         }
 
@@ -263,9 +299,7 @@
             const active = document.getElementById("adminNoticeActive").checked;
             try {
                 await setDoc(doc(db, "settings", "notice"), {
-                    text: text,
-                    active: active,
-                    updatedAt: new Date()
+                    text: text, active: active, updatedAt: new Date()
                 }, { merge: true });
                 alert("Notice bar settings updated successfully!");
             } catch(e) { alert("Error: " + e.message); }
@@ -286,26 +320,48 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // Match Create with Notice
-        window.addNewMatchToDB = async function() {
-            const code = document.getElementById("mCode").value.trim();
-            const name = document.getElementById("mName").value.trim();
-            const fee = Number(document.getElementById("mFee").value);
-            const slots = Number(document.getElementById("mSlots").value);
-            const notice = document.getElementById("mNotice").value.trim();
+        // Match Create Function (Handles both Normal & Per Kill)
+        window.addNewMatchToDB = async function(matchType) {
+            let code, name, fee, slots, notice, time;
+            let matchData = {};
 
-            if(!code || !name) { alert("কোড এবং নাম দিন।"); return; }
+            if(matchType === 'normal') {
+                code = document.getElementById("mCode").value.trim();
+                name = document.getElementById("mName").value.trim();
+                fee = Number(document.getElementById("mFee").value);
+                slots = Number(document.getElementById("mSlots").value);
+                notice = document.getElementById("mNotice").value.trim();
+                time = document.getElementById("mTime").value;
 
-            try {
-                await setDoc(doc(db, "matches", code), {
+                if(!code || !name) { alert("কোড এবং নাম দিন।"); return; }
+                matchData = {
                     matchCode: code, matchName: name, entryFee: fee,
                     firstPrize: document.getElementById("mFirstPrize").value.trim(),
-                    matchTime: document.getElementById("mTime").value,
-                    totalSlots: slots, joinedCount: 0, roomId: "", roomPass: "",
-                    matchNotice: notice
-                });
+                    matchTime: time, totalSlots: slots, joinedCount: 0, 
+                    roomId: "", roomPass: "", matchNotice: notice, type: "normal"
+                };
+            } else {
+                code = document.getElementById("pkCode").value.trim();
+                name = document.getElementById("pkName").value.trim();
+                fee = Number(document.getElementById("pkFee").value);
+                slots = Number(document.getElementById("pkSlots").value);
+                notice = document.getElementById("pkNotice").value.trim();
+                time = document.getElementById("pkTime").value;
+
+                if(!code || !name) { alert("কোড এবং নাম দিন।"); return; }
+                matchData = {
+                    matchCode: code, matchName: name, entryFee: fee,
+                    prizePool: document.getElementById("pkPrizePool").value.trim(),
+                    perKillAmount: Number(document.getElementById("pkPerKill").value),
+                    matchTime: time, totalSlots: slots, joinedCount: 0, 
+                    roomId: "", roomPass: "", matchNotice: notice, type: "perkill"
+                };
+            }
+
+            try {
+                await setDoc(doc(db, "matches", code), matchData);
                 alert("ম্যাচ সফলভাবে তৈরি হয়েছে!");
-                closeSections();
+                goBackHome();
             } catch(e) { alert("Error: " + e.message); }
         }
 
@@ -433,29 +489,39 @@
                 }
             } catch(e) {}
 
+            // Room Control List (Gichano & Structured Layout)
             const roomListContainer = document.getElementById("roomControlList");
             const snapMatch = await getDocs(collection(db, "matches"));
             roomListContainer.innerHTML = snapMatch.empty ? `<p style="color:var(--text-muted); text-align:center;">কোনো ম্যাচ নেই।</p>` : "";
             snapMatch.forEach(d => {
                 const m = d.data();
                 roomListContainer.innerHTML += `
-                    <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 6px;">
-                        <strong style="color: var(--neon-cyan);">${m.matchName} (${m.matchCode})</strong>
-                        <input type="text" id="rid_${m.matchCode}" class="form-control" placeholder="Room ID" value="${m.roomId || ''}" style="margin:2px 0; padding:5px; font-size:12px;">
-                        <input type="text" id="rpass_${m.matchCode}" class="form-control" placeholder="Password" value="${m.roomPass || ''}" style="margin:2px 0; padding:5px; font-size:12px;">
-                        <div style="display: flex; gap: 5px; width: 100%;">
-                            <button class="btn-approve" style="flex:1; padding:4px;" onclick="setRoomCreds('${m.matchCode}')">Save</button>
-                            <button class="btn-fail" style="padding:4px;" onclick="deleteMatch('${m.matchCode}')">Delete</button>
+                    <div class="room-item-box">
+                        <div class="room-item-top">
+                            <strong style="color: var(--neon-cyan); font-size:14px;">${m.matchName} (${m.matchCode}) [${m.type === 'perkill' ? 'Per Kill' : 'Normal'}]</strong>
+                        </div>
+                        <div class="room-grid-inputs">
+                            <input type="text" id="rid_${m.matchCode}" class="form-control" placeholder="Room ID" value="${m.roomId || ''}" style="margin:0;">
+                            <input type="text" id="rpass_${m.matchCode}" class="form-control" placeholder="Password" value="${m.roomPass || ''}" style="margin:0;">
+                        </div>
+                        <div class="room-actions">
+                            <button class="btn-approve" style="flex:1; padding:6px;" onclick="setRoomCreds('${m.matchCode}')">Save Room Info</button>
+                            <button class="btn-fail" style="padding:6px;" onclick="deleteMatch('${m.matchCode}')">Delete</button>
                         </div>
                     </div>`;
             });
 
+            // Add Balance Pending Counter & List
+            let pendingAddBalCount = 0;
             const addBalContainer = document.getElementById("addBalanceRequestsList");
             const snapBal = await getDocs(collection(db, "addBalanceRequests"));
-            addBalContainer.innerHTML = snapBal.empty ? `<p style="color:var(--text-muted); text-align:center;">কোনো রিকুয়েষ্ট নেই।</p>` : "";
+            addBalContainer.innerHTML = `<p style="color:var(--text-muted); text-align:center;" id="noAddBalMsg">কোনো রিকুয়েষ্ট নেই।</p>`;
+            
             snapBal.forEach(d => {
                 const data = d.data();
                 if(data.status === 'Pending') {
+                    pendingAddBalCount++;
+                    if(pendingAddBalCount === 1) addBalContainer.innerHTML = "";
                     addBalContainer.innerHTML += `
                         <div class="list-item">
                             <div>Trx: ${data.trxId} | ৳${data.amount}</div>
@@ -467,12 +533,25 @@
                 }
             });
 
+            const badgeAddBal = document.getElementById("badgeAddBal");
+            if(pendingAddBalCount > 0) {
+                badgeAddBal.innerText = pendingAddBalCount;
+                badgeAddBal.style.display = "block";
+            } else {
+                badgeAddBal.style.display = "none";
+            }
+
+            // Withdraw Pending Counter & List
+            let pendingWithdrawCount = 0;
             const withdrawContainer = document.getElementById("withdrawRequestsList");
             const snapWith = await getDocs(collection(db, "withdrawRequests"));
-            withdrawContainer.innerHTML = snapWith.empty ? `<p style="color:var(--text-muted); text-align:center;">কোনো রিকুয়েষ্ট নেই।</p>` : "";
+            withdrawContainer.innerHTML = `<p style="color:var(--text-muted); text-align:center;">কোনো রিকুয়েষ্ট নেই।</p>`;
+            
             snapWith.forEach(d => {
                 const data = d.data();
                 if(data.status === 'Pending') {
+                    pendingWithdrawCount++;
+                    if(pendingWithdrawCount === 1) withdrawContainer.innerHTML = "";
                     withdrawContainer.innerHTML += `
                         <div class="list-item">
                             <div>${data.number} | ৳${data.amount}</div>
@@ -481,8 +560,16 @@
                                 <button class="btn-fail" onclick="processWithdraw('${d.id}', '${data.userId}', ${data.amount}, 'Fail')">Fail</button>
                             </div>
                         </div>`;
-                    }
+                }
             });
+
+            const badgeWithdraw = document.getElementById("badgeWithdraw");
+            if(pendingWithdrawCount > 0) {
+                badgeWithdraw.innerText = pendingWithdrawCount;
+                badgeWithdraw.style.display = "block";
+            } else {
+                badgeWithdraw.style.display = "none";
+            }
         }
     </script>
 </body>
