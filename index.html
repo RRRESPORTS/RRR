@@ -429,7 +429,7 @@
             loadMyMatches();
         });
 
-        function startCountdown(matchTimeStr, elementId) {
+        function startCountdown(matchTimeStr, joinedCount, elementId) {
             const countDownDate = new Date(matchTimeStr).getTime();
             if(isNaN(countDownDate)) { document.getElementById(elementId).innerText = "Time Expired"; return; }
 
@@ -437,9 +437,17 @@
                 const now = new Date().getTime();
                 const distance = countDownDate - now;
 
+                const el = document.getElementById(elementId);
+                if(!el) { clearInterval(x); return; }
+
                 if (distance < 0) {
                     clearInterval(x);
-                    document.getElementById(elementId).innerText = "Match Started / Running";
+                    // Check if players joined or not
+                    if (joinedCount > 0) {
+                        el.innerText = "Match Started / Running";
+                    } else {
+                        el.innerText = "Waiting for Players";
+                    }
                     return;
                 }
 
@@ -452,9 +460,7 @@
                 if(days > 0) timeStr += days + "d ";
                 timeStr += hours + "h " + minutes + "m " + seconds + "s";
                 
-                const el = document.getElementById(elementId);
-                if(el) el.innerText = timeStr;
-                else clearInterval(x);
+                el.innerText = timeStr;
             }, 1000);
         }
 
@@ -517,7 +523,16 @@
                                 <button class="view-players-btn" id="${viewBtnId}">👥 View Joined Players (${joined})</button>
                             </div>`;
                         
-                        if(m.matchTime) startCountdown(m.matchTime, timerId);
+                        if(m.matchTime) {
+                            // Check immediately if time passed and joined is 0
+                            const countDownDate = new Date(m.matchTime).getTime();
+                            const now = new Date().getTime();
+                            if (countDownDate - now < 0 && joined === 0) {
+                                document.getElementById(timerId).innerText = "Waiting for Players";
+                            } else {
+                                startCountdown(m.matchTime, joined, timerId);
+                            }
+                        }
 
                         setTimeout(() => {
                             const bElem = document.getElementById(btnId);
