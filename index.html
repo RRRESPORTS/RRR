@@ -34,9 +34,9 @@
         .section { display: none; }
         .section.active { display: block; }
         
-        /* 3 Lines Gift Code Box inside Match Section */
-        .gift-box-3line { background: var(--card-bg); border: 1px solid var(--neon-pink); border-radius: 10px; padding: 15px; margin-bottom: 20px; }
-        .gift-box-3line h4 { color: var(--neon-pink); font-size: 15px; margin-bottom: 10px; text-align: center; }
+        /* 3 Lines Compact Gift Code Section */
+        .gift-box-3line { background: var(--card-bg); border: 1px solid var(--neon-pink); border-radius: 10px; padding: 12px; margin-bottom: 15px; }
+        .gift-box-3line h4 { color: var(--neon-pink); font-size: 14px; margin-bottom: 8px; font-weight: bold; }
 
         .match-card { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px; }
         .match-card h4 { color: var(--neon-cyan); font-size: 16px; margin-bottom: 5px; }
@@ -46,7 +46,6 @@
         .history-list { margin-top: 15px; max-height: 300px; overflow-y: auto; }
         .history-item { background: var(--card-bg); border: 1px solid #374151; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
 
-        /* Social Footer Links */
         .social-footer { margin-top: 30px; padding: 20px; background: var(--card-bg); border-top: 1px solid rgba(0,243,255,0.2); text-align: center; }
         .social-footer h4 { color: var(--neon-cyan); margin-bottom: 12px; font-size: 14px; }
         .social-links-grid { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
@@ -100,11 +99,11 @@
     <div class="container">
         <div id="matchSection" class="section active">
             
-            <!-- 3 Lines Gift Code Section -->
+            <!-- 3 Line Compact Gift Code Section inside Match Section -->
             <div class="gift-box-3line">
                 <h4>🎁 Redeem Gift Code</h4>
-                <input type="text" id="redeemCodeInput" class="form-control" placeholder="Enter Gift Code">
-                <button class="submit-btn" style="background: var(--neon-pink); color: #fff;" onclick="claimGiftCode()">Claim Bonus</button>
+                <input type="text" id="redeemCodeInput" class="form-control" placeholder="Enter Gift Code" style="margin-bottom: 8px; padding: 8px;">
+                <button class="submit-btn" style="background: var(--neon-pink); color: #fff; padding: 8px; margin-top: 0;" onclick="claimGiftCode()">Claim Bonus</button>
             </div>
 
             <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">Live & Upcoming Matches</h3>
@@ -143,7 +142,6 @@
         </div>
     </div>
 
-    <!-- Social Media Footer Section -->
     <div class="social-footer">
         <h4>Connect With Us</h4>
         <div class="social-links-grid">
@@ -282,7 +280,6 @@
             } catch (e) { alert("Error: " + e.message); }
         }
 
-        // Claim Gift Code Logic
         window.claimGiftCode = async function() {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
             const codeInput = document.getElementById('redeemCodeInput').value.trim();
@@ -404,7 +401,6 @@
                         } else if (isFull) {
                             btnHtml = `<button class="join-btn" style="background: gray; cursor: not-allowed;" disabled>Match Full</button>`;
                         } else {
-                            // Escape single quotes for match notice safely
                             const safeNotice = (m.matchNotice || "").replace(/'/g, "\\'");
                             btnHtml = `<button class="join-btn" onclick="openJoinModal('${m.matchCode}', '${m.matchName}', ${m.entryFee}, '${safeNotice}')">Join Match</button>`;
                         }
@@ -436,7 +432,6 @@
             selectedMatchForJoin = { code, name, fee };
             document.getElementById('joinMatchInfo').innerText = `${name} (Fee: ৳${fee})`;
             
-            // Show match-specific notice in Join Modal if available
             const noticeBox = document.getElementById('modalMatchNoticeBox');
             if(notice && notice.trim() !== "") {
                 noticeBox.innerText = `Notice: ${notice}`;
