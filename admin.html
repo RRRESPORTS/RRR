@@ -35,9 +35,10 @@
         .admin-btn { width: 100%; padding: 10px; background: var(--neon-cyan); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
         
         .list-container { max-height: 250px; overflow-y: auto; margin-top: 10px; }
-        .list-item { background: #1f2937; padding: 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; border-left: 3px solid var(--neon-cyan); display: flex; justify-content: space-between; align-items: center; }
-        .btn-approve { background: var(--neon-green); border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; color: #000; }
-        .btn-fail { background: var(--neon-pink); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .list-item { background: #1f2937; padding: 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; border-left: 3px solid var(--neon-cyan); display: flex; flex-direction: column; gap: 8px; }
+        .action-btns { display: flex; gap: 5px; }
+        .btn-approve { background: var(--neon-green); border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; color: #000; flex: 1; }
+        .btn-fail { background: var(--neon-pink); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; flex: 1; }
     </style>
 </head>
 <body>
@@ -144,20 +145,35 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        window.approveAddBalance = async function(reqId, userId, amount) {
+        window.updateAddBalanceStatus = async function(reqId, userId, amount, status) {
             try {
-                const userRef = doc(db, "users", userId);
-                const userSnap = await getDoc(userRef);
-                let currentBal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
-                await updateDoc(userRef, { balance: currentBal + Number(amount) });
-                await deleteDoc(doc(db, "addBalanceRequests", reqId));
-                alert("Balance added!");
+                const reqRef = doc(db, "addBalanceRequests", reqId);
+                if(status === 'Approved') {
+                    const userRef = doc(db, "users", userId);
+                    const userSnap = await getDoc(userRef);
+                    let currentBal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
+                    await updateDoc(userRef, { balance: currentBal + Number(amount) });
+                }
+                await updateDoc(reqRef, { status: status });
+                alert(`Request ${status}!`);
                 loadAdminData();
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        window.approveWithdraw = async function(reqId) {
-            try { await deleteDoc(doc(db, "withdrawRequests", reqId)); alert("Withdraw approved!"); loadAdminData(); } catch(e) {}
+        window.updateWithdrawStatus = async function(reqId, userId, amount, status) {
+            try {
+                const reqRef = doc(db, "withdrawRequests", reqId);
+                if(status === 'Fail') {
+                    // Refund balance if withdraw failed
+                    const userRef = doc(db, "users", userId);
+                    const userSnap = await getDoc(userRef);
+                    let currentBal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
+                    await updateDoc(userRef, { balance: currentBal + Number(amount) });
+                }
+                await updateDoc(reqRef, { status: status });
+                alert(`Withdraw ${status}!`);
+                loadAdminData();
+            } catch(e) { alert("Error: " + e.message); }
         }
 
         window.setRoomCreds = async function(matchId) {
@@ -179,7 +195,16 @@
             addBalContainer.innerHTML = snapBal.empty ? `<p style="color:var(--text-muted); text-align:center;">Kono request nei.</p>` : "";
             snapBal.forEach(d => {
                 const data = d.data();
-                addBalContainer.innerHTML += `<div class="list-item"><span>Trx: ${data.trxId} | ৳${data.amount}</span><button class="btn-approve" onclick="approveAddBalance('${d.id}', '${data.userId}', ${data.amount})">Accept</button></div>`;
+                if(data.status === "Pending") {
+                    addBalContainer.innerHTML += `
+                        <div class="list-item">
+                            <span>Trx: ${data.trxId} | ৳${data.amount}</span>
+                            <div class="action-btns">
+                                <button class="btn-approve" onclick="updateAddBalanceStatus('${d.id}', '${data.userId}', ${data.amount}, 'Approved')">Approve</button>
+                                <button class="btn-fail" onclick="updateAddBalanceStatus('${d.id}', '${data.userId}', ${data.amount}, 'Fail')">Fail</button>
+                            </div>
+                        </div>`;
+                }
             });
 
             const withdrawContainer = document.getElementById("withdrawRequestsList");
@@ -187,7 +212,16 @@
             withdrawContainer.innerHTML = snapWith.empty ? `<p style="color:var(--text-muted); text-align:center;">Kono request nei.</p>` : "";
             snapWith.forEach(d => {
                 const data = d.data();
-                withdrawContainer.innerHTML += `<div class="list-item"><span>${data.number} | ৳${data.amount}</span><button class="btn-approve" onclick="approveWithdraw('${d.id}')">Approve</button></div>`;
+                if(data.status === "Pending") {
+                    withdrawContainer.innerHTML += `
+                        <div class="list-item">
+                            <span>No: ${data.number} | ৳${data.amount}</span>
+                            <div class="action-btns">
+                                <button class="btn-approve" onclick="updateWithdrawStatus('${d.id}', '${data.userId}', ${data.amount}, 'Approved')">Approve</button>
+                                <button class="btn-fail" onclick="updateWithdrawStatus('${d.id}', '${data.userId}', ${data.amount}, 'Fail')">Fail</button>
+                            </div>
+                        </div>`;
+                }
             });
 
             const matchListContainer = document.getElementById("adminMatchList");
@@ -196,12 +230,12 @@
             snapMatch.forEach(d => {
                 const m = d.data();
                 matchListContainer.innerHTML += `
-                    <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                    <div class="list-item" style="align-items: flex-start;">
                         <strong style="color: var(--neon-cyan);">${m.matchName} (${m.matchCode}) - Slots: ${m.joinedCount || 0}/${m.totalSlots}</strong>
                         <input type="text" id="rid_${m.matchCode}" class="form-control" placeholder="Room ID" value="${m.roomId || ''}" style="margin:2px 0; padding:6px;">
                         <input type="text" id="rpass_${m.matchCode}" class="form-control" placeholder="Password" value="${m.roomPass || ''}" style="margin:2px 0; padding:6px;">
                         <div style="display: flex; gap: 5px; width: 100%; margin-top: 5px;">
-                            <button class="btn-approve" style="flex:1;" onclick="setRoomCreds('${m.matchCode}')">Save</button>
+                            <button class="btn-approve" onclick="setRoomCreds('${m.matchCode}')">Save</button>
                             <button class="btn-fail" onclick="deleteMatch('${m.matchCode}')">Delete</button>
                         </div>
                     </div>`;
