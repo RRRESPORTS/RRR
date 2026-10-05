@@ -25,7 +25,6 @@
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid rgba(0,243,255,0.2); padding-bottom: 15px; }
         .dashboard-header h2 { color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0,243,255,0.4); }
         
-        /* Your Drawing Style Grid Layout */
         .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         .admin-card { background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: 12px; padding: 20px; box-shadow: 0 0 15px rgba(0,255,102,0.1); transition: 0.3s; }
         .admin-card:hover { box-shadow: 0 0 25px rgba(0,255,102,0.3); }
@@ -63,6 +62,21 @@
 
         <div class="admin-grid">
             
+            <!-- Notice Control Card -->
+            <div class="admin-card" style="border-color: var(--neon-cyan);">
+                <h3>Update Notice Bar</h3>
+                <textarea id="noticeInput" class="form-control" placeholder="Write site notice here..." rows="3"></textarea>
+                <button class="admin-btn" style="background: var(--neon-cyan);" onclick="updateSiteNotice()">Update Notice</button>
+            </div>
+
+            <!-- Gift Code Creation Card -->
+            <div class="admin-card" style="border-color: var(--neon-pink);">
+                <h3>Create Gift Code</h3>
+                <input type="text" id="giftCodeText" class="form-control" placeholder="Gift Code (e.g., ZEG50)">
+                <input type="number" id="giftCodeAmount" class="form-control" placeholder="Bonus Amount (৳)">
+                <button class="admin-btn" style="background: var(--neon-pink); color: #fff;" onclick="createGiftCode()">Create Code</button>
+            </div>
+
             <!-- 1. Input Match Id & Password -->
             <div class="admin-card">
                 <h3>Input Match Id & Password</h3>
@@ -109,22 +123,6 @@
                 <div id="searchResultBox" style="margin-top: 10px; font-size: 13px; color: var(--text-muted);"></div>
             </div>
 
-            <!-- 7. Gift Code -->
-            <div class="admin-card">
-                <h3>Gift Code System</h3>
-                <input type="text" id="giftCodeText" class="form-control" placeholder="Promo Code (e.g. FREE50)">
-                <input type="number" id="giftCodeAmount" class="form-control" placeholder="Bonus Amount (৳)">
-                <button class="admin-btn" onclick="createGiftCode()">Create Gift Code</button>
-            </div>
-
-            <!-- 8. Extra Card (Reserved / System Status) -->
-            <div class="admin-card" style="border-color: var(--neon-cyan);">
-                <h3>System Info</h3>
-                <p style="font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 20px;">
-                    ZEG-G Tournament Platform v2.0 <br>All modules active and synced with Firestore.
-                </p>
-            </div>
-
         </div>
     </div>
 
@@ -163,6 +161,33 @@
         }
 
         window.logoutAdmin = function() { sessionStorage.removeItem("isAdminLoggedIn"); location.reload(); }
+
+        // Notice Update Function
+        window.updateSiteNotice = async function() {
+            const noticeText = document.getElementById("noticeInput").value.trim();
+            try {
+                await setDoc(doc(db, "settings", "notice"), { text: noticeText });
+                alert("নোটিশ সফলভাবে আপডেট হয়েছে!");
+            } catch(e) { alert("Error: " + e.message); }
+        }
+
+        // Gift Code Create Function
+        window.createGiftCode = async function() {
+            const code = document.getElementById("giftCodeText").value.trim();
+            const amount = Number(document.getElementById("giftCodeAmount").value);
+            if(!code || !amount) { alert("কোড এবং অ্যামাউন্ট দিন।"); return; }
+            try {
+                await setDoc(doc(db, "giftCodes", code), {
+                    code: code,
+                    amount: amount,
+                    isUsed: false,
+                    createdAt: new Date()
+                });
+                alert("গিফট কোড সফলভাবে তৈরি হয়েছে!");
+                document.getElementById("giftCodeText").value = "";
+                document.getElementById("giftCodeAmount").value = "";
+            } catch(e) { alert("Error: " + e.message); }
+        }
 
         // 1. Match Create
         window.addNewMatchToDB = async function() {
@@ -303,27 +328,16 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // 7. Gift Code Creation
-        window.createGiftCode = async function() {
-            const codeText = document.getElementById("giftCodeText").value.trim();
-            const amount = Number(document.getElementById("giftCodeAmount").value);
-            if(!codeText || !amount) { alert("কোড এবং অ্যামাউন্ট দিন।"); return; }
-
-            try {
-                await setDoc(doc(db, "giftCodes", codeText), {
-                    code: codeText,
-                    amount: amount,
-                    isUsed: false,
-                    createdAt: new Date()
-                });
-                alert("গিফট কোড তৈরি সফল হয়েছে!");
-                document.getElementById("giftCodeText").value = "";
-                document.getElementById("giftCodeAmount").value = "";
-            } catch(e) { alert("Error: " + e.message); }
-        }
-
         // Load All Admin Lists
         async function loadAdminData() {
+            // Load existing notice into textarea
+            try {
+                const noticeDoc = await getDoc(doc(db, "settings", "notice"));
+                if(noticeDoc.exists()) {
+                    document.getElementById("noticeInput").value = noticeDoc.data().text || "";
+                }
+            } catch(e) {}
+
             // Room Control List
             const roomListContainer = document.getElementById("roomControlList");
             const snapMatch = await getDocs(collection(db, "matches"));
