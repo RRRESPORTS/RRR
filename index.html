@@ -34,7 +34,12 @@
         .section { display: none; }
         .section.active { display: block; }
         
-        .notice-box { background: rgba(0,243,255,0.05); border-left: 4px solid var(--neon-cyan); padding: 10px; margin: 15px; font-size: 14px; border-radius: 0 6px 6px 0; }
+        /* Notice Bar */
+        .notice-box { background: rgba(0,243,255,0.05); border-left: 4px solid var(--neon-cyan); padding: 12px; margin: 15px; font-size: 14px; border-radius: 0 6px 6px 0; color: #fff; }
+
+        /* Gift Code Section (3 Lines structure) */
+        .gift-box { background: var(--card-bg); border: 1px solid var(--neon-pink); border-radius: 10px; padding: 15px; margin: 15px 0; }
+        .gift-box h4 { color: var(--neon-pink); font-size: 15px; margin-bottom: 10px; text-align: center; }
 
         .match-card { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px; }
         .match-card h4 { color: var(--neon-cyan); font-size: 16px; margin-bottom: 5px; }
@@ -43,6 +48,15 @@
 
         .history-list { margin-top: 15px; max-height: 300px; overflow-y: auto; }
         .history-item { background: var(--card-bg); border: 1px solid #374151; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+
+        /* Social Footer Links */
+        .social-footer { margin-top: 30px; padding: 20px; background: var(--card-bg); border-top: 1px solid rgba(0,243,255,0.2); text-align: center; }
+        .social-footer h4 { color: var(--neon-cyan); margin-bottom: 12px; font-size: 14px; }
+        .social-links-grid { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .social-btn { padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-yt { background: #ff0000; color: #fff; }
+        .btn-fb { background: #1877f2; color: #fff; }
+        .btn-tg { background: #0088cc; color: #fff; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100; }
         .nav-item { text-align: center; color: var(--text-muted); font-size: 12px; cursor: pointer; }
@@ -86,10 +100,19 @@
         </div>
     </div>
 
-    <div class="notice-box">Welcome to ZEG-G Tournament Platform!</div>
+    <!-- Dynamic Notice Bar from Admin -->
+    <div class="notice-box" id="siteNoticeBar">Loading notice...</div>
 
     <div class="container">
         <div id="matchSection" class="section active">
+            
+            <!-- 3 Lines Gift Code Bar -->
+            <div class="gift-box">
+                <h4>🎁 Redeem Gift Code</h4>
+                <input type="text" id="redeemCodeInput" class="form-control" placeholder="Enter Gift Code">
+                <button class="submit-btn" style="background: var(--neon-pink); color: #fff;" onclick="claimGiftCode()">Claim Bonus</button>
+            </div>
+
             <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">Live & Upcoming Matches</h3>
             <div id="matchListContainer"><p style="color: var(--text-muted);">Loading matches...</p></div>
         </div>
@@ -126,6 +149,16 @@
         </div>
     </div>
 
+    <!-- Social Media Footer Section -->
+    <div class="social-footer">
+        <h4>Connect With Us</h4>
+        <div class="social-links-grid">
+            <a href="https://youtube.com" target="_blank" class="social-btn btn-yt">YouTube</a>
+            <a href="https://facebook.com" target="_blank" class="social-btn btn-fb">Facebook</a>
+            <a href="https://telegram.org" target="_blank" class="social-btn btn-tg">Telegram</a>
+        </div>
+    </div>
+
     <!-- Join Match Modal -->
     <div class="modal-overlay" id="joinModal" style="display: none;">
         <div class="modal-card">
@@ -138,7 +171,7 @@
         </div>
     </div>
 
-    <!-- Auth Modal (Forces Login on start) -->
+    <!-- Auth Modal -->
     <div class="modal-overlay" id="authModal">
         <div class="modal-card">
             <h3 id="modalTitle">Login to ZEG-G</h3>
@@ -182,7 +215,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, query, where, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
@@ -254,10 +287,62 @@
             } catch (e) { alert("Error: " + e.message); }
         }
 
+        // Load Live Notice from Firestore
+        async function loadNoticeBar() {
+            try {
+                const noticeDoc = await getDoc(doc(db, "settings", "notice"));
+                if(noticeDoc.exists() && noticeDoc.data().text) {
+                    document.getElementById('siteNoticeBar').innerText = noticeDoc.data().text;
+                } else {
+                    document.getElementById('siteNoticeBar').innerText = "Welcome to ZEG-G Tournament Platform!";
+                }
+            } catch(e) {
+                document.getElementById('siteNoticeBar').innerText = "Welcome to ZEG-G Tournament Platform!";
+            }
+        }
+
+        // Claim Gift Code Logic
+        window.claimGiftCode = async function() {
+            if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
+            const codeInput = document.getElementById('redeemCodeInput').value.trim();
+            if(!codeInput) { alert("গিফট কোড লিখুন।"); return; }
+
+            try {
+                const codeRef = doc(db, "giftCodes", codeInput);
+                const codeSnap = await getDoc(codeRef);
+
+                if(!codeSnap.exists()) {
+                    alert("ভুল বা মেয়াদোত্তীর্ণ গিফট কোড!");
+                    return;
+                }
+
+                const codeData = codeSnap.data();
+                if(codeData.isUsed) {
+                    alert("এই কোডটি ইতিমধ্যে ব্যবহার করা হয়েছে!");
+                    return;
+                }
+
+                // Mark code as used
+                await updateDoc(codeRef, { isUsed: true, usedBy: auth.currentUser.uid });
+
+                // Add bonus to user balance
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                const userSnap = await getDoc(userRef);
+                let currentBal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
+                
+                await updateDoc(userRef, { balance: currentBal + Number(codeData.amount) });
+
+                alert(`অভিনন্দন! আপনি ৳${codeData.amount} বোনাস পেয়েছেন!`);
+                document.getElementById('redeemCodeInput').value = "";
+            } catch(e) { alert("Error: " + e.message); }
+        }
+
         onAuthStateChanged(auth, async (user) => {
             const authNavBtn = document.getElementById('authNavBtn');
             const drawerAuthItem = document.getElementById('drawerAuthItem');
             userJoinedMatchCodes = [];
+
+            loadNoticeBar();
 
             if(user) {
                 authNavBtn.innerText = "Logout"; authNavBtn.onclick = () => signOut(auth);
