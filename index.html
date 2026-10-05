@@ -162,8 +162,9 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="authModal" style="display: none;">
-        <div class="modal-card">
+    <!-- Auth Modal (強制 Login/Register on Load) -->
+    <div class="modal-overlay" id="authModal" style="display: flex;">
+        <div class="modal-card" onclick="event.stopPropagation()">
             <h3 id="modalTitle">Login to ZEG-G</h3>
             <input type="email" id="authEmail" class="form-control" placeholder="Email Address">
             <input type="password" id="authPassword" class="form-control" placeholder="Password">
@@ -327,6 +328,7 @@
                 drawerAuthItem.innerText = "Login / Register"; 
                 drawerAuthItem.onclick = openAuthModal;
                 document.getElementById('userBalance').innerText = "৳0.00";
+                openAuthModal(); // ইউজার লগআউট অবস্থায় থাকলে বা না থাকলে পপআপ ওপেন রাখবে
             }
             loadWebMatches();
             loadMyMatches();
@@ -558,7 +560,6 @@
             });
         }
 
-        // অটোমেটেড ব্যালেন্স অ্যাড ফাংশন (আব্বুর ফোনের SMS Forwarder ডাটাবেজের সাথে মিল করে ব্যালেন্স যোগ করবে)
         async function submitAddBalance() {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
             
@@ -569,7 +570,6 @@
             if(amountInput < 5 || amountInput > 100) { alert("Add Balance minimum ৳5 এবং maximum ৳100 হতে হবে।"); return; }
 
             try {
-                // ১. ফায়ারবেসের incomingSMS কালেকশন চেক করা (আব্বুর ফোনের অ্যাপ থেকে আসা মেসেজের সাথে মিলছে কি না)
                 const smsQuery = query(
                     collection(db, "incomingSMS"), 
                     where("trxId", "==", trxIdInput), 
@@ -584,7 +584,6 @@
                     return;
                 }
 
-                // ২. পাওয়া গেলে SMS টি 'used: true' করে দেওয়া যাতে কেউ ডাবল ইউজ করতে না পারে
                 let smsDocId = null;
                 smsSnapshot.forEach((docSnap) => {
                     smsDocId = docSnap.id;
@@ -592,14 +591,12 @@
 
                 await updateDoc(doc(db, "incomingSMS", smsDocId), { used: true });
 
-                // ৩. ইউজারের বর্তমান ব্যালেন্সের সাথে টাকা যোগ করা
                 const userRef = doc(db, "users", auth.currentUser.uid);
                 const userSnap = await getDoc(userRef);
                 let currentBal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
 
                 await updateDoc(userRef, { balance: currentBal + amountInput });
 
-                // ৪. হিস্ট্রিতে Approved স্ট্যাটাস দিয়ে সেভ করা
                 await addDoc(collection(db, "addBalanceRequests"), {
                     userId: auth.currentUser.uid, 
                     email: auth.currentUser.email,
