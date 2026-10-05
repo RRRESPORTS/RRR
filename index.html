@@ -16,101 +16,112 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 70px; }
+
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--card-bg); border-bottom: 1px solid rgba(0,243,255,0.2); }
+        .logo { font-size: 20px; font-weight: bold; color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0,243,255,0.4); }
+        .menu-btn { font-size: 24px; cursor: pointer; color: var(--neon-green); }
+
+        /* Sidebar / Drawer */
+        .sidebar { height: 100%; width: 0; position: fixed; z-index: 1000; top: 0; left: 0; background-color: #111827; overflow-x: hidden; transition: 0.3s; padding-top: 60px; border-right: 1px solid var(--neon-cyan); }
+        .sidebar a { padding: 12px 25px; text-decoration: none; font-size: 16px; color: var(--text-main); display: block; transition: 0.2s; border-bottom: 1px solid #1f2937; }
+        .sidebar a:hover { background: #1f2937; color: var(--neon-cyan); }
+        .sidebar .closebtn { position: absolute; top: 15px; right: 20px; font-size: 30px; color: var(--neon-pink); border: none; }
+
+        /* Main Container */
+        .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+        .wallet-card { background: linear-gradient(135deg, #111827, #1f2937); border: 1px solid var(--neon-cyan); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 20px; box-shadow: 0 0 15px rgba(0,243,255,0.1); }
+        .wallet-card h2 { color: var(--neon-green); font-size: 28px; margin-top: 5px; }
+
+        /* Sections & Cards */
+        .section-title { font-size: 18px; color: var(--neon-cyan); margin-bottom: 10px; border-left: 4px solid var(--neon-green); padding-left: 8px; }
+        .match-card { background: var(--card-bg); border: 1px solid #374151; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .match-card h3 { color: var(--text-main); font-size: 16px; margin-bottom: 5px; }
+        .match-info { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
         
-        .header { background: var(--card-bg); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,243,255,0.2); }
-        .header h1 { color: var(--neon-cyan); font-size: 20px; text-shadow: 0 0 10px rgba(0,243,255,0.4); }
-        .balance-badge { background: #1f2937; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--neon-green); font-size: 14px; font-weight: bold; color: var(--neon-green); }
-
-        /* 3-Line Menu Drawer Style */
-        .menu-btn { font-size: 24px; cursor: pointer; color: var(--neon-cyan); }
-        .drawer { position: fixed; left: -260px; top: 0; width: 260px; height: 100%; background: var(--card-bg); z-index: 1000; transition: 0.3s; border-right: 1px solid rgba(0,243,255,0.3); padding-top: 20px; }
-        .drawer.active { left: 0; }
-        .drawer-header { padding: 15px 20px; font-size: 18px; color: var(--neon-cyan); border-bottom: 1px solid #374151; display: flex; justify-content: space-between; align-items: center; }
-        .drawer-item { padding: 15px 20px; display: block; color: var(--text-main); text-decoration: none; border-bottom: 1px solid #1f2937; transition: 0.2s; }
-        .drawer-item:hover { background: #1f2937; color: var(--neon-cyan); }
-
-        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
-        .card { background: var(--card-bg); border: 1px solid #374151; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .card h3 { color: var(--neon-cyan); margin-bottom: 10px; font-size: 16px; }
-
-        .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; font-size: 14px; }
-        .form-control:focus { border-color: var(--neon-cyan); outline: none; }
-        .btn { width: 100%; padding: 11px; background: var(--neon-green); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+        .btn { width: 100%; padding: 10px; background: var(--neon-green); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; text-align: center; display: block; text-decoration: none; }
         .btn:hover { opacity: 0.9; }
-
+        .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; font-size: 14px; }
+        
         /* Modal */
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
-        .modal-content { background: var(--card-bg); border: 2px solid var(--neon-cyan); border-radius: 12px; width: 90%; max-width: 400px; padding: 20px; position: relative; }
-        .close-btn { color: var(--neon-pink); float: right; font-size: 24px; cursor: pointer; }
+        .modal-content { background: var(--card-bg); border: 1px solid var(--neon-cyan); padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; position: relative; }
+        .close-modal { float: right; font-size: 24px; color: var(--neon-pink); cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <div class="menu-btn" onclick="toggleDrawer()">&#9776;</div>
-            <h1>ZEG-G Eports</h1>
-        </div>
-        <div class="balance-badge" id="userBalDisplay">৳ 0</div>
-    </div>
+    <header>
+        <div class="logo">ZEG-G Eports</div>
+        <div class="menu-btn" onclick="openNav()">&#9776;</div>
+    </header>
 
-    <!-- 3-Line Drawer Menu -->
-    <div class="drawer" id="navDrawer">
-        <div class="drawer-header">
-            <span>Menu</span>
-            <span style="cursor:pointer; color:var(--neon-pink);" onclick="toggleDrawer()">&times;</span>
-        </div>
-        <a href="#" class="drawer-item" onclick="openModal('profileModal'); toggleDrawer();">My Profile</a>
-        <a href="#" class="drawer-item" onclick="openModal('giftCodeModal'); toggleDrawer();">Gift Code Redeem</a>
-        <a href="admin.html" class="drawer-item" style="color: var(--neon-pink);">Admin Panel</a>
+    <!-- Sidebar Menu -->
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="#" onclick="openModal('profileModal'); closeNav();">👤 My Profile</a>
+        <a href="#" onclick="openModal('addBalModal'); closeNav();">➕ Add Balance</a>
+        <a href="#" onclick="openModal('withdrawModal'); closeNav();">💸 Withdraw</a>
+        <a href="#" onclick="openModal('giftCodeModal'); closeNav();">🎁 Gift Code</a>
+        <a href="#" onclick="logoutUser()">🚪 Logout</a>
     </div>
 
     <div class="container">
-        <!-- Match List Area -->
-        <div class="card">
-            <h3>Running Matches</h3>
-            <div id="userMatchList"><p style="color:var(--text-muted); text-align:center;">Loading matches...</p></div>
+        <!-- Wallet Balance Card -->
+        <div class="wallet-card">
+            <p style="color: var(--text-muted);">Total Balance</p>
+            <h2 id="userBalance">৳0.00</h2>
         </div>
 
-        <!-- Add Balance Request Card -->
-        <div class="card">
-            <h3>Add Balance (Bkash/Nagad)</h3>
-            <input type="text" id="addTrxId" class="form-control" placeholder="Transaction ID (TrxID)">
-            <input type="number" id="addAmount" class="form-control" placeholder="Amount (৳)">
-            <button class="btn" onclick="submitAddBalance()">Submit Request</button>
-        </div>
-
-        <!-- Withdraw Request Card -->
-        <div class="card">
-            <h3>Withdraw Balance</h3>
-            <input type="text" id="withdrawNum" class="form-control" placeholder="Bkash/Nagad Number">
-            <input type="number" id="withdrawAmount" class="form-control" placeholder="Amount (৳)">
-            <button class="btn" style="background:var(--neon-cyan);" onclick="submitWithdraw()">Withdraw Request</button>
+        <div class="section-title">Running Matches</div>
+        <div id="matchList">
+            <p style="color: var(--text-muted); text-align: center;">Loading matches...</p>
         </div>
     </div>
 
-    <!-- Profile Modal -->
+    <!-- Modals -->
     <div id="profileModal" class="modal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('profileModal')">&times;</span>
-            <h3 style="color:var(--neon-cyan); margin-bottom:15px;">My Profile</h3>
-            <div id="profileDetails" style="font-size:14px; line-height: 1.8;">Loading profile...</div>
+            <span class="close-modal" onclick="closeModal('profileModal')">&times;</span>
+            <h3 style="color: var(--neon-cyan); margin-bottom: 15px;">My Profile</h3>
+            <p><strong>Name:</strong> <span id="pName">N/A</span></p>
+            <p><strong>Game UID:</strong> <span id="pUID">N/A</span></p>
+            <p><strong>Phone:</strong> <span id="pPhone">N/A</span></p>
         </div>
     </div>
 
-    <!-- Gift Code Modal -->
+    <div id="addBalModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('addBalModal')">&times;</span>
+            <h3 style="color: var(--neon-cyan); margin-bottom: 15px;">Add Balance</h3>
+            <input type="number" id="addAmount" class="form-control" placeholder="Amount (৳)">
+            <input type="text" id="addTrxId" class="form-control" placeholder="Bkash/Nagad TrxID">
+            <button class="btn" onclick="submitAddBalance()">Submit Request</button>
+        </div>
+    </div>
+
+    <div id="withdrawModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('withdrawModal')">&times;</span>
+            <h3 style="color: var(--neon-cyan); margin-bottom: 15px;">Withdraw Request</h3>
+            <input type="number" id="withAmount" class="form-control" placeholder="Amount (৳)">
+            <input type="text" id="withNumber" class="form-control" placeholder="Bkash/Nagad Number">
+            <button class="btn" onclick="submitWithdraw()">Withdraw</button>
+        </div>
+    </div>
+
     <div id="giftCodeModal" class="modal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('giftCodeModal')">&times;</span>
-            <h3 style="color:var(--neon-cyan); margin-bottom:15px;">Redeem Gift Code</h3>
-            <input type="text" id="redeemCodeInput" class="form-control" placeholder="Enter Gift Code">
-            <button class="btn" onclick="redeemGiftCode()">Redeem Now</button>
+            <span class="close-modal" onclick="closeModal('giftCodeModal')">&times;</span>
+            <h3 style="color: var(--neon-cyan); margin-bottom: 15px;">Redeem Gift Code</h3>
+            <input type="text" id="redeemCodeText" class="form-control" placeholder="Enter Gift Code">
+            <button class="btn" onclick="redeemGiftCode()">Redeem</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, getDoc, query, where, addTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
@@ -125,111 +136,105 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Dummy Local User for testing demo integration (replace with real auth ID if needed)
-        let currentUserId = localStorage.getItem("zeg_user_id");
-        if(!currentUserId) {
-            currentUserId = "user_" + Math.random().toString(36.substring(2, 9));
-            localStorage.setItem("zeg_user_id", currentUserId);
-            // Initialize user doc
-            setDoc(doc(db, "users", currentUserId), {
-                userId: currentUserId,
-                playerUID: "12345678",
-                playerName: "Demo Player",
-                balance: 100,
-                isBlocked: false
+        window.openNav = function() { document.getElementById("mySidebar").style.width = "250px"; }
+        window.closeNav = function() { document.getElementById("mySidebar").style.width = "0"; }
+        window.openModal = function(id) { document.getElementById(id).style.display = "flex"; }
+        window.closeModal = function(id) { document.getElementById(id).style.display = "none"; }
+        window.logoutUser = function() { localStorage.clear(); location.reload(); }
+
+        const currentUserId = localStorage.getItem("userId");
+
+        window.onload = async function() {
+            if(!currentUserId) {
+                alert("Please login first!");
+                window.location.href = "login.html"; // Adjust to your login file
+                return;
+            }
+            loadUserData();
+            loadMatches();
+        }
+
+        async function loadUserData() {
+            const userSnap = await getDoc(doc(db, "users", currentUserId));
+            if(userSnap.exists()) {
+                const data = userSnap.data();
+                document.getElementById("userBalance").innerText = `৳${data.balance || 0}`;
+                document.getElementById("pName").innerText = data.playerName || 'N/A';
+                document.getElementById("pUID").innerText = data.playerUID || 'N/A';
+                document.getElementById("pPhone").innerText = data.phoneNumber || 'N/A';
+            }
+        }
+
+        async function loadMatches() {
+            const list = document.getElementById("matchList");
+            const snap = await getDocs(collection(db, "matches"));
+            list.innerHTML = snap.empty ? `<p style="color:var(--text-muted); text-align:center;">No matches available.</p>` : "";
+            snap.forEach(d => {
+                const m = d.data();
+                list.innerHTML += `
+                    <div class="match-card">
+                        <h3>${m.matchName}</h3>
+                        <div class="match-info">Entry Fee: ৳${m.entryFee} | Prize: ${m.firstPrize}</div>
+                        <div class="match-info" style="color:var(--neon-cyan);">Room ID: ${m.roomId || 'Pending'} | Pass: ${m.roomPass || 'Pending'}</div>
+                    </div>`;
             });
         }
 
-        window.toggleDrawer = function() {
-            document.getElementById("navDrawer").classList.toggle("active");
-        }
-
-        window.openModal = function(id) { document.getElementById(id).style.display = "flex"; loadProfileData(); }
-        window.closeModal = function(id) { document.getElementById(id).style.display = "none"; }
-
-        // Load User Info
-        async function loadProfileData() {
-            const userRef = doc(db, "users", currentUserId);
-            const snap = await getDoc(userRef);
-            if(snap.exists()) {
-                const u = snap.data();
-                document.getElementById("userBalDisplay").innerText = "৳ " + (u.balance || 0);
-                document.getElementById("profileDetails").innerHTML = `
-                    <strong>Name:</strong> ${u.playerName || 'N/A'}<br>
-                    <strong>Game UID:</strong> ${u.playerUID || 'N/A'}<br>
-                    <strong>Balance:</strong> ৳${u.balance || 0}<br>
-                    <strong>Status:</strong> ${u.isBlocked ? '<span style="color:red">Blocked</span>' : '<span style="color:green">Active</span>'}
-                `;
-            }
-        }
-        loadProfileData();
-
-        // Submit Add Balance Request
         window.submitAddBalance = async function() {
-            const trxId = document.getElementById("addTrxId").value.trim();
             const amount = Number(document.getElementById("addAmount").value);
-            if(!trxId || !amount) { alert("সব তথ্য দিন।"); return; }
+            const trxId = document.getElementById("addTrxId").value.trim();
+            if(!amount || !trxId) { alert("Fill all fields!"); return; }
 
             try {
                 await setDoc(doc(collection(db, "addBalanceRequests")), {
-                    userId: currentUserId, trxId: trxId, amount: amount, status: "Pending", time: new Date()
+                    userId: currentUserId, amount: amount, trxId: trxId, status: 'Pending', time: new Date()
                 });
-                alert("ব্যালেন্স রিকুয়েস্ট সাবমিট হয়েছে!");
-                document.getElementById("addTrxId").value = "";
-                document.getElementById("addAmount").value = "";
+                alert("Balance request submitted!");
+                closeModal('addBalModal');
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // Submit Withdraw Request
         window.submitWithdraw = async function() {
-            const number = document.getElementById("withdrawNum").value.trim();
-            const amount = Number(document.getElementById("withdrawAmount").value);
-            if(!number || !amount) { alert("সব তথ্য দিন।"); return; }
+            const amount = Number(document.getElementById("withAmount").value);
+            const number = document.getElementById("withNumber").value.trim();
+            if(!amount || !number) { alert("Fill all fields!"); return; }
 
-            const userRef = doc(db, "users", currentUserId);
-            const snap = await getDoc(userRef);
-            let bal = snap.exists() ? Number(snap.data().balance || 0) : 0;
-
-            if(bal < amount) { alert("পর্যাপ্ত ব্যালেন্স নেই!"); return; }
+            const userSnap = await getDoc(doc(db, "users", currentUserId));
+            let currentBal = Number(userSnap.data().balance || 0);
+            if(amount > currentBal) { alert("Insufficient balance!"); return; }
 
             try {
-                // Cut balance instantly on request
-                await updateDoc(userRef, { balance: bal - amount });
+                await updateDoc(doc(db, "users", currentUserId), { balance: currentBal - amount });
                 await setDoc(doc(collection(db, "withdrawRequests")), {
-                    userId: currentUserId, number: number, amount: amount, status: "Pending", time: new Date()
+                    userId: currentUserId, amount: amount, number: number, status: 'Pending', time: new Date()
                 });
-                alert("উইথড্র রিকুয়েস্ট সফল হয়েছে!");
-                loadProfileData();
-                document.getElementById("withdrawNum").value = "";
-                document.getElementById("withdrawAmount").value = "";
+                alert("Withdraw request submitted!");
+                closeModal('withdrawModal');
+                loadUserData();
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // Redeem Gift Code
         window.redeemGiftCode = async function() {
-            const code = document.getElementById("redeemCodeInput").value.trim();
-            if(!code) { alert("গিফট কোড লিখুন।"); return; }
+            const code = document.getElementById("redeemCodeText").value.trim();
+            if(!code) { alert("Enter gift code!"); return; }
 
             try {
                 const codeRef = doc(db, "giftCodes", code);
                 const codeSnap = await getDoc(codeRef);
-                if(!codeSnap.exists()) { alert("ভুল গিফট কোড!"); return; }
+                if(!codeSnap.exists()) { alert("Invalid gift code!"); return; }
 
                 const data = codeSnap.data();
-                if(data.isUsed) { alert("এই কোডটি ইতিমধ্যে ব্যবহার করা হয়েছে!"); return; }
+                if(data.isUsed) { alert("This code is already used!"); return; }
 
-                // Mark code as used
+                const userSnap = await getDoc(doc(db, "users", currentUserId));
+                let currentBal = Number(userSnap.data().balance || 0);
+
+                await updateDoc(doc(db, "users", currentUserId), { balance: currentBal + Number(data.amount) });
                 await updateDoc(codeRef, { isUsed: true });
 
-                // Add balance to user
-                const userRef = doc(db, "users", currentUserId);
-                const userSnap = await getDoc(userRef);
-                let bal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
-                await updateDoc(userRef, { balance: bal + Number(data.amount) });
-
-                alert(`সফল! আপনি ৳${data.amount} বোনাস পেয়েছেন।`);
+                alert(`Successfully redeemed ৳${data.amount}!`);
                 closeModal('giftCodeModal');
-                loadProfileData();
+                loadUserData();
             } catch(e) { alert("Error: " + e.message); }
         }
     </script>
