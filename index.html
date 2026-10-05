@@ -46,7 +46,8 @@
         .match-card { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px; }
         .match-card h4 { color: var(--neon-cyan); font-size: 16px; margin-bottom: 5px; }
         .match-details { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
-        .join-btn { background: var(--neon-green); color: #000; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; }
+        .join-btn { background: var(--neon-green); color: #000; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 8px; }
+        .view-players-btn { background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 6px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 6px; }
 
         .history-list { margin-top: 15px; max-height: 300px; overflow-y: auto; }
         .history-item { background: var(--card-bg); border: 1px solid #374151; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
@@ -171,6 +172,7 @@
         powered by <span>ZEG-G</span>
     </div>
 
+    <!-- Join Match Modal -->
     <div class="modal-overlay" id="joinModal" style="display: none;">
         <div class="modal-card">
             <h3>Join Match</h3>
@@ -180,6 +182,17 @@
             <input type="text" id="gamePlayerID" class="form-control" placeholder="Game Player ID / UID">
             <button class="submit-btn" id="confirmJoinBtn">Confirm & Pay Entry Fee</button>
             <div class="switch-text" id="cancelJoinBtn" style="color: var(--text-muted); margin-top: 10px; cursor: pointer;">Cancel</div>
+        </div>
+    </div>
+
+    <!-- Joined Players List Modal -->
+    <div class="modal-overlay" id="playersListModal" style="display: none;">
+        <div class="modal-card" style="max-width: 400px;" onclick="event.stopPropagation()">
+            <h3 style="color: var(--neon-cyan);" id="playersModalTitle">Joined Players</h3>
+            <div id="playersListContainer" style="max-height: 250px; overflow-y: auto; margin: 10px 0; font-size: 13px;">
+                <p style="color: var(--text-muted); text-align: center;">Loading...</p>
+            </div>
+            <div class="switch-text" id="closePlayersModal" style="color: var(--neon-pink); margin-top: 15px; cursor: pointer;">Close</div>
         </div>
     </div>
 
@@ -485,7 +498,9 @@
                             btnHtml = `<button class="join-btn" id="${btnId}">Join Match</button>`;
                         }
 
+                        const viewBtnId = `viewBtn_${m.matchCode}`;
                         const timerId = `timer_${m.matchCode}`;
+
                         container.innerHTML += `
                             <div class="match-card">
                                 <h4>${m.matchName} (Code: ${m.matchCode})</h4>
@@ -499,6 +514,7 @@
                                 </div>
                                 ${roomInfoHtml}
                                 ${btnHtml}
+                                <button class="view-players-btn" id="${viewBtnId}">👥 View Joined Players (${joined})</button>
                             </div>`;
                         
                         if(m.matchTime) startCountdown(m.matchTime, timerId);
@@ -508,11 +524,53 @@
                             if(bElem) {
                                 bElem.onclick = () => openJoinModal(m.matchCode, m.matchName, m.entryFee, m.matchNotice);
                             }
+                            const vElem = document.getElementById(viewBtnId);
+                            if(vElem) {
+                                vElem.onclick = () => openJoinedPlayersModal(m.matchCode, m.matchName);
+                            }
                         }, 100);
                     });
                 }
             } catch(e) {}
         }
+
+        async function openJoinedPlayersModal(matchCode, matchName) {
+            const modal = document.getElementById('playersListModal');
+            const title = document.getElementById('playersModalTitle');
+            const container = document.getElementById('playersListContainer');
+
+            title.innerText = `${matchName} - Players`;
+            container.innerHTML = `<p style="color: var(--text-muted); text-align: center;">Loading players...</p>`;
+            modal.style.display = 'flex';
+
+            try {
+                const q = query(collection(db, "matchRegistrations"), where("matchCode", "==", matchCode));
+                const querySnapshot = await getDocs(q);
+
+                if(querySnapshot.empty) {
+                    container.innerHTML = `<p style="color: var(--text-muted); text-align: center;">এখনো কেউ এই ম্যাচে জয়েন করেনি।</p>`;
+                } else {
+                    container.innerHTML = "";
+                    let count = 1;
+                    querySnapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
+                        container.innerHTML += `
+                            <div style="background: #1f2937; padding: 10px; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid var(--neon-cyan); display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong style="color: var(--neon-green);">#${count++} ${data.playerName || 'N/A'}</strong><br>
+                                    <span style="color: var(--text-muted); font-size: 11px;">UID: ${data.playerID || 'N/A'}</span>
+                                </div>
+                            </div>`;
+                    });
+                }
+            } catch(e) {
+                container.innerHTML = `<p style="color: var(--neon-pink); text-align: center;">Error loading players!</p>`;
+            }
+        }
+
+        document.getElementById('closePlayersModal').onclick = () => {
+            document.getElementById('playersListModal').style.display = 'none';
+        };
 
         async function openJoinModal(code, name, fee, notice) {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
