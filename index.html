@@ -242,7 +242,7 @@
             <li style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; padding-top: 12px; color: var(--neon-cyan);">
                 <strong>সহায়তা কেন্দ্র</strong><br>
                 <span style="font-size: 12px; color: var(--text-muted);">WhatsApp - 01902009133</span><br>
-                <span style="font-size: 12px; color: var(--text-muted);">Telegram - @Aveen_Reed</span>
+                <span style="font-size: 12px; color: var(--text-muted);">Telegram - Aveen_Reed</span>
             </li>
             <li id="menuAdmin" style="color: var(--neon-pink); font-weight: bold;">Admin Panel</li>
         </ul>
@@ -537,7 +537,7 @@
                             const countDownDate = new Date(m.matchTime).getTime();
                             const now = new Date().getTime();
                             if (countDownDate - now < 0 && joined === 0) {
-                                document.getElementById(timerId).innerHTML = `<span style="color: var(--neon-pink); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি। দয়া করে কিছু সময় অপেক্ষা করুন...</span>`;
+                                document.getElementById(timerId).innerHTML = `<span style="color: var(--neon-pink); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি</span>`;
                             } else {
                                 startCountdown(m.matchTime, joined, timerId);
                             }
