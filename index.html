@@ -406,7 +406,6 @@
         async function loadUserHistory() {
             if(!auth.currentUser) return;
             
-            // Add Balance History
             const addHistContainer = document.getElementById('addBalanceHistory');
             const qAdd = query(collection(db, "addBalanceRequests"), where("userId", "==", auth.currentUser.uid));
             const snapAdd = await getDocs(qAdd);
@@ -422,7 +421,6 @@
                     </div>`;
             });
 
-            // Withdraw History
             const withHistContainer = document.getElementById('withdrawHistory');
             const qWith = query(collection(db, "withdrawRequests"), where("userId", "==", auth.currentUser.uid));
             const snapWith = await getDocs(qWith);
@@ -476,7 +474,6 @@
             }
 
             try {
-                // Instantly deduct balance when withdraw request is made
                 await updateDoc(userRef, { balance: currentBal - amount });
 
                 await addDoc(collection(db, "withdrawRequests"), {
