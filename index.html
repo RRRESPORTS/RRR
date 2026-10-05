@@ -194,20 +194,22 @@
         </div>
     </div>
 
-    <!-- Profile Modal -->
+    <!-- Profile Modal (Both Game Name and UID Editable) -->
     <div class="modal-overlay" id="profileModal" style="display: none;">
         <div class="modal-card" onclick="event.stopPropagation()">
             <h3 style="color: var(--neon-green);">👤 User Profile</h3>
-            <div style="font-size: 13px; margin-bottom: 10px; line-height: 1.6; color: var(--text-muted);">
+            <div style="font-size: 13px; margin-bottom: 12px; line-height: 1.6; color: var(--text-muted);">
                 <div><strong>Gmail:</strong> <span id="profileEmail" style="color: #fff;">-</span></div>
-                <div><strong>Password:</strong> <span id="profilePass" style="color: #fff;">••••••••</span></div>
-                <div><strong>Game Name:</strong> <span id="profileGameName" style="color: var(--neon-cyan);">-</span></div>
             </div>
-            <div style="margin-top: 10px;">
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 12px; color: var(--neon-cyan);">Change Game Name:</label>
+                <input type="text" id="profileEditName" class="form-control" placeholder="Enter new Game Name">
+            </div>
+            <div style="margin-bottom: 15px;">
                 <label style="font-size: 12px; color: var(--neon-cyan);">Change Game UID:</label>
                 <input type="text" id="profileEditUID" class="form-control" placeholder="Enter new UID">
             </div>
-            <button class="submit-btn" id="updateProfileBtn" style="background: var(--neon-cyan); color: #000;">Update UID</button>
+            <button class="submit-btn" id="updateProfileBtn" style="background: var(--neon-cyan); color: #000;">Update Profile</button>
             <div class="switch-text" id="closeProfileModal" style="color: var(--neon-pink); margin-top: 10px; cursor: pointer;">Close</div>
         </div>
     </div>
@@ -240,7 +242,7 @@
             <li style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; padding-top: 12px; color: var(--neon-cyan);">
                 <strong>সহায়তা কেন্দ্র</strong><br>
                 <span style="font-size: 12px; color: var(--text-muted);">WhatsApp - 01902009133</span><br>
-                <span style="font-size: 12px; color: var(--text-muted);">Telegram - @Aveen_Reed</span>
+                <span style="font-size: 12px; color: var(--text-muted);">Telegram - Aveen_Reed</span>
             </li>
             <li id="menuAdmin" style="color: var(--neon-pink); font-weight: bold;">Admin Panel</li>
         </ul>
@@ -332,16 +334,26 @@
             } catch (e) { alert("Error: " + e.message); }
         }
 
-        async function updateProfileUID() {
+        async function updateProfileInfo() {
             if(!auth.currentUser) return;
+            const newName = document.getElementById('profileEditName').value.trim();
             const newUID = document.getElementById('profileEditUID').value.trim();
-            if(!newUID) { alert("নতুন UID লিখুন।"); return; }
+            
+            if(!newName || !newUID) { 
+                alert("Game Name এবং UID উভয় ফিল্ড পূরণ করা বাধ্যতামূলক!"); 
+                return; 
+            }
 
             try {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { playerUID: newUID });
-                alert("Game UID successfully updated!");
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { 
+                    playerName: newName, 
+                    playerUID: newUID 
+                });
+                alert("Game Name & UID successfully updated!");
                 closeProfileModal();
-            } catch(e) { alert("Error: " + e.message); }
+            } catch(e) { 
+                alert("Error: " + e.message); 
+            }
         }
 
         async function claimGiftCode() {
@@ -403,7 +415,9 @@
                         const data = docSnap.data();
                         document.getElementById('userBalance').innerText = `৳${data.balance || 0.00}`;
                         document.getElementById('profileEmail').innerText = data.email || user.email;
-                        document.getElementById('profileGameName').innerText = `${data.playerName || 'N/A'} (UID: ${data.playerUID || 'N/A'})`;
+                        
+                        // Set current Game Name & UID in the profile input boxes
+                        document.getElementById('profileEditName').value = data.playerName || "";
                         document.getElementById('profileEditUID').value = data.playerUID || "";
                     }
                 });
@@ -442,7 +456,7 @@
                     if (joinedCount > 0) {
                         el.innerHTML = `<span style="color: var(--neon-green);">Match Started / Running</span>`;
                     } else {
-                        el.innerHTML = `<span style="color: var(--neon-pink); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি। কিছুক্ষণ অপেক্ষা করুন... </span>`;
+                        el.innerHTML = `<span style="color: var(--neon-pink); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি</span>`;
                     }
                     return;
                 }
@@ -808,7 +822,7 @@
         document.getElementById('drawerCloseBtn').onclick = toggleDrawer;
 
         document.getElementById('menuProfile').onclick = openProfileModal;
-        document.getElementById('updateProfileBtn').onclick = updateProfileUID;
+        document.getElementById('updateProfileBtn').onclick = updateProfileInfo;
         document.getElementById('closeProfileModal').onclick = closeProfileModal;
 
         document.getElementById('menuMatch').onclick = () => { switchTab('matchSection'); toggleDrawer(); };
