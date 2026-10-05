@@ -34,7 +34,6 @@
         .section { display: none; }
         .section.active { display: block; }
         
-        /* 3 Line Compact Gift Code Section inside Gift Code Tab */
         .gift-box-3line { background: var(--card-bg); border: 1px solid var(--neon-pink); border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(255,0,127,0.1); }
         .gift-box-3line h4 { color: var(--neon-pink); font-size: 15px; margin-bottom: 10px; font-weight: bold; }
 
@@ -80,8 +79,8 @@
     <header>
         <div class="logo">ZEG-G TOURNAMENT</div>
         <div class="header-right">
-            <button class="login-btn" id="authNavBtn" onclick="openAuthModal()">Login</button>
-            <div class="menu-icon" onclick="toggleDrawer()">☰</div>
+            <button class="login-btn" id="authNavBtn">Login</button>
+            <div class="menu-icon" id="menuToggleBtn">☰</div>
         </div>
     </header>
 
@@ -91,34 +90,30 @@
             <h2 id="userBalance">৳0.00</h2>
         </div>
         <div class="bal-btns">
-            <button class="btn-add" onclick="switchTab('addBalance')">Add Balance</button>
-            <button class="btn-withdraw" onclick="switchTab('withdraw')">Withdraw</button>
+            <button class="btn-add" id="navAddBalBtn">Add Balance</button>
+            <button class="btn-withdraw" id="navWithdrawBtn">Withdraw</button>
         </div>
     </div>
 
     <div class="container">
-        <!-- Match Section -->
         <div id="matchSection" class="section active">
             <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">Live & Upcoming Matches</h3>
             <div id="matchListContainer"><p style="color: var(--text-muted);">Loading matches...</p></div>
         </div>
 
-        <!-- My Match Section -->
         <div id="myMatchSection" class="section">
             <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">My Registered Matches</h3>
             <div id="myMatchListContainer"><p style="color: var(--text-muted);">Loading joined matches...</p></div>
         </div>
 
-        <!-- Gift Code Section (3-Line Compact layout) -->
         <div id="giftCodeSection" class="section">
             <div class="gift-box-3line">
                 <h4>🎁 Redeem Gift Code</h4>
                 <input type="text" id="redeemCodeInput" class="form-control" placeholder="Enter Gift Code" style="margin-bottom: 8px; padding: 8px;">
-                <button class="submit-btn" style="background: var(--neon-pink); color: #fff; padding: 8px; margin-top: 0;" onclick="claimGiftCode()">Claim Bonus</button>
+                <button class="submit-btn" id="claimGiftBtn" style="background: var(--neon-pink); color: #fff; padding: 8px; margin-top: 0;">Claim Bonus</button>
             </div>
         </div>
 
-        <!-- Add Balance Section -->
         <div id="addBalanceSection" class="section">
             <h3 style="color: var(--neon-green);">Add Balance via bKash</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0;">Send Money: <strong style="color: #fff;">01902009133</strong></p>
@@ -126,13 +121,12 @@
             <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #374151; margin-top: 10px;">
                 <input type="text" id="bkashTrxID" class="form-control" placeholder="Transaction ID (TrxID)">
                 <input type="number" id="addAmount" class="form-control" placeholder="Amount (৳)">
-                <button class="submit-btn" onclick="submitAddBalance()">Submit Request</button>
+                <button class="submit-btn" id="submitAddBalBtn">Submit Request</button>
             </div>
             <h4 style="margin-top: 15px; color: var(--neon-cyan); font-size: 14px;">Add Balance History & Status</h4>
             <div class="history-list" id="addBalanceHistory"><p style="color: var(--text-muted); font-size: 12px;">No requests found.</p></div>
         </div>
 
-        <!-- Withdraw Section -->
         <div id="withdrawSection" class="section">
             <h3 style="color: var(--neon-pink);">Withdraw Funds</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0;">শুধু বিকাশ পার্সোনাল নাম্বার।</p>
@@ -140,7 +134,7 @@
             <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #374151; margin-top: 10px;">
                 <input type="text" id="withdrawNumber" class="form-control" placeholder="bKash Number">
                 <input type="number" id="withdrawAmount" class="form-control" placeholder="Amount (৳)">
-                <button class="submit-btn" style="background: var(--neon-pink); color: #fff;" onclick="submitWithdraw()">Request Withdraw</button>
+                <button class="submit-btn" id="submitWithdrawBtn" style="background: var(--neon-pink); color: #fff;">Request Withdraw</button>
             </div>
             <h4 style="margin-top: 15px; color: var(--neon-cyan); font-size: 14px;">Withdraw History & Status</h4>
             <div class="history-list" id="withdrawHistory"><p style="color: var(--text-muted); font-size: 12px;">No requests found.</p></div>
@@ -156,62 +150,55 @@
         </div>
     </div>
 
-    <!-- Join Match Modal -->
     <div class="modal-overlay" id="joinModal" style="display: none;">
         <div class="modal-card">
             <h3>Join Match</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;" id="joinMatchInfo"></p>
-            
             <div id="modalMatchNoticeBox" style="background: rgba(0,243,255,0.1); border-left: 3px solid var(--neon-cyan); padding: 8px; font-size: 12px; margin-bottom: 12px; border-radius: 0 4px 4px 0; display: none;"></div>
-
             <input type="text" id="gamePlayerName" class="form-control" placeholder="Game Player Name">
             <input type="text" id="gamePlayerID" class="form-control" placeholder="Game Player ID / UID">
-            <button class="submit-btn" onclick="confirmJoinMatch()">Confirm & Pay Entry Fee</button>
-            <div class="switch-text" style="color: var(--text-muted); margin-top: 10px;" onclick="closeJoinModal()">Cancel</div>
+            <button class="submit-btn" id="confirmJoinBtn">Confirm & Pay Entry Fee</button>
+            <div class="switch-text" id="cancelJoinBtn" style="color: var(--text-muted); margin-top: 10px; cursor: pointer;">Cancel</div>
         </div>
     </div>
 
-    <!-- Auth Modal (Hidden by default to prevent unwanted popups on refresh) -->
     <div class="modal-overlay" id="authModal" style="display: none;">
         <div class="modal-card">
             <h3 id="modalTitle">Login to ZEG-G</h3>
             <input type="email" id="authEmail" class="form-control" placeholder="Email Address">
             <input type="password" id="authPassword" class="form-control" placeholder="Password">
-            
             <div id="registerExtraFields" style="display: none;">
                 <input type="text" id="regPlayerName" class="form-control" placeholder="Game Player Name">
                 <input type="text" id="regPlayerUID" class="form-control" placeholder="Game Player UID">
             </div>
-
-            <button class="submit-btn" id="authSubmitBtn" onclick="handleAuth()">Login</button>
-            <div class="switch-text" id="switchText" onclick="toggleAuthMode()">Don't have an account? <span>Register</span></div>
+            <button class="submit-btn" id="authSubmitBtn">Login</button>
+            <div class="switch-text" id="switchText">Don't have an account? <span>Register</span></div>
         </div>
     </div>
 
-    <!-- 3 Line Drawer Menu (Gift Code added right below Withdraw) -->
     <div class="drawer" id="sideDrawer">
-        <div class="drawer-close" onclick="toggleDrawer()">✕</div>
+        <div class="drawer-close" id="drawerCloseBtn">✕</div>
         <ul class="drawer-links">
-            <li onclick="switchTab('matchSection'); toggleDrawer();">Match</li>
-            <li onclick="switchTab('myMatchSection'); toggleDrawer();">My Match</li>
-            <li onclick="switchTab('addBalance'); toggleDrawer();">Add Balance</li>
-            <li onclick="switchTab('withdraw'); toggleDrawer();">Withdraw</li>
-            <li onclick="switchTab('giftCodeSection'); toggleDrawer();" style="color: var(--neon-pink); font-weight: bold;">🎁 Gift Code</li>
-            <li id="drawerAuthItem" onclick="openAuthModal(); toggleDrawer();">Login / Register</li>
+            <li id="menuMatch">Match</li>
+            <li id="menuMyMatch">My Match</li>
+            <li id="menuAddBal">Add Balance</li>
+            <li id="menuWithdraw">Withdraw</li>
+            <li id="menuGift" style="color: var(--neon-pink); font-weight: bold;">🎁 Gift Code</li>
+            <li id="drawerAuthItem">Login / Register</li>
             <li style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; padding-top: 12px; color: var(--neon-cyan);">
                 <strong>সহায়তা কেন্দ্র</strong><br>
                 <span style="font-size: 12px; color: var(--text-muted);">WhatsApp - 01902009133</span><br>
                 <span style="font-size: 12px; color: var(--text-muted);">Telegram - Aveen_Reed</span>
             </li>
-            <li onclick="window.location.href='admin.html'" style="color: var(--neon-pink); font-weight: bold;">Admin Panel</li>
+            <li id="menuAdmin" style="color: var(--neon-pink); font-weight: bold;">Admin Panel</li>
         </ul>
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('matchSection')"><div>🏠</div>Home</div>
-        <div class="nav-item" onclick="switchTab('myMatchSection')"><div>🎮</div>My Match</div>
-        <div class="nav-item" onclick="switchTab('addBalance')"><div>💳</div>Add Balance</div>
-        <div class="nav-item" onclick="switchTab('withdraw')"><div>💸</div>Withdraw</div>
+        <div class="nav-item active" id="navHome"><div>🏠</div>Home</div>
+        <div class="nav-item" id="navMyMatch"><div>🎮</div>My Match</div>
+        <div class="nav-item" id="navAdd"><div>💳</div>Add Balance</div>
+        <div class="nav-item" id="navWith"><div>💸</div>Withdraw</div>
     </div>
 
     <script type="module">
@@ -237,7 +224,7 @@
         let selectedMatchForJoin = null;
         let userJoinedMatchCodes = [];
 
-        window.switchTab = function(tabId) {
+        function switchTab(tabId) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
             
@@ -248,12 +235,12 @@
             if(tabId === 'withdraw') { document.getElementById('withdrawSection').classList.add('active'); loadUserHistory(); }
         }
 
-        window.toggleDrawer = function() { document.getElementById('sideDrawer').classList.toggle('open'); }
-        window.openAuthModal = function() { document.getElementById('authModal').style.display = 'flex'; }
-        window.closeAuthModal = function() { document.getElementById('authModal').style.display = 'none'; }
-        window.closeJoinModal = function() { document.getElementById('joinModal').style.display = 'none'; }
+        function toggleDrawer() { document.getElementById('sideDrawer').classList.toggle('open'); }
+        function openAuthModal() { document.getElementById('authModal').style.display = 'flex'; }
+        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; }
+        function closeJoinModal() { document.getElementById('joinModal').style.display = 'none'; }
 
-        window.toggleAuthMode = function() {
+        function toggleAuthMode() {
             isLoginMode = !isLoginMode;
             document.getElementById('modalTitle').innerText = isLoginMode ? "Login to ZEG-G" : "Register New Account";
             document.getElementById('authSubmitBtn').innerText = isLoginMode ? "Login" : "Sign Up";
@@ -261,7 +248,7 @@
             document.getElementById('registerExtraFields').style.display = isLoginMode ? 'none' : 'block';
         }
 
-        window.handleAuth = async function() {
+        async function handleAuth() {
             const email = document.getElementById('authEmail').value;
             const password = document.getElementById('authPassword').value;
             if(!email || !password) { alert("সব তথ্য পূরণ করুন।"); return; }
@@ -277,7 +264,6 @@
                     if(!playerName || !playerUID) { alert("Game Name এবং UID দিন।"); return; }
 
                     const cred = await createUserWithEmailAndPassword(auth, email, password);
-                    
                     await setDoc(doc(db, "users", cred.user.uid), { 
                         email: email, balance: 0.00, playerName: playerName, playerUID: playerUID 
                     });
@@ -287,7 +273,7 @@
             } catch (e) { alert("Error: " + e.message); }
         }
 
-        window.claimGiftCode = async function() {
+        async function claimGiftCode() {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
             const codeInput = document.getElementById('redeemCodeInput').value.trim();
             if(!codeInput) { alert("গিফট কোড লিখুন।"); return; }
@@ -314,15 +300,16 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // Auth state listener - Refresh korle jate bar bar login modal na ase, tar jonne user thakle modal off thakbe
         onAuthStateChanged(auth, async (user) => {
             const authNavBtn = document.getElementById('authNavBtn');
             const drawerAuthItem = document.getElementById('drawerAuthItem');
             userJoinedMatchCodes = [];
 
             if(user) {
-                authNavBtn.innerText = "Logout"; authNavBtn.onclick = () => signOut(auth);
-                drawerAuthItem.innerText = "Logout"; drawerAuthItem.onclick = () => signOut(auth);
+                authNavBtn.innerText = "Logout"; 
+                authNavBtn.onclick = () => signOut(auth);
+                drawerAuthItem.innerText = "Logout"; 
+                drawerAuthItem.onclick = () => signOut(auth);
                 
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if(docSnap.exists()) document.getElementById('userBalance').innerText = `৳${docSnap.data().balance || 0.00}`;
@@ -333,12 +320,13 @@
                 snapReg.forEach(d => { userJoinedMatchCodes.push(d.data().matchCode); });
 
                 loadUserHistory();
-                closeAuthModal(); // User thakle login modal automatic close thakbe
+                closeAuthModal();
             } else {
-                authNavBtn.innerText = "Login"; authNavBtn.onclick = openAuthModal;
-                drawerAuthItem.innerText = "Login / Register"; drawerAuthItem.onclick = openAuthModal;
+                authNavBtn.innerText = "Login"; 
+                authNavBtn.onclick = openAuthModal;
+                drawerAuthItem.innerText = "Login / Register"; 
+                drawerAuthItem.onclick = openAuthModal;
                 document.getElementById('userBalance').innerText = "৳0.00";
-                // Login na thaklei shudhu modal dekhabe, refresh marle user logout na thakle ar modal asbe na
             }
             loadWebMatches();
             loadMyMatches();
@@ -404,13 +392,13 @@
                         }
 
                         let btnHtml = "";
+                        const btnId = `joinBtn_${m.matchCode}`;
                         if (hasAlreadyJoined) {
                             btnHtml = `<button class="join-btn" style="background: #374151; color: var(--neon-green); cursor: not-allowed;" disabled>Already Joined</button>`;
                         } else if (isFull) {
                             btnHtml = `<button class="join-btn" style="background: gray; cursor: not-allowed;" disabled>Match Full</button>`;
                         } else {
-                            const safeNotice = (m.matchNotice || "").replace(/'/g, "\\'");
-                            btnHtml = `<button class="join-btn" onclick="openJoinModal('${m.matchCode}', '${m.matchName}', ${m.entryFee}, '${safeNotice}')">Join Match</button>`;
+                            btnHtml = `<button class="join-btn" id="${btnId}">Join Match</button>`;
                         }
 
                         const timerId = `timer_${m.matchCode}`;
@@ -430,12 +418,19 @@
                             </div>`;
                         
                         if(m.matchTime) startCountdown(m.matchTime, timerId);
+
+                        setTimeout(() => {
+                            const bElem = document.getElementById(btnId);
+                            if(bElem) {
+                                bElem.onclick = () => openJoinModal(m.matchCode, m.matchName, m.entryFee, m.matchNotice);
+                            }
+                        }, 100);
                     });
                 }
             } catch(e) {}
         }
 
-        window.openJoinModal = async function(code, name, fee, notice) {
+        async function openJoinModal(code, name, fee, notice) {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
             selectedMatchForJoin = { code, name, fee };
             document.getElementById('joinMatchInfo').innerText = `${name} (Fee: ৳${fee})`;
@@ -457,7 +452,7 @@
             document.getElementById('joinModal').style.display = 'flex';
         }
 
-        window.confirmJoinMatch = async function() {
+        async function confirmJoinMatch() {
             const playerName = document.getElementById('gamePlayerName').value.trim();
             const playerID = document.getElementById('gamePlayerID').value.trim();
 
@@ -552,7 +547,7 @@
             const snapWith = await getDocs(qWith);
             withHistContainer.innerHTML = snapWith.empty ? `<p style="color: var(--text-muted); font-size: 12px;">No requests found.</p>` : "";
             snapWith.forEach(d => {
-                const item.data();
+                const item = d.data();
                 let statusText = item.status === 'Approved' ? 'Approved' : (item.status === 'Fail' ? 'Fail' : 'Pending');
                 let color = item.status === 'Approved' ? 'var(--neon-green)' : (item.status === 'Fail' ? 'var(--neon-pink)' : 'var(--neon-cyan)');
                 withHistContainer.innerHTML += `
@@ -563,7 +558,7 @@
             });
         }
 
-        window.submitAddBalance = async function() {
+        async function submitAddBalance() {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
             const trxId = document.getElementById('bkashTrxID').value.trim();
             const amount = Number(document.getElementById('addAmount').value);
@@ -582,7 +577,7 @@
             } catch(e) {}
         }
 
-        window.submitWithdraw = async function() {
+        async function submitWithdraw() {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
             const number = document.getElementById('withdrawNumber').value.trim();
             const amount = Number(document.getElementById('withdrawAmount').value);
@@ -609,6 +604,32 @@
                 loadUserHistory();
             } catch(e) { alert("Error: " + e.message); }
         }
+
+        // Event Listeners Binding
+        document.getElementById('authNavBtn').onclick = openAuthModal;
+        document.getElementById('menuToggleBtn').onclick = toggleDrawer;
+        document.getElementById('navAddBalBtn').onclick = () => switchTab('addBalance');
+        document.getElementById('navWithdrawBtn').onclick = () => switchTab('withdraw');
+        document.getElementById('claimGiftBtn').onclick = claimGiftCode;
+        document.getElementById('submitAddBalBtn').onclick = submitAddBalance;
+        document.getElementById('submitWithdrawBtn').onclick = submitWithdraw;
+        document.getElementById('confirmJoinBtn').onclick = confirmJoinMatch;
+        document.getElementById('cancelJoinBtn').onclick = closeJoinModal;
+        document.getElementById('authSubmitBtn').onclick = handleAuth;
+        document.getElementById('switchText').onclick = toggleAuthMode;
+        document.getElementById('drawerCloseBtn').onclick = toggleDrawer;
+
+        document.getElementById('menuMatch').onclick = () => { switchTab('matchSection'); toggleDrawer(); };
+        document.getElementById('menuMyMatch').onclick = () => { switchTab('myMatchSection'); toggleDrawer(); };
+        document.getElementById('menuAddBal').onclick = () => { switchTab('addBalance'); toggleDrawer(); };
+        document.getElementById('menuWithdraw').onclick = () => { switchTab('withdraw'); toggleDrawer(); };
+        document.getElementById('menuGift').onclick = () => { switchTab('giftCodeSection'); toggleDrawer(); };
+        document.getElementById('menuAdmin').onclick = () => { window.location.href = 'admin.html'; };
+
+        document.getElementById('navHome').onclick = () => switchTab('matchSection');
+        document.getElementById('navMyMatch').onclick = () => switchTab('myMatchSection');
+        document.getElementById('navAdd').onclick = () => switchTab('addBalance');
+        document.getElementById('navWith').onclick = () => switchTab('withdraw');
     </script>
 </body>
 </html>
