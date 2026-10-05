@@ -9,6 +9,17 @@
             --bg-color: #0b0f19;
             --card-bg: #111827;
             --neon-green: #00ff66;
+            --neon-cyan: #00f3<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEG-G Admin Panel</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #111827;
+            --neon-green: #00ff66;
             --neon-cyan: #00f3ff;
             --neon-pink: #ff007f;
             --text-main: #ffffff;
@@ -25,11 +36,31 @@
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid rgba(0,243,255,0.2); padding-bottom: 15px; }
         .dashboard-header h2 { color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0,243,255,0.4); }
         
-        /* Your Drawing Style Grid Layout */
-        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .admin-card { background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: 12px; padding: 20px; box-shadow: 0 0 15px rgba(0,255,102,0.1); transition: 0.3s; }
-        .admin-card:hover { box-shadow: 0 0 25px rgba(0,255,102,0.3); }
-        .admin-card h3 { font-size: 16px; color: var(--neon-cyan); margin-bottom: 15px; text-align: center; border-bottom: 1px dashed #374151; padding-bottom: 8px; }
+        /* Updated Grid Layout matching the image reference */
+        .admin-grid { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 25px; 
+        }
+        .admin-card { 
+            background: var(--card-bg); 
+            border: 3px solid var(--neon-green); 
+            border-radius: 16px; 
+            padding: 25px; 
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.2); 
+            transition: 0.3s; 
+        }
+        .admin-card:hover { 
+            box-shadow: 0 0 30px rgba(0, 255, 102, 0.4); 
+        }
+        .admin-card h3 { 
+            font-size: 18px; 
+            color: var(--neon-cyan); 
+            margin-bottom: 15px; 
+            text-align: center; 
+            border-bottom: 2px dashed #1e293b; 
+            padding-bottom: 10px; 
+        }
         
         .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; font-size: 14px; }
         .form-control:focus { border-color: var(--neon-cyan); outline: none; }
@@ -42,6 +73,12 @@
         .btn-group { display: flex; gap: 5px; }
         .btn-approve { background: var(--neon-green); border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; color: #000; }
         .btn-fail { background: var(--neon-pink); color: #fff; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+
+        @media (max-width: 768px) {
+            .admin-grid { 
+                grid-template-columns: 1fr; 
+            }
+        }
     </style>
 </head>
 <body>
