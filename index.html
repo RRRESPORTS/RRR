@@ -580,7 +580,7 @@
                 const smsSnapshot = await getDocs(smsQuery);
 
                 if(smsSnapshot.empty) {
-                    alert("দুঃখিত! এই TrxID বা অ্যামাউন্টের কোনো পেমেন্ট পাওয়া যায়নি অথবা এটি ইতিমধ্যে ব্যবহৃত হয়েছে।");
+                    alert("দুঃখিত! এই TrxID বা Amount এ কোনো পেমেন্ট পাওয়া যায়নি। দয়াকরে সঠিক তথ্য দিন।");
                     return;
                 }
 
