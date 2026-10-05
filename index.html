@@ -60,7 +60,6 @@
         .btn-fb { background: #1877f2; color: #fff; }
         .btn-tg { background: #0088cc; color: #fff; }
 
-        /* Powered By Footer */
         .powered-footer { text-align: center; padding: 15px; font-size: 12px; color: var(--text-muted); background: #080b11; border-top: 1px solid rgba(255,255,255,0.05); }
         .powered-footer span { color: var(--neon-cyan); font-weight: bold; }
 
@@ -167,7 +166,6 @@
         </div>
     </div>
 
-    <!-- Powered By Footer -->
     <div class="powered-footer">
         powered by <span>ZEG-G</span>
     </div>
@@ -196,7 +194,7 @@
         </div>
     </div>
 
-    <!-- Profile Modal (User Info & Update UID) -->
+    <!-- Profile Modal -->
     <div class="modal-overlay" id="profileModal" style="display: none;">
         <div class="modal-card" onclick="event.stopPropagation()">
             <h3 style="color: var(--neon-green);">👤 User Profile</h3>
@@ -214,7 +212,7 @@
         </div>
     </div>
 
-    <!-- Auth Modal (Forced Login/Register) -->
+    <!-- Auth Modal -->
     <div class="modal-overlay" id="authModal" style="display: flex;">
         <div class="modal-card" onclick="event.stopPropagation()">
             <h3 id="modalTitle">Login to ZEG-G</h3>
@@ -373,7 +371,6 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // Real-time Notice Bar Listener
         onSnapshot(doc(db, "settings", "notice"), (docSnap) => {
             const noticeBar = document.getElementById('noticeBarContainer');
             const noticeText = document.getElementById('noticeTextDisplay');
@@ -442,11 +439,10 @@
 
                 if (distance < 0) {
                     clearInterval(x);
-                    // Check if players joined or not
                     if (joinedCount > 0) {
-                        el.innerText = "Match Started / Running";
+                        el.innerHTML = `<span style="color: var(--neon-green);">Match Started / Running</span>`;
                     } else {
-                        el.innerText = "Waiting for Players";
+                        el.innerHTML = `<span style="color: var(--neon-pink); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি</span>`;
                     }
                     return;
                 }
@@ -516,7 +512,7 @@
                                 </div>
                                 <div class="match-details">
                                     <span>Slots: ${joined}/${total}</span>
-                                    <span style="color: var(--neon-cyan);">Starts In: <strong id="${timerId}" style="color: var(--neon-pink);">Calculating...</strong></span>
+                                    <span style="color: var(--neon-cyan);">Status / Time: <strong id="${timerId}" style="color: var(--neon-pink);">Calculating...</strong></span>
                                 </div>
                                 ${roomInfoHtml}
                                 ${btnHtml}
@@ -524,11 +520,10 @@
                             </div>`;
                         
                         if(m.matchTime) {
-                            // Check immediately if time passed and joined is 0
                             const countDownDate = new Date(m.matchTime).getTime();
                             const now = new Date().getTime();
                             if (countDownDate - now < 0 && joined === 0) {
-                                document.getElementById(timerId).innerText = "Waiting for Players";
+                                document.getElementById(timerId).innerHTML = `<span style="color: var(--neon-pink); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি</span>`;
                             } else {
                                 startCountdown(m.matchTime, joined, timerId);
                             }
@@ -799,7 +794,6 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // Event Listeners Binding
         document.getElementById('authNavBtn').onclick = openAuthModal;
         document.getElementById('menuToggleBtn').onclick = toggleDrawer;
         document.getElementById('navAddBalBtn').onclick = () => switchTab('addBalance');
