@@ -1,4 +1,180 @@
-<script type="module">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEG-G TOURNAMENT</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #111827;
+            --neon-green: #00ff66;
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff007f;
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 70px; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--card-bg); border-bottom: 1px solid rgba(0, 243, 255, 0.2); position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 20px; font-weight: bold; color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0,243,255,0.5); }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .login-btn { background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 5px 15px; border-radius: 5px; cursor: pointer; }
+        .menu-icon { font-size: 24px; cursor: pointer; color: var(--neon-pink); }
+
+        .balance-container { background: linear-gradient(135deg, #1f2937, #111827); margin: 15px; padding: 20px; border-radius: 12px; border: 1px solid rgba(0,255,102,0.3); display: flex; justify-content: space-between; align-items: center; }
+        .bal-info h4 { color: var(--text-muted); font-size: 14px; }
+        .bal-info h2 { color: var(--neon-green); font-size: 24px; }
+        .bal-btns button { padding: 8px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 5px; }
+        .btn-add { background: var(--neon-green); color: #000; }
+        .btn-withdraw { background: var(--neon-pink); color: #fff; }
+
+        .container { padding: 0 15px; }
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        .notice-box { background: rgba(0,243,255,0.05); border-left: 4px solid var(--neon-cyan); padding: 10px; margin: 15px; font-size: 14px; border-radius: 0 6px 6px 0; }
+
+        .match-card { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px; }
+        .match-card h4 { color: var(--neon-cyan); font-size: 16px; margin-bottom: 5px; }
+        .match-details { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
+        .join-btn { background: var(--neon-green); color: #000; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; }
+
+        .history-list { margin-top: 15px; max-height: 300px; overflow-y: auto; }
+        .history-item { background: var(--card-bg); border: 1px solid #374151; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100; }
+        .nav-item { text-align: center; color: var(--text-muted); font-size: 12px; cursor: pointer; }
+        .nav-item.active { color: var(--neon-cyan); }
+        .nav-item div { font-size: 18px; }
+
+        .drawer { position: fixed; top: 0; right: -250px; width: 250px; height: 100%; background: #111827; box-shadow: -5px 0 15px rgba(0,0,0,0.5); z-index: 1000; transition: 0.3s; padding: 20px; border-left: 1px solid var(--neon-pink); }
+        .drawer.open { right: 0; }
+        .drawer-close { font-size: 20px; cursor: pointer; text-align: right; margin-bottom: 20px; color: var(--neon-pink); }
+        .drawer-links { list-style: none; }
+        .drawer-links li { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; font-size: 14px; }
+        .drawer-links li:hover { color: var(--neon-cyan); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-card { background: var(--card-bg); border: 1px solid var(--neon-cyan); padding: 25px; border-radius: 12px; width: 90%; max-width: 350px; }
+        .modal-card h3 { color: var(--neon-cyan); margin-bottom: 15px; text-align: center; }
+        .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; }
+        .submit-btn { width: 100%; padding: 12px; background: var(--neon-green); border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; color: #000; }
+        .switch-text { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 15px; cursor: pointer; }
+        .switch-text span { color: var(--neon-pink); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">ZEG-G TOURNAMENT</div>
+        <div class="header-right">
+            <button class="login-btn" id="authNavBtn" onclick="openAuthModal()">Login</button>
+            <div class="menu-icon" onclick="toggleDrawer()">☰</div>
+        </div>
+    </header>
+
+    <div class="balance-container">
+        <div class="bal-info">
+            <h4>Total Balance</h4>
+            <h2 id="userBalance">৳0.00</h2>
+        </div>
+        <div class="bal-btns">
+            <button class="btn-add" onclick="switchTab('addBalance')">Add Balance</button>
+            <button class="btn-withdraw" onclick="switchTab('withdraw')">Withdraw</button>
+        </div>
+    </div>
+
+    <div class="notice-box">Welcome to ZEG-G Tournament Platform!</div>
+
+    <div class="container">
+        <div id="matchSection" class="section active">
+            <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">Live & Upcoming Matches</h3>
+            <div id="matchListContainer"><p style="color: var(--text-muted);">Loading matches...</p></div>
+        </div>
+
+        <div id="myMatchSection" class="section">
+            <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">My Registered Matches</h3>
+            <div id="myMatchListContainer"><p style="color: var(--text-muted);">Please login to view your joined matches.</p></div>
+        </div>
+
+        <div id="addBalanceSection" class="section">
+            <h3 style="color: var(--neon-green);">Add Balance via bKash</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0;">Send Money: <strong style="color: #fff;">01902009133</strong></p>
+            <p style="font-size: 12px; color: var(--neon-pink); margin-bottom: 5px;">Limit: Minimum ৳5 - Maximum ৳100</p>
+            <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #374151; margin-top: 10px;">
+                <input type="text" id="bkashTrxID" class="form-control" placeholder="Transaction ID (TrxID)">
+                <input type="number" id="addAmount" class="form-control" placeholder="Amount (৳)">
+                <button class="submit-btn" onclick="submitAddBalance()">Submit Request</button>
+            </div>
+            <h4 style="margin-top: 15px; color: var(--neon-cyan); font-size: 14px;">Add Balance History & Status</h4>
+            <div class="history-list" id="addBalanceHistory"><p style="color: var(--text-muted); font-size: 12px;">No requests found.</p></div>
+        </div>
+
+        <div id="withdrawSection" class="section">
+            <h3 style="color: var(--neon-pink);">Withdraw Funds</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0;">শুধু বিকাশ পার্সোনাল নাম্বার।</p>
+            <p style="font-size: 12px; color: var(--neon-pink); margin-bottom: 5px;">Limit: Minimum ৳30 - Maximum ৳200</p>
+            <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #374151; margin-top: 10px;">
+                <input type="text" id="withdrawNumber" class="form-control" placeholder="bKash Number">
+                <input type="number" id="withdrawAmount" class="form-control" placeholder="Amount (৳)">
+                <button class="submit-btn" style="background: var(--neon-pink); color: #fff;" onclick="submitWithdraw()">Request Withdraw</button>
+            </div>
+            <h4 style="margin-top: 15px; color: var(--neon-cyan); font-size: 14px;">Withdraw History & Status</h4>
+            <div class="history-list" id="withdrawHistory"><p style="color: var(--text-muted); font-size: 12px;">No requests found.</p></div>
+        </div>
+    </div>
+
+    <!-- Join Match Modal -->
+    <div class="modal-overlay" id="joinModal">
+        <div class="modal-card">
+            <h3>Join Match</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;" id="joinMatchInfo"></p>
+            <input type="text" id="gamePlayerName" class="form-control" placeholder="Game Player Name">
+            <input type="text" id="gamePlayerID" class="form-control" placeholder="Game Player ID / UID">
+            <button class="submit-btn" onclick="confirmJoinMatch()">Confirm & Pay Entry Fee</button>
+            <div class="switch-text" style="color: var(--text-muted); margin-top: 10px;" onclick="closeJoinModal()">Cancel</div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-card">
+            <h3 id="modalTitle">Login to ZEG-G</h3>
+            <input type="email" id="authEmail" class="form-control" placeholder="Email Address">
+            <input type="password" id="authPassword" class="form-control" placeholder="Password">
+            <button class="submit-btn" id="authSubmitBtn" onclick="handleAuth()">Login</button>
+            <div class="switch-text" id="switchText" onclick="toggleAuthMode()">Don't have an account? <span>Register</span></div>
+            <div class="switch-text" style="color: var(--text-muted); margin-top: 10px;" onclick="closeAuthModal()">Cancel</div>
+        </div>
+    </div>
+
+    <div class="drawer" id="sideDrawer">
+        <div class="drawer-close" onclick="toggleDrawer()">✕</div>
+        <ul class="drawer-links">
+            <li onclick="switchTab('matchSection'); toggleDrawer();">Match</li>
+            <li onclick="switchTab('myMatchSection'); toggleDrawer();">My Match</li>
+            <li onclick="switchTab('addBalance'); toggleDrawer();">Add Balance</li>
+            <li onclick="switchTab('withdraw'); toggleDrawer();">Withdraw</li>
+            <li id="drawerAuthItem" onclick="openAuthModal(); toggleDrawer();">Login / Register</li>
+            <li style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; padding-top: 12px; color: var(--neon-cyan);">
+                <strong>সহায়তা কেন্দ্র</strong><br>
+                <span style="font-size: 12px; color: var(--text-muted);">WhatsApp - 01902009133</span><br>
+                <span style="font-size: 12px; color: var(--text-muted);">Telegram - Aveen_Reed</span>
+            </li>
+            <li onclick="window.location.href='admin.html'" style="color: var(--neon-pink); font-weight: bold;">Admin Panel</li>
+        </ul>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('matchSection')"><div>🏠</div>Home</div>
+        <div class="nav-item" onclick="switchTab('myMatchSection')"><div>🎮</div>My Match</div>
+        <div class="nav-item" onclick="switchTab('addBalance')"><div>💳</div>Add Balance</div>
+        <div class="nav-item" onclick="switchTab('withdraw')"><div>💸</div>Withdraw</div>
+    </div>
+
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -19,6 +195,7 @@
 
         let isLoginMode = true;
         let selectedMatchForJoin = null;
+        let userJoinedMatchCodes = []; // ইউজারের জয়েন করা ম্যাচগুলোর কোড ট্র্যাক রাখার জন্য
 
         window.switchTab = function(tabId) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -59,15 +236,26 @@
             } catch (e) { alert("Error: " + e.message); }
         }
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             const authNavBtn = document.getElementById('authNavBtn');
             const drawerAuthItem = document.getElementById('drawerAuthItem');
+            userJoinedMatchCodes = []; // রিফ্রেশ বা লগইন পরিবর্তনের সময় রিসেট করা
+
             if(user) {
                 authNavBtn.innerText = "Logout"; authNavBtn.onclick = () => signOut(auth);
                 drawerAuthItem.innerText = "Logout"; drawerAuthItem.onclick = () => signOut(auth);
+                
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if(docSnap.exists()) document.getElementById('userBalance').innerText = `৳${docSnap.data().balance || 0.00}`;
                 });
+
+                // ইউজারের জয়েন করা ম্যাচগুলোর কোড ফেচ করে নেওয়া
+                const qReg = query(collection(db, "matchRegistrations"), where("userId", "==", user.uid));
+                const snapReg = await getDocs(qReg);
+                snapReg.forEach(d => {
+                    userJoinedMatchCodes.push(d.data().matchCode);
+                });
+
                 loadUserHistory();
             } else {
                 authNavBtn.innerText = "Login"; authNavBtn.onclick = openAuthModal;
@@ -113,80 +301,61 @@
                 const snap = await getDocs(collection(db, "matches"));
                 if(snap.empty) {
                     container.innerHTML = `<p style="color: var(--text-muted);">No matches available.</p>`;
-                    return;
-                }
+                } else {
+                    container.innerHTML = "";
+                    snap.forEach((d) => {
+                        const m = d.data();
+                        const joined = m.joinedCount || 0;
+                        const total = m.totalSlots || 0;
+                        const isFull = joined >= total;
+                        const hasAlreadyJoined = userJoinedMatchCodes.includes(m.matchCode);
 
-                // ইউজার অলরেডি কোন কোন ম্যাচে জয়েন করেছে তা চেক করার জন্য ফেচ করা
-                let joinedMatchCodes = [];
-                if(auth.currentUser) {
-                    const regQuery = query(collection(db, "matchRegistrations"), where("userId", "==", auth.currentUser.uid));
-                    const regSnap = await getDocs(regQuery);
-                    regSnap.forEach(doc => {
-                        joinedMatchCodes.push(doc.data().matchCode);
+                        // রুম আইডি ও পাসওয়ার্ড দেখানোর লজিক (শুধুমাত্র যারা জয়েন করেছে তারা দেখতে পাবে)
+                        let roomInfoHtml = "";
+                        if (hasAlreadyJoined) {
+                            if (m.roomId && m.roomId.trim() !== "") {
+                                roomInfoHtml = `
+                                    <div style="margin-top: 8px; padding: 8px; background: rgba(0,255,102,0.1); border-radius: 5px; color: var(--neon-green);">
+                                        <strong>Room ID:</strong> ${m.roomId} | <strong>Pass:</strong> ${m.roomPass || 'N/A'}
+                                    </div>`;
+                            } else {
+                                roomInfoHtml = `
+                                    <div style="margin-top: 8px; padding: 8px; background: rgba(0,243,255,0.05); border-radius: 5px; color: var(--neon-cyan); font-size: 12px;">
+                                        ম্যাচ শুরু হওয়ার ২-৩ মিনিট আগে রুম আইডি ও পাসওয়ার্ড দেওয়া হবে।
+                                    </div>`;
+                            }
+                        }
+
+                        // বাটন স্ট্যাটাস নির্ধারণ
+                        let btnHtml = "";
+                        if (hasAlreadyJoined) {
+                            btnHtml = `<button class="join-btn" style="background: #374151; color: var(--neon-green); cursor: not-allowed;" disabled>Already Joined</button>`;
+                        } else if (isFull) {
+                            btnHtml = `<button class="join-btn" style="background: gray; cursor: not-allowed;" disabled>Match Full</button>`;
+                        } else {
+                            btnHtml = `<button class="join-btn" onclick="openJoinModal('${m.matchCode}', '${m.matchName}', ${m.entryFee})">Join Match</button>`;
+                        }
+
+                        const timerId = `timer_${m.matchCode}`;
+                        container.innerHTML += `
+                            <div class="match-card">
+                                <h4>${m.matchName} (Code: ${m.matchCode})</h4>
+                                <div class="match-details">
+                                    <span>Entry Fee: ৳${m.entryFee}</span>
+                                    <span>Prize: ৳${m.firstPrize}</span>
+                                </div>
+                                <div class="match-details">
+                                    <span>Slots: ${joined}/${total}</span>
+                                    <span style="color: var(--neon-cyan);">Starts In: <strong id="${timerId}" style="color: var(--neon-pink);">Calculating...</strong></span>
+                                </div>
+                                ${roomInfoHtml}
+                                ${btnHtml}
+                            </div>`;
+                        
+                        if(m.matchTime) startCountdown(m.matchTime, timerId);
                     });
                 }
-
-                container.innerHTML = "";
-                snap.forEach((d) => {
-                    const m = d.data();
-                    const joined = m.joinedCount || 0;
-                    const total = m.totalSlots || 0;
-                    const isFull = joined >= total;
-                    const hasJoinedAlready = joinedMatchCodes.includes(m.matchCode);
-
-                    // রুম আইডি ও পাসওয়ার্ড লজিক (শুধুমাত্র জয়েন করা ইউজার দেখতে পাবে)
-                    let roomInfoHtml = "";
-                    if(hasJoinedAlready) {
-                        if(m.roomId && m.roomId.trim() !== "") {
-                            roomInfoHtml = `
-                                <div style="margin-top: 8px; padding: 10px; background: rgba(0,255,102,0.1); border: 1px solid var(--neon-green); border-radius: 6px; color: var(--neon-green); font-size: 13px;">
-                                    <strong>Room ID:</strong> ${m.roomId} <br>
-                                    <strong>Password:</strong> ${m.roomPass || 'N/A'}
-                                </div>`;
-                        } else {
-                            roomInfoHtml = `
-                                <div style="margin-top: 8px; padding: 8px; background: rgba(0,243,255,0.05); border-left: 3px solid var(--neon-cyan); border-radius: 4px; color: var(--text-muted); font-size: 12px;">
-                                    ম্যাচ শুরু হওয়ার ২-৩ মিনিট আগে রুম আইডি ও পাসওয়ার্ড দেওয়া হবে।
-                                </div>`;
-                        }
-                    }
-
-                    // বাটন স্ট্যাটাস নির্ধারণ
-                    let btnStyle = "";
-                    let btnText = "Join Match";
-                    let isDisabled = false;
-
-                    if(hasJoinedAlready) {
-                        btnStyle = 'style="background: #374151; color: var(--neon-green); cursor: not-allowed;"';
-                        btnText = '✓ Already Joined';
-                        isDisabled = true;
-                    } else if(isFull) {
-                        btnStyle = 'style="background: gray; cursor: not-allowed;"';
-                        btnText = 'Match Full';
-                        isDisabled = true;
-                    } else {
-                        btnStyle = 'style="background: var(--neon-green); color: #000; cursor: pointer;"';
-                    }
-
-                    const timerId = `timer_${m.matchCode}`;
-                    container.innerHTML += `
-                        <div class="match-card">
-                            <h4>${m.matchName} (Code: ${m.matchCode})</h4>
-                            <div class="match-details">
-                                <span>Entry Fee: ৳${m.entryFee}</span>
-                                <span>Prize: ৳${m.firstPrize}</span>
-                            </div>
-                            <div class="match-details">
-                                <span>Slots: ${joined}/${total}</span>
-                                <span style="color: var(--neon-cyan);">Starts In: <strong id="${timerId}" style="color: var(--neon-pink);">Calculating...</strong></span>
-                            </div>
-                            ${roomInfoHtml}
-                            <button class="join-btn" ${btnStyle} ${isDisabled ? 'disabled' : ''} onclick="${isDisabled ? '' : `openJoinModal('${m.matchCode}', '${m.matchName}',${m.entryFee})`}">${btnText}</button>
-                        </div>`;
-                    
-                    if(m.matchTime) startCountdown(m.matchTime, timerId);
-                });
-            } catch(e) { console.error(e); }
+            } catch(e) {}
         }
 
         window.openJoinModal = function(code, name, fee) {
@@ -216,15 +385,6 @@
             }
 
             try {
-                // ডাবল চেক যেন সাবমিট করার সময়ও ইউজার আগে জয়েন করা না থাকে
-                const checkQuery = query(collection(db, "matchRegistrations"), where("userId", "==", auth.currentUser.uid), where("matchCode", "==", selectedMatchForJoin.code));
-                const checkSnap = await getDocs(checkQuery);
-                if(!checkSnap.empty) {
-                    alert("আপনি ইতিমধ্যে এই ম্যাচে জয়েন করেছেন!");
-                    closeJoinModal();
-                    return;
-                }
-
                 await updateDoc(userRef, { balance: userBal - selectedMatchForJoin.fee });
 
                 const matchRef = doc(db, "matches", selectedMatchForJoin.code);
@@ -240,6 +400,9 @@
                     playerID: playerID,
                     timestamp: new Date()
                 });
+
+                // লোকাল অ্যারেতে যুক্ত করা যাতে ইনস্ট্যান্ট আপডেট দেখায়
+                userJoinedMatchCodes.push(selectedMatchForJoin.code);
 
                 alert("Successfully joined the match!");
                 closeJoinModal();
@@ -360,4 +523,6 @@
                 loadUserHistory();
             } catch(e) { alert("Error: " + e.message); }
         }
-</script>
+    </script>
+</body>
+</html>
