@@ -23,7 +23,6 @@
         .login-btn { background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 5px 15px; border-radius: 5px; cursor: pointer; }
         .menu-icon { font-size: 24px; cursor: pointer; color: var(--neon-pink); }
 
-        /* Notice Bar Styling */
         .notice-bar { background: linear-gradient(90deg, #1f2937, #111827); border-bottom: 1px solid rgba(0, 255, 102, 0.3); padding: 10px 15px; display: flex; align-items: center; overflow: hidden; white-space: nowrap; }
         .notice-title { background: var(--neon-green); color: #000; font-weight: bold; padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-right: 10px; text-transform: uppercase; flex-shrink: 0; }
         .notice-content { color: var(--neon-cyan); font-size: 13px; display: inline-block; animation: marquee 15s linear infinite; }
@@ -94,7 +93,6 @@
         </div>
     </header>
 
-    <!-- Dynamic Notice Bar -->
     <div class="notice-bar" id="noticeBarContainer" style="display: none;">
         <div class="notice-title">Notice</div>
         <div class="notice-content" id="noticeTextDisplay">Loading notice...</div>
@@ -170,7 +168,6 @@
         powered by <span>ZEG-G</span>
     </div>
 
-    <!-- Join Match Modal -->
     <div class="modal-overlay" id="joinModal" style="display: none;">
         <div class="modal-card">
             <h3>Join Match</h3>
@@ -183,7 +180,6 @@
         </div>
     </div>
 
-    <!-- Joined Players List Modal -->
     <div class="modal-overlay" id="playersListModal" style="display: none;">
         <div class="modal-card" style="max-width: 400px;" onclick="event.stopPropagation()">
             <h3 style="color: var(--neon-cyan);" id="playersModalTitle">Joined Players</h3>
@@ -194,7 +190,6 @@
         </div>
     </div>
 
-    <!-- Profile Modal (Both Game Name and UID Editable) -->
     <div class="modal-overlay" id="profileModal" style="display: none;">
         <div class="modal-card" onclick="event.stopPropagation()">
             <h3 style="color: var(--neon-green);">👤 User Profile</h3>
@@ -214,7 +209,6 @@
         </div>
     </div>
 
-    <!-- Auth Modal -->
     <div class="modal-overlay" id="authModal" style="display: flex;">
         <div class="modal-card" onclick="event.stopPropagation()">
             <h3 id="modalTitle">Login to ZEG-G</h3>
@@ -416,7 +410,6 @@
                         document.getElementById('userBalance').innerText = `৳${data.balance || 0.00}`;
                         document.getElementById('profileEmail').innerText = data.email || user.email;
                         
-                        // Set current Game Name & UID in the profile input boxes
                         document.getElementById('profileEditName').value = data.playerName || "";
                         document.getElementById('profileEditUID').value = data.playerUID || "";
                     }
@@ -517,12 +510,27 @@
                         const viewBtnId = `viewBtn_${m.matchCode}`;
                         const timerId = `timer_${m.matchCode}`;
 
+                        // Prize display logic (Total Prize & Per Kill support)
+                        let prizeDisplayHtml = "";
+                        if (m.type === 'perkill') {
+                            prizeDisplayHtml = `
+                                <span>Total Prize: ${m.prizePool || 'N/A'}</span>
+                                <span style="color: var(--neon-pink);">Per Kill: ৳${m.perKillAmount || 0}</span>
+                            `;
+                        } else {
+                            prizeDisplayHtml = `
+                                <span style="grid-column: span 2;">Total Prize: ৳${m.firstPrize || m.prize || 'N/A'}</span>
+                            `;
+                        }
+
                         container.innerHTML += `
                             <div class="match-card">
                                 <h4>${m.matchName} (Code: ${m.matchCode})</h4>
                                 <div class="match-details">
                                     <span>Entry Fee: ৳${m.entryFee}</span>
-                                    <span>Prize: ৳${m.firstPrize}</span>
+                                </div>
+                                <div class="match-details" style="font-weight: bold; color: var(--neon-green);">
+                                    ${prizeDisplayHtml}
                                 </div>
                                 <div class="match-details">
                                     <span>Slots: ${joined}/${total}</span>
