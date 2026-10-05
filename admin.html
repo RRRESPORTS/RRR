@@ -27,16 +27,13 @@
         
         .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         
-        /* Dashboard Home Cards (Clickable) */
         .dash-card { background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: 12px; padding: 25px; box-shadow: 0 0 15px rgba(0,255,102,0.1); transition: 0.3s; cursor: pointer; text-align: center; position: relative; }
         .dash-card:hover { transform: translateY(-5px); box-shadow: 0 0 25px rgba(0,243,255,0.3); border-color: var(--neon-cyan); }
         .dash-card h3 { font-size: 18px; color: var(--neon-cyan); margin-bottom: 10px; }
         .dash-card p { font-size: 13px; color: var(--text-muted); }
 
-        /* Badge for pending requests counter on cards */
         .card-badge { position: absolute; top: 12px; right: 12px; background: var(--neon-pink); color: #fff; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 10px; display: none; }
 
-        /* Inner Work Sections (Initially Hidden) */
         .admin-section { display: none; background: var(--card-bg); border: 2px solid var(--neon-cyan); border-radius: 12px; padding: 25px; box-shadow: 0 0 20px rgba(0,243,255,0.1); }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px dashed #374151; padding-bottom: 12px; }
         .section-header h3 { font-size: 18px; color: var(--neon-cyan); }
@@ -51,7 +48,6 @@
         
         .list-container { max-height: 400px; overflow-y: auto; margin-top: 10px; padding-right: 5px; }
         
-        /* Gichano / Structured Room Control Box Design */
         .room-item-box { background: #161e2e; border: 1px solid #374151; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid var(--neon-cyan); }
         .room-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .room-grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
@@ -65,7 +61,6 @@
 </head>
 <body>
 
-    <!-- Login Container -->
     <div class="login-container" id="loginContainer">
         <div class="login-box">
             <h2>Admin Login</h2>
@@ -75,14 +70,12 @@
         </div>
     </div>
 
-    <!-- Admin Dashboard Main -->
     <div id="adminDashboard">
         <div class="dashboard-header">
             <h2>ZEG-G ADMIN PANEL</h2>
             <button onclick="logoutAdmin()" style="background: var(--neon-pink); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">Logout</button>
         </div>
 
-        <!-- 1. Home Dashboard Menu Cards -->
         <div class="admin-grid" id="dashboardHome">
             <div class="dash-card" style="border-color: var(--neon-cyan);" onclick="openCardSection('cardNotice')">
                 <h3>Notice Bar Setting</h3>
@@ -104,10 +97,9 @@
                 <p>সাধারণ টুর্নামেন্ট বা ম্যাচ যুক্ত করুন</p>
             </div>
 
-            <!-- New Per Kill Match Card -->
             <div class="dash-card" style="border-color: var(--neon-cyan);" onclick="openCardSection('cardAddPerKillMatch')">
                 <h3>Add Per Kill Match</h3>
-                <p>প্রাইজ পুল ও পার কিল অ্যামাউন্ট সহ ম্যাচ যুক্ত করুন</p>
+                <p>টোটাল প্রাইজ ও পার কিল অ্যামাউন্ট সহ ম্যাচ যুক্ত করুন</p>
             </div>
 
             <div class="dash-card" onclick="openCardSection('cardAddBalance')">
@@ -133,9 +125,6 @@
             </div>
         </div>
 
-        <!-- 2. Individual Functional Sections -->
-        
-        <!-- Notice Bar Section -->
         <div id="cardNotice" class="admin-section">
             <div class="section-header">
                 <h3>Notice Bar Setting</h3>
@@ -149,7 +138,6 @@
             <button class="admin-btn" style="background: var(--neon-cyan); color: #000;" onclick="updateNoticeSettings()">Save Notice</button>
         </div>
 
-        <!-- Gift Code Section -->
         <div id="cardGiftCode" class="admin-section">
             <div class="section-header">
                 <h3>Create Gift Code</h3>
@@ -160,7 +148,6 @@
             <button class="admin-btn" style="background: var(--neon-pink); color: #fff;" onclick="createGiftCode()">Create Code</button>
         </div>
 
-        <!-- Room Control Section (Gichano & Clean Layout) -->
         <div id="cardRoomControl" class="admin-section">
             <div class="section-header">
                 <h3>Input Match Id & Password</h3>
@@ -169,7 +156,6 @@
             <div class="list-container" id="roomControlList"><p style="color: var(--text-muted); text-align: center;">Loading matches...</p></div>
         </div>
 
-        <!-- Add Normal Match Section -->
         <div id="cardAddMatch" class="admin-section">
             <div class="section-header">
                 <h3>Add Normal Match</h3>
@@ -178,14 +164,13 @@
             <input type="text" id="mCode" class="form-control" placeholder="Match Code (e.g. M01)">
             <input type="text" id="mName" class="form-control" placeholder="Match Name">
             <input type="number" id="mFee" class="form-control" placeholder="Entry Fee (৳)">
-            <input type="text" id="mFirstPrize" class="form-control" placeholder="First Prize">
+            <input type="text" id="mFirstPrize" class="form-control" placeholder="Total Prize">
             <input type="datetime-local" id="mTime" class="form-control">
             <input type="number" id="mSlots" class="form-control" placeholder="Total Slots (e.g. 48)">
             <textarea id="mNotice" class="form-control" placeholder="Match Notice (Show when joining)" rows="2"></textarea>
             <button class="admin-btn" onclick="addNewMatchToDB('normal')">Create Normal Match</button>
         </div>
 
-        <!-- Add Per Kill Match Section -->
         <div id="cardAddPerKillMatch" class="admin-section">
             <div class="section-header">
                 <h3>Add Per Kill Match</h3>
@@ -194,7 +179,7 @@
             <input type="text" id="pkCode" class="form-control" placeholder="Match Code (e.g. PK01)">
             <input type="text" id="pkName" class="form-control" placeholder="Match Name (e.g. Free Fire Per Kill)">
             <input type="number" id="pkFee" class="form-control" placeholder="Entry Fee (৳)">
-            <input type="text" id="pkPrizePool" class="form-control" placeholder="Total Prize Pool (e.g. 500 BDT)">
+            <input type="text" id="pkPrizePool" class="form-control" placeholder="Total Prize (e.g. 500 BDT)">
             <input type="number" id="pkPerKill" class="form-control" placeholder="Per Kill Amount (৳)">
             <input type="datetime-local" id="pkTime" class="form-control">
             <input type="number" id="pkSlots" class="form-control" placeholder="Total Slots (e.g. 48)">
@@ -202,7 +187,6 @@
             <button class="admin-btn" style="background: var(--neon-cyan); color: #000;" onclick="addNewMatchToDB('perkill')">Create Per Kill Match</button>
         </div>
 
-        <!-- Add Balance Request Section -->
         <div id="cardAddBalance" class="admin-section">
             <div class="section-header">
                 <h3>Add Balance Request</h3>
@@ -211,7 +195,6 @@
             <div class="list-container" id="addBalanceRequestsList"><p style="color: var(--text-muted); text-align: center;">Loading...</p></div>
         </div>
 
-        <!-- Withdraw Request Section -->
         <div id="cardWithdraw" class="admin-section">
             <div class="section-header">
                 <h3>Withdraw Request</h3>
@@ -220,7 +203,6 @@
             <div class="list-container" id="withdrawRequestsList"><p style="color: var(--text-muted); text-align: center;">Loading...</p></div>
         </div>
 
-        <!-- Add User Balance Section -->
         <div id="cardUserBalance" class="admin-section">
             <div class="section-header">
                 <h3>Add User Balance</h3>
@@ -231,7 +213,6 @@
             <button class="admin-btn" onclick="modifyUserBalance()">Update Balance</button>
         </div>
 
-        <!-- Search & Block User Section -->
         <div id="cardSearchUser" class="admin-section">
             <div class="section-header">
                 <h3>Search User & Block/Unblock</h3>
@@ -241,7 +222,6 @@
             <button class="admin-btn" onclick="searchUserByUID()">Search User</button>
             <div id="searchResultBox" style="margin-top: 10px; font-size: 13px; color: var(--text-muted);"></div>
         </div>
-
     </div>
 
     <script type="module">
@@ -280,7 +260,6 @@
 
         window.logoutAdmin = function() { sessionStorage.removeItem("isAdminLoggedIn"); location.reload(); }
 
-        // Card navigation system
         window.openCardSection = function(sectionId) {
             document.getElementById("dashboardHome").style.display = "none";
             document.querySelectorAll(".admin-section").forEach(sec => sec.style.display = "none");
@@ -293,7 +272,6 @@
             loadAdminData();
         }
 
-        // Notice Bar Setting Update Function
         window.updateNoticeSettings = async function() {
             const text = document.getElementById("adminNoticeText").value.trim();
             const active = document.getElementById("adminNoticeActive").checked;
@@ -305,7 +283,6 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // Gift Code Create Function
         window.createGiftCode = async function() {
             const code = document.getElementById("giftCodeText").value.trim();
             const amount = Number(document.getElementById("giftCodeAmount").value);
@@ -320,7 +297,6 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // Match Create Function (Handles both Normal & Per Kill)
         window.addNewMatchToDB = async function(matchType) {
             let code, name, fee, slots, notice, time;
             let matchData = {};
@@ -479,7 +455,6 @@
         }
 
         async function loadAdminData() {
-            // Load existing notice setting values into admin form
             try {
                 const noticeDoc = await getDoc(doc(db, "settings", "notice"));
                 if(noticeDoc.exists()) {
@@ -489,7 +464,6 @@
                 }
             } catch(e) {}
 
-            // Room Control List (Gichano & Structured Layout)
             const roomListContainer = document.getElementById("roomControlList");
             const snapMatch = await getDocs(collection(db, "matches"));
             roomListContainer.innerHTML = snapMatch.empty ? `<p style="color:var(--text-muted); text-align:center;">কোনো ম্যাচ নেই।</p>` : "";
@@ -511,7 +485,6 @@
                     </div>`;
             });
 
-            // Add Balance Pending Counter & List
             let pendingAddBalCount = 0;
             const addBalContainer = document.getElementById("addBalanceRequestsList");
             const snapBal = await getDocs(collection(db, "addBalanceRequests"));
@@ -541,7 +514,6 @@
                 badgeAddBal.style.display = "none";
             }
 
-            // Withdraw Pending Counter & List
             let pendingWithdrawCount = 0;
             const withdrawContainer = document.getElementById("withdrawRequestsList");
             const snapWith = await getDocs(collection(db, "withdrawRequests"));
