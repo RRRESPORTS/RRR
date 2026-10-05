@@ -59,6 +59,7 @@
         </div>
 
         <div class="admin-grid">
+            <!-- Match Create Setting -->
             <div class="admin-card">
                 <h3>🎮 Match Create Setting</h3>
                 <input type="text" id="mCode" class="form-control" placeholder="Match Code (e.g. M01)">
@@ -71,16 +72,27 @@
                 <button class="admin-btn" onclick="addNewMatchToDB()">Create Match</button>
             </div>
 
+            <!-- Search User by Game UID -->
+            <div class="admin-card">
+                <h3>🔍 Search User by Game UID</h3>
+                <input type="text" id="searchUidInput" class="form-control" placeholder="Enter Game UID">
+                <button class="admin-btn" onclick="searchUserByUID()">Search User</button>
+                <div id="searchResultBox" style="margin-top: 10px; font-size: 13px; color: var(--text-muted);"></div>
+            </div>
+
+            <!-- Add Balance Requests -->
             <div class="admin-card">
                 <h3>💳 Add Balance Requests</h3>
                 <div class="list-container" id="addBalanceRequestsList"><p style="color: var(--text-muted); text-align: center;">Loading...</p></div>
             </div>
 
+            <!-- Withdraw Requests -->
             <div class="admin-card">
                 <h3>💸 Withdraw Requests</h3>
                 <div class="list-container" id="withdrawRequestsList"><p style="color: var(--text-muted); text-align: center;">Loading...</p></div>
             </div>
 
+            <!-- Room ID & Match Control -->
             <div class="admin-card">
                 <h3>🔑 Room ID & Match Control</h3>
                 <div class="list-container" id="adminMatchList"><p style="color: var(--text-muted); text-align: center;">Loading...</p></div>
@@ -90,7 +102,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
@@ -143,6 +155,36 @@
                 alert("Match created successfully!");
                 location.reload();
             } catch(e) { alert("Error: " + e.message); }
+        }
+
+        // User Search by UID Feature
+        window.searchUserByUID = async function() {
+            const uid = document.getElementById("searchUidInput").value.trim();
+            const resultBox = document.getElementById("searchResultBox");
+            if(!uid) { alert("দয়া করে একটি Game UID লিখুন।"); return; }
+
+            resultBox.innerHTML = "Searching...";
+            try {
+                const q = query(collection(db, "users"), where("playerUID", "==", uid));
+                const querySnapshot = await getDocs(q);
+
+                if(querySnapshot.empty) {
+                    resultBox.innerHTML = `<span style="color: var(--neon-pink);">কোনো ইউজার পাওয়া যায়নি!</span>`;
+                } else {
+                    querySnapshot.forEach((docSnap) => {
+                        const userData = docSnap.data();
+                        resultBox.innerHTML = `
+                            <div style="background: #1f2937; padding: 10px; border-radius: 6px; border-left: 3px solid var(--neon-green);">
+                                <strong style="color: var(--neon-cyan);">Name:</strong> ${userData.playerName || 'N/A'}<br>
+                                <strong style="color: var(--neon-cyan);">UID:</strong> ${userData.playerUID}<br>
+                                <strong style="color: var(--neon-cyan);">Email:</strong> ${userData.email || 'N/A'}<br>
+                                <strong style="color: var(--neon-cyan);">Balance:</strong> ৳${userData.balance || 0}
+                            </div>`;
+                    });
+                }
+            } catch(e) {
+                resultBox.innerHTML = `<span style="color: var(--neon-pink);">Error: ${e.message}</span>`;
+            }
         }
 
         window.processAddBalance = async function(reqId, userId, amount, status) {
