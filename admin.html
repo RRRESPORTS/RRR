@@ -60,6 +60,17 @@
 
         <div class="admin-grid">
             
+            <!-- Notice Bar Setting Card -->
+            <div class="admin-card" style="border-color: var(--neon-cyan);">
+                <h3>Notice Bar Setting</h3>
+                <textarea id="adminNoticeText" class="form-control" placeholder="Enter notice text here..." rows="3"></textarea>
+                <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 14px;">
+                    <input type="checkbox" id="adminNoticeActive" style="width: 18px; height: 18px; cursor: pointer;">
+                    <label for="adminNoticeActive" style="color: var(--text-muted); cursor: pointer;">Show Notice Bar on Site</label>
+                </div>
+                <button class="admin-btn" style="background: var(--neon-cyan); color: #000;" onclick="updateNoticeSettings()">Save Notice</button>
+            </div>
+
             <!-- Gift Code Creation Card -->
             <div class="admin-card" style="border-color: var(--neon-pink);">
                 <h3>Create Gift Code</h3>
@@ -153,6 +164,20 @@
         }
 
         window.logoutAdmin = function() { sessionStorage.removeItem("isAdminLoggedIn"); location.reload(); }
+
+        // Notice Bar Setting Update Function
+        window.updateNoticeSettings = async function() {
+            const text = document.getElementById("adminNoticeText").value.trim();
+            const active = document.getElementById("adminNoticeActive").checked;
+            try {
+                await setDoc(doc(db, "settings", "notice"), {
+                    text: text,
+                    active: active,
+                    updatedAt: new Date()
+                }, { merge: true });
+                alert("Notice bar settings updated successfully!");
+            } catch(e) { alert("Error: " + e.message); }
+        }
 
         // Gift Code Create Function
         window.createGiftCode = async function() {
@@ -306,6 +331,16 @@
         }
 
         async function loadAdminData() {
+            // Load existing notice setting values into admin form
+            try {
+                const noticeDoc = await getDoc(doc(db, "settings", "notice"));
+                if(noticeDoc.exists()) {
+                    const noticeData = noticeDoc.data();
+                    document.getElementById("adminNoticeText").value = noticeData.text || "";
+                    document.getElementById("adminNoticeActive").checked = noticeData.active || false;
+                }
+            } catch(e) {}
+
             const roomListContainer = document.getElementById("roomControlList");
             const snapMatch = await getDocs(collection(db, "matches"));
             roomListContainer.innerHTML = snapMatch.empty ? `<p style="color:var(--text-muted); text-align:center;">কোনো ম্যাচ নেই।</p>` : "";
