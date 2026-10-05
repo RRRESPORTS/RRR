@@ -6,75 +6,42 @@
     <title>ZEG-G Admin Panel</title>
     <style>
         :root {
-            --bg-color: #070913;
-            --card-bg: #10172a;
+            --bg-color: #0b0f19;
+            --card-bg: #111827;
             --neon-green: #00ff66;
             --neon-cyan: #00f3ff;
             --neon-pink: #ff007f;
-            --neon-purple: #9d4edd;
             --text-main: #ffffff;
-            --text-muted: #94a3b8;
+            --text-muted: #9ca3af;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; }
         
         .login-container { display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .login-box { background: var(--card-bg); border: 2px solid var(--neon-cyan); padding: 35px; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 0 30px rgba(0,243,255,0.2); }
-        .login-box h2 { color: var(--neon-cyan); margin-bottom: 20px; text-align: center; text-shadow: 0 0 10px rgba(0,243,255,0.4); }
+        .login-box { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.3); padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 0 20px rgba(0,243,255,0.1); }
+        .login-box h2 { color: var(--neon-cyan); margin-bottom: 20px; text-align: center; }
         
         #adminDashboard { display: none; max-width: 1200px; margin: 0 auto; }
-        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid rgba(0,243,255,0.3); padding-bottom: 15px; }
-        .dashboard-header h2 { color: var(--neon-cyan); text-shadow: 0 0 15px rgba(0,243,255,0.5); letter-spacing: 1px; }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid rgba(0,243,255,0.2); padding-bottom: 15px; }
+        .dashboard-header h2 { color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0,243,255,0.4); }
         
-        /* 2-Column Grid Layout matching the image reference */
-        .admin-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 25px; 
-        }
+        /* Your Drawing Style Grid Layout */
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .admin-card { background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: 12px; padding: 20px; box-shadow: 0 0 15px rgba(0,255,102,0.1); transition: 0.3s; }
+        .admin-card:hover { box-shadow: 0 0 25px rgba(0,255,102,0.3); }
+        .admin-card h3 { font-size: 16px; color: var(--neon-cyan); margin-bottom: 15px; text-align: center; border-bottom: 1px dashed #374151; padding-bottom: 8px; }
         
-        .admin-card { 
-            background: var(--card-bg); 
-            border: 3px solid var(--neon-green); 
-            border-radius: 16px; 
-            padding: 25px; 
-            box-shadow: 0 0 20px rgba(0, 255, 102, 0.15); 
-            transition: all 0.3s ease; 
-        }
-        .admin-card:hover { 
-            box-shadow: 0 0 30px rgba(0, 255, 102, 0.35); 
-            transform: translateY(-3px);
-        }
+        .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; font-size: 14px; }
+        .form-control:focus { border-color: var(--neon-cyan); outline: none; }
         
-        .admin-card h3 { 
-            font-size: 18px; 
-            color: var(--neon-cyan); 
-            margin-bottom: 15px; 
-            text-align: center; 
-            border-bottom: 2px dashed rgba(0, 243, 255, 0.3); 
-            padding-bottom: 10px; 
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        .admin-btn { width: 100%; padding: 10px; background: var(--neon-green); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+        .admin-btn:hover { opacity: 0.9; }
         
-        .form-control { width: 100%; padding: 12px; margin: 8px 0; background: #0b0f19; border: 1px solid #334155; color: #fff; border-radius: 8px; font-size: 14px; transition: 0.2s; }
-        .form-control:focus { border-color: var(--neon-cyan); outline: none; box-shadow: 0 0 8px rgba(0,243,255,0.3); }
-        
-        .admin-btn { width: 100%; padding: 12px; background: var(--neon-green); color: #000; border: none; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; font-size: 14px; transition: 0.2s; }
-        .admin-btn:hover { opacity: 0.9; box-shadow: 0 0 10px var(--neon-green); }
-        
-        .list-container { max-height: 250px; overflow-y: auto; margin-top: 10px; padding-right: 5px; }
-        .list-item { background: #0b0f19; padding: 12px; border-radius: 8px; margin-bottom: 10px; font-size: 13px; border-left: 4px solid var(--neon-cyan); display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e293b; }
-        
-        .btn-group { display: flex; gap: 6px; }
-        .btn-approve { background: var(--neon-green); border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; color: #000; font-size: 12px; }
-        .btn-fail { background: var(--neon-pink); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
-
-        @media (max-width: 768px) {
-            .admin-grid { 
-                grid-template-columns: 1fr; 
-            }
-        }
+        .list-container { max-height: 250px; overflow-y: auto; margin-top: 10px; }
+        .list-item { background: #1f2937; padding: 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; border-left: 3px solid var(--neon-cyan); display: flex; justify-content: space-between; align-items: center; }
+        .btn-group { display: flex; gap: 5px; }
+        .btn-approve { background: var(--neon-green); border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; color: #000; }
+        .btn-fail { background: var(--neon-pink); color: #fff; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -91,7 +58,7 @@
     <div id="adminDashboard">
         <div class="dashboard-header">
             <h2>ZEG-G ADMIN PANEL</h2>
-            <button onclick="logoutAdmin()" style="background: var(--neon-pink); color: #fff; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 0 10px rgba(255,0,127,0.4);">Logout</button>
+            <button onclick="logoutAdmin()" style="background: var(--neon-pink); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">Logout</button>
         </div>
 
         <div class="admin-grid">
@@ -150,12 +117,11 @@
                 <button class="admin-btn" onclick="createGiftCode()">Create Gift Code</button>
             </div>
 
-            <!-- 8. System Info Card -->
-            <div class="admin-card" style="border-color: var(--neon-cyan); box-shadow: 0 0 20px rgba(0,243,255,0.15);">
+            <!-- 8. Extra Card (Reserved / System Status) -->
+            <div class="admin-card" style="border-color: var(--neon-cyan);">
                 <h3>System Info</h3>
-                <p style="font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 25px; line-height: 1.6;">
-                    <strong style="color: var(--neon-cyan);">ZEG-G Tournament Platform v2.0</strong> <br>
-                    All categories & modules active and fully synced with Firestore database.
+                <p style="font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 20px;">
+                    ZEG-G Tournament Platform v2.0 <br>All modules active and synced with Firestore.
                 </p>
             </div>
 
@@ -313,12 +279,12 @@
                         const isBlocked = userData.isBlocked || false;
                         
                         resultBox.innerHTML = `
-                            <div style="background: #0b0f19; padding: 12px; border-radius: 8px; border-left: 3px solid var(--neon-green); margin-top: 8px; border: 1px solid #1e293b;">
+                            <div style="background: #1f2937; padding: 10px; border-radius: 6px; border-left: 3px solid var(--neon-green); margin-top: 5px;">
                                 <strong style="color: var(--neon-cyan);">Name:</strong> ${userData.playerName || 'N/A'}<br>
                                 <strong style="color: var(--neon-cyan);">UID:</strong> ${userData.playerUID}<br>
                                 <strong style="color: var(--neon-cyan);">Balance:</strong> ৳${userData.balance || 0}<br>
                                 <strong style="color: var(--neon-cyan);">Status:</strong> ${isBlocked ? '<span style="color:red">Blocked</span>' : '<span style="color:green">Active</span>'}<br>
-                                <button class="admin-btn" style="background: ${isBlocked ? 'var(--neon-green)' : 'var(--neon-pink)'}; margin-top:8px; padding:8px;" onclick="toggleBlockUser('${docId}', ${isBlocked})">
+                                <button class="admin-btn" style="background: ${isBlocked ? 'var(--neon-green)' : 'var(--neon-pink)'}; margin-top:8px; padding:6px;" onclick="toggleBlockUser('${docId}', ${isBlocked})">
                                     ${isBlocked ? 'Unblock User' : 'Block User'}
                                 </button>
                             </div>`;
@@ -365,13 +331,13 @@
             snapMatch.forEach(d => {
                 const m = d.data();
                 roomListContainer.innerHTML += `
-                    <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                    <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 6px;">
                         <strong style="color: var(--neon-cyan);">${m.matchName} (${m.matchCode})</strong>
-                        <input type="text" id="rid_${m.matchCode}" class="form-control" placeholder="Room ID" value="${m.roomId || ''}" style="margin:0; padding:8px; font-size:12px;">
-                        <input type="text" id="rpass_${m.matchCode}" class="form-control" placeholder="Password" value="${m.roomPass || ''}" style="margin:0; padding:8px; font-size:12px;">
-                        <div style="display: flex; gap: 6px; width: 100%;">
-                            <button class="btn-approve" style="flex:1; padding:6px;" onclick="setRoomCreds('${m.matchCode}')">Save</button>
-                            <button class="btn-fail" style="padding:6px;" onclick="deleteMatch('${m.matchCode}')">Delete</button>
+                        <input type="text" id="rid_${m.matchCode}" class="form-control" placeholder="Room ID" value="${m.roomId || ''}" style="margin:2px 0; padding:5px; font-size:12px;">
+                        <input type="text" id="rpass_${m.matchCode}" class="form-control" placeholder="Password" value="${m.roomPass || ''}" style="margin:2px 0; padding:5px; font-size:12px;">
+                        <div style="display: flex; gap: 5px; width: 100%;">
+                            <button class="btn-approve" style="flex:1; padding:4px;" onclick="setRoomCreds('${m.matchCode}')">Save</button>
+                            <button class="btn-fail" style="padding:4px;" onclick="deleteMatch('${m.matchCode}')">Delete</button>
                         </div>
                     </div>`;
             });
