@@ -145,7 +145,6 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // Add Balance Actions
         window.processAddBalance = async function(reqId, userId, amount, status) {
             try {
                 const reqRef = doc(db, "addBalanceRequests", reqId);
@@ -164,7 +163,6 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // Withdraw Actions
         window.processWithdraw = async function(reqId, userId, amount, status) {
             try {
                 const reqRef = doc(db, "withdrawRequests", reqId);
@@ -172,7 +170,6 @@
                     await updateDoc(reqRef, { status: 'Approved' });
                     alert("Withdraw Approved!");
                 } else {
-                    // Refund balance to user since it was deducted earlier
                     const userRef = doc(db, "users", userId);
                     const userSnap = await getDoc(userRef);
                     if(userSnap.exists()) {
