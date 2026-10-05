@@ -183,6 +183,24 @@
         </div>
     </div>
 
+    <!-- Profile Modal (User Info & Update UID) -->
+    <div class="modal-overlay" id="profileModal" style="display: none;">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <h3 style="color: var(--neon-green);">👤 User Profile</h3>
+            <div style="font-size: 13px; margin-bottom: 10px; line-height: 1.6; color: var(--text-muted);">
+                <div><strong>Gmail:</strong> <span id="profileEmail" style="color: #fff;">-</span></div>
+                <div><strong>Password:</strong> <span id="profilePass" style="color: #fff;">••••••••</span></div>
+                <div><strong>Game Name:</strong> <span id="profileGameName" style="color: var(--neon-cyan);">-</span></div>
+            </div>
+            <div style="margin-top: 10px;">
+                <label style="font-size: 12px; color: var(--neon-cyan);">Change Game UID:</label>
+                <input type="text" id="profileEditUID" class="form-control" placeholder="Enter new UID">
+            </div>
+            <button class="submit-btn" id="updateProfileBtn" style="background: var(--neon-cyan); color: #000;">Update UID</button>
+            <div class="switch-text" id="closeProfileModal" style="color: var(--neon-pink); margin-top: 10px; cursor: pointer;">Close</div>
+        </div>
+    </div>
+
     <!-- Auth Modal (Forced Login/Register) -->
     <div class="modal-overlay" id="authModal" style="display: flex;">
         <div class="modal-card" onclick="event.stopPropagation()">
@@ -201,6 +219,7 @@
     <div class="drawer" id="sideDrawer">
         <div class="drawer-close" id="drawerCloseBtn">✕</div>
         <ul class="drawer-links">
+            <li id="menuProfile" style="color: var(--neon-green); font-weight: bold;">👤 Profile</li>
             <li id="menuMatch">Match</li>
             <li id="menuMyMatch">My Match</li>
             <li id="menuAddBal">Add Balance</li>
@@ -262,6 +281,13 @@
         function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; }
         function closeJoinModal() { document.getElementById('joinModal').style.display = 'none'; }
 
+        function openProfileModal() {
+            if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
+            toggleDrawer();
+            document.getElementById('profileModal').style.display = 'flex';
+        }
+        function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
+
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
             document.getElementById('modalTitle').innerText = isLoginMode ? "Login to ZEG-G" : "Register New Account";
@@ -293,6 +319,18 @@
                     closeAuthModal();
                 }
             } catch (e) { alert("Error: " + e.message); }
+        }
+
+        async function updateProfileUID() {
+            if(!auth.currentUser) return;
+            const newUID = document.getElementById('profileEditUID').value.trim();
+            if(!newUID) { alert("নতুন UID লিখুন।"); return; }
+
+            try {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { playerUID: newUID });
+                alert("Game UID successfully updated!");
+                closeProfileModal();
+            } catch(e) { alert("Error: " + e.message); }
         }
 
         async function claimGiftCode() {
@@ -351,7 +389,13 @@
                 drawerAuthItem.onclick = () => signOut(auth);
                 
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
-                    if(docSnap.exists()) document.getElementById('userBalance').innerText = `৳${docSnap.data().balance || 0.00}`;
+                    if(docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById('userBalance').innerText = `৳${data.balance || 0.00}`;
+                        document.getElementById('profileEmail').innerText = data.email || user.email;
+                        document.getElementById('profileGameName').innerText = `${data.playerName || 'N/A'} (UID: ${data.playerUID || 'N/A'})`;
+                        document.getElementById('profileEditUID').value = data.playerUID || "";
+                    }
                 });
 
                 const qReg = query(collection(db, "matchRegistrations"), where("userId", "==", user.uid));
@@ -695,6 +739,10 @@
         document.getElementById('authSubmitBtn').onclick = handleAuth;
         document.getElementById('switchText').onclick = toggleAuthMode;
         document.getElementById('drawerCloseBtn').onclick = toggleDrawer;
+
+        document.getElementById('menuProfile').onclick = openProfileModal;
+        document.getElementById('updateProfileBtn').onclick = updateProfileUID;
+        document.getElementById('closeProfileModal').onclick = closeProfileModal;
 
         document.getElementById('menuMatch').onclick = () => { switchTab('matchSection'); toggleDrawer(); };
         document.getElementById('menuMyMatch').onclick = () => { switchTab('myMatchSection'); toggleDrawer(); };
