@@ -17,27 +17,36 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; }
         
+        /* Login Page */
         .login-container { display: flex; justify-content: center; align-items: center; height: 100vh; }
         .login-box { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.3); padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 0 20px rgba(0,243,255,0.1); }
         .login-box h2 { color: var(--neon-cyan); margin-bottom: 20px; text-align: center; }
         
-        #adminDashboard { display: none; max-width: 1200px; margin: 0 auto; }
-        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid rgba(0,243,255,0.2); padding-bottom: 15px; }
+        #adminDashboard { display: none; max-width: 1100px; margin: 0 auto; }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid rgba(0,243,255,0.2); padding-bottom: 15px; }
         .dashboard-header h2 { color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0,243,255,0.4); }
         
-        /* Your Drawing Style Grid Layout */
-        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .admin-card { background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: 12px; padding: 20px; box-shadow: 0 0 15px rgba(0,255,102,0.1); transition: 0.3s; }
-        .admin-card:hover { box-shadow: 0 0 25px rgba(0,255,102,0.3); }
-        .admin-card h3 { font-size: 16px; color: var(--neon-cyan); margin-bottom: 15px; text-align: center; border-bottom: 1px dashed #374151; padding-bottom: 8px; }
+        /* Clickable Card Grid Layout (Your Drawing Style) */
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+        .action-card { background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: 15px; padding: 30px 20px; text-align: center; cursor: pointer; box-shadow: 0 0 15px rgba(0,255,102,0.1); transition: 0.3s; }
+        .action-card:hover { transform: translateY(-5px); box-shadow: 0 0 25px rgba(0,255,102,0.3); background: #1a2236; }
+        .action-card h3 { font-size: 16px; color: var(--neon-cyan); letter-spacing: 0.5px; }
         
-        .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; font-size: 14px; }
+        /* Modal Popup System */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+        .modal-content { background: var(--card-bg); border: 2px solid var(--neon-cyan); border-radius: 12px; width: 90%; max-width: 500px; padding: 25px; position: relative; box-shadow: 0 0 30px rgba(0,243,255,0.2); max-height: 85vh; overflow-y: auto; }
+        .close-btn { color: var(--neon-pink); float: right; font-size: 28px; font-weight: bold; cursor: pointer; margin-top: -10px; }
+        .close-btn:hover { color: #fff; }
+        .modal-content h3 { color: var(--neon-cyan); margin-bottom: 20px; border-bottom: 1px dashed #374151; padding-bottom: 10px; }
+
+        /* Form elements inside modals */
+        .form-control { width: 100%; padding: 10px; margin: 10px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; font-size: 14px; }
         .form-control:focus { border-color: var(--neon-cyan); outline: none; }
-        
-        .admin-btn { width: 100%; padding: 10px; background: var(--neon-green); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+        .admin-btn { width: 100%; padding: 11px; background: var(--neon-green); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
         .admin-btn:hover { opacity: 0.9; }
         
-        .list-container { max-height: 250px; overflow-y: auto; margin-top: 10px; }
+        /* Lists inside modals */
+        .list-container { max-height: 300px; overflow-y: auto; margin-top: 10px; }
         .list-item { background: #1f2937; padding: 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; border-left: 3px solid var(--neon-cyan); display: flex; justify-content: space-between; align-items: center; }
         .btn-group { display: flex; gap: 5px; }
         .btn-approve { background: var(--neon-green); border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; color: #000; }
@@ -46,6 +55,7 @@
 </head>
 <body>
 
+    <!-- Login Container -->
     <div class="login-container" id="loginContainer">
         <div class="login-box">
             <h2>Admin Login</h2>
@@ -55,6 +65,7 @@
         </div>
     </div>
 
+    <!-- Dashboard Cards Grid -->
     <div id="adminDashboard">
         <div class="dashboard-header">
             <h2>ZEG-G ADMIN PANEL</h2>
@@ -62,72 +73,108 @@
         </div>
 
         <div class="admin-grid">
-            
-            <!-- 1. Input Match Id & Password -->
-            <div class="admin-card">
+            <div class="action-card" onclick="openModal('matchIdModal')">
                 <h3>Input Match Id & Password</h3>
-                <div class="list-container" id="roomControlList"><p style="color: var(--text-muted); text-align: center;">Loading matches...</p></div>
             </div>
-
-            <!-- 2. Add Match -->
-            <div class="admin-card">
+            <div class="action-card" onclick="openModal('addMatchModal')">
                 <h3>Add Match</h3>
-                <input type="text" id="mCode" class="form-control" placeholder="Match Code (e.g. M01)">
-                <input type="text" id="mName" class="form-control" placeholder="Match Name">
-                <input type="number" id="mFee" class="form-control" placeholder="Entry Fee (৳)">
-                <input type="text" id="mFirstPrize" class="form-control" placeholder="First Prize">
-                <input type="datetime-local" id="mTime" class="form-control">
-                <input type="number" id="mSlots" class="form-control" placeholder="Total Slots (e.g. 48)">
-                <button class="admin-btn" onclick="addNewMatchToDB()">Create Match</button>
             </div>
-
-            <!-- 3. Add Balance Request -->
-            <div class="admin-card">
+            <div class="action-card" onclick="openModal('addBalanceModal')">
                 <h3>Add Balance Request</h3>
-                <div class="list-container" id="addBalanceRequestsList"><p style="color: var(--text-muted); text-align: center;">Loading...</p></div>
             </div>
-
-            <!-- 4. Withdraw Request -->
-            <div class="admin-card">
+            <div class="action-card" onclick="openModal('withdrawModal')">
                 <h3>Withdraw Request</h3>
-                <div class="list-container" id="withdrawRequestsList"><p style="color: var(--text-muted); text-align: center;">Loading...</p></div>
             </div>
-
-            <!-- 5. Add User Balance -->
-            <div class="admin-card">
+            <div class="action-card" onclick="openModal('userBalanceModal')">
                 <h3>Add User Balance</h3>
-                <input type="text" id="targetUserUID" class="form-control" placeholder="Enter User Game UID">
-                <input type="number" id="bonusAmount" class="form-control" placeholder="Amount (৳) [Use minus for cut]">
-                <button class="admin-btn" onclick="modifyUserBalance()">Update Balance</button>
             </div>
-
-            <!-- 6. Search User And Block, Unblock -->
-            <div class="admin-card">
-                <h3>Search User & Block/Unblock</h3>
-                <input type="text" id="searchUidInput" class="form-control" placeholder="Enter Game UID">
-                <button class="admin-btn" onclick="searchUserByUID()">Search User</button>
-                <div id="searchResultBox" style="margin-top: 10px; font-size: 13px; color: var(--text-muted);"></div>
+            <div class="action-card" onclick="openModal('searchUserModal')">
+                <h3>Search User & Block / Unblock</h3>
             </div>
-
-            <!-- 7. Gift Code -->
-            <div class="admin-card">
-                <h3>Gift Code System</h3>
-                <input type="text" id="giftCodeText" class="form-control" placeholder="Promo Code (e.g. FREE50)">
-                <input type="number" id="giftCodeAmount" class="form-control" placeholder="Bonus Amount (৳)">
-                <button class="admin-btn" onclick="createGiftCode()">Create Gift Code</button>
+            <div class="action-card" onclick="openModal('giftCodeModal')">
+                <h3>Gift Code</h3>
             </div>
-
-            <!-- 8. Extra Card (Reserved / System Status) -->
-            <div class="admin-card" style="border-color: var(--neon-cyan);">
-                <h3>System Info</h3>
-                <p style="font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 20px;">
-                    ZEG-G Tournament Platform v2.0 <br>All modules active and synced with Firestore.
-                </p>
-            </div>
-
         </div>
     </div>
 
+    <!-- MODALS (Popups for each card) -->
+
+    <!-- 1. Match ID & Password Modal -->
+    <div id="matchIdModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('matchIdModal')">&times;</span>
+            <h3>Input Match Id & Password</h3>
+            <div class="list-container" id="roomControlList"><p style="color:var(--text-muted); text-align:center;">Loading...</p></div>
+        </div>
+    </div>
+
+    <!-- 2. Add Match Modal -->
+    <div id="addMatchModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('addMatchModal')">&times;</span>
+            <h3>Add New Match</h3>
+            <input type="text" id="mCode" class="form-control" placeholder="Match Code (e.g. M01)">
+            <input type="text" id="mName" class="form-control" placeholder="Match Name">
+            <input type="number" id="mFee" class="form-control" placeholder="Entry Fee (৳)">
+            <input type="text" id="mFirstPrize" class="form-control" placeholder="First Prize">
+            <input type="datetime-local" id="mTime" class="form-control">
+            <input type="number" id="mSlots" class="form-control" placeholder="Total Slots (e.g. 48)">
+            <button class="admin-btn" onclick="addNewMatchToDB()">Create Match</button>
+        </div>
+    </div>
+
+    <!-- 3. Add Balance Request Modal -->
+    <div id="addBalanceModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('addBalanceModal')">&times;</span>
+            <h3>Add Balance Requests</h3>
+            <div class="list-container" id="addBalanceRequestsList"><p style="color:var(--text-muted); text-align:center;">Loading...</p></div>
+        </div>
+    </div>
+
+    <!-- 4. Withdraw Request Modal -->
+    <div id="withdrawModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('withdrawModal')">&times;</span>
+            <h3>Withdraw Requests</h3>
+            <div class="list-container" id="withdrawRequestsList"><p style="color:var(--text-muted); text-align:center;">Loading...</p></div>
+        </div>
+    </div>
+
+    <!-- 5. Add User Balance Modal -->
+    <div id="userBalanceModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('userBalanceModal')">&times;</span>
+            <h3>Add / Cut User Balance</h3>
+            <input type="text" id="targetUserUID" class="form-control" placeholder="Enter User Game UID">
+            <input type="number" id="bonusAmount" class="form-control" placeholder="Amount (৳) [Use minus for cut]">
+            <button class="admin-btn" onclick="modifyUserBalance()">Update Balance</button>
+        </div>
+    </div>
+
+    <!-- 6. Search & Block/Unblock Modal -->
+    <div id="searchUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('searchUserModal')">&times;</span>
+            <h3>Search User & Block/Unblock</h3>
+            <input type="text" id="searchUidInput" class="form-control" placeholder="Enter Game UID">
+            <button class="admin-btn" onclick="searchUserByUID()">Search User</button>
+            <div id="searchResultBox" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    <!-- 7. Gift Code Modal -->
+    <div id="giftCodeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('giftCodeModal')">&times;</span>
+            <h3>Gift Code System</h3>
+            <input type="text" id="giftCodeText" class="form-control" placeholder="Promo Code (e.g. FREE50)">
+            <input type="number" id="giftCodeAmount" class="form-control" placeholder="Bonus Amount (৳)">
+            <button class="admin-btn" onclick="createGiftCode()">Create Gift Code</button>
+        </div>
+    </div>
+
+    <!-- JavaScript Script Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -164,6 +211,14 @@
 
         window.logoutAdmin = function() { sessionStorage.removeItem("isAdminLoggedIn"); location.reload(); }
 
+        // Modal Open / Close Functions
+        window.openModal = function(modalId) {
+            document.getElementById(modalId).style.display = "flex";
+        }
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+
         // 1. Match Create
         window.addNewMatchToDB = async function() {
             const code = document.getElementById("mCode").value.trim();
@@ -181,7 +236,7 @@
                     totalSlots: slots, joinedCount: 0, roomId: "", roomPass: ""
                 });
                 alert("ম্যাচ সফলভাবে তৈরি হয়েছে!");
-                location.reload();
+                closeModal('addMatchModal');
             } catch(e) { alert("Error: " + e.message); }
         }
 
@@ -254,8 +309,7 @@
                 let currentBal = Number(snap.docs[0].data().balance || 0);
                 await updateDoc(userDocRef, { balance: currentBal + amount });
                 alert(`সফলভাবে ব্যালেন্স আপডেট করা হয়েছে! নতুন ব্যালেন্স: ৳${currentBal + amount}`);
-                document.getElementById("targetUserUID").value = "";
-                document.getElementById("bonusAmount").value = "";
+                closeModal('userBalanceModal');
             } catch(e) { alert("Error: " + e.message); }
         }
 
@@ -279,12 +333,12 @@
                         const isBlocked = userData.isBlocked || false;
                         
                         resultBox.innerHTML = `
-                            <div style="background: #1f2937; padding: 10px; border-radius: 6px; border-left: 3px solid var(--neon-green); margin-top: 5px;">
+                            <div style="background: #1f2937; padding: 12px; border-radius: 6px; border-left: 3px solid var(--neon-green);">
                                 <strong style="color: var(--neon-cyan);">Name:</strong> ${userData.playerName || 'N/A'}<br>
                                 <strong style="color: var(--neon-cyan);">UID:</strong> ${userData.playerUID}<br>
                                 <strong style="color: var(--neon-cyan);">Balance:</strong> ৳${userData.balance || 0}<br>
                                 <strong style="color: var(--neon-cyan);">Status:</strong> ${isBlocked ? '<span style="color:red">Blocked</span>' : '<span style="color:green">Active</span>'}<br>
-                                <button class="admin-btn" style="background: ${isBlocked ? 'var(--neon-green)' : 'var(--neon-pink)'}; margin-top:8px; padding:6px;" onclick="toggleBlockUser('${docId}', ${isBlocked})">
+                                <button class="admin-btn" style="background: ${isBlocked ? 'var(--neon-green)' : 'var(--neon-pink)'}; margin-top:10px; padding:8px;" onclick="toggleBlockUser('${docId}', ${isBlocked})">
                                     ${isBlocked ? 'Unblock User' : 'Block User'}
                                 </button>
                             </div>`;
@@ -317,14 +371,12 @@
                     createdAt: new Date()
                 });
                 alert("গিফট কোড তৈরি সফল হয়েছে!");
-                document.getElementById("giftCodeText").value = "";
-                document.getElementById("giftCodeAmount").value = "";
+                closeModal('giftCodeModal');
             } catch(e) { alert("Error: " + e.message); }
         }
 
         // Load All Admin Lists
         async function loadAdminData() {
-            // Room Control List
             const roomListContainer = document.getElementById("roomControlList");
             const snapMatch = await getDocs(collection(db, "matches"));
             roomListContainer.innerHTML = snapMatch.empty ? `<p style="color:var(--text-muted); text-align:center;">কোনো ম্যাচ নেই।</p>` : "";
@@ -342,7 +394,6 @@
                     </div>`;
             });
 
-            // Add Balance Requests
             const addBalContainer = document.getElementById("addBalanceRequestsList");
             const snapBal = await getDocs(collection(db, "addBalanceRequests"));
             addBalContainer.innerHTML = snapBal.empty ? `<p style="color:var(--text-muted); text-align:center;">কোনো রিকুয়েষ্ট নেই।</p>` : "";
@@ -360,7 +411,6 @@
                 }
             });
 
-            // Withdraw Requests
             const withdrawContainer = document.getElementById("withdrawRequestsList");
             const snapWith = await getDocs(collection(db, "withdrawRequests"));
             withdrawContainer.innerHTML = snapWith.empty ? `<p style="color:var(--text-muted); text-align:center;">কোনো রিকুয়েষ্ট নেই।</p>` : "";
@@ -375,7 +425,7 @@
                                 <button class="btn-fail" onclick="processWithdraw('${d.id}', '${data.userId}', ${data.amount}, 'Fail')">Fail</button>
                             </div>
                         </div>`;
-                    }
+                }
             });
         }
     </script>
