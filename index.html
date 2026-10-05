@@ -34,9 +34,9 @@
         .section { display: none; }
         .section.active { display: block; }
         
-        /* 3 Lines Compact Gift Code Section */
-        .gift-box-3line { background: var(--card-bg); border: 1px solid var(--neon-pink); border-radius: 10px; padding: 12px; margin-bottom: 15px; }
-        .gift-box-3line h4 { color: var(--neon-pink); font-size: 14px; margin-bottom: 8px; font-weight: bold; }
+        /* 3 Line Compact Gift Code Section inside Gift Code Tab */
+        .gift-box-3line { background: var(--card-bg); border: 1px solid var(--neon-pink); border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(255,0,127,0.1); }
+        .gift-box-3line h4 { color: var(--neon-pink); font-size: 15px; margin-bottom: 10px; font-weight: bold; }
 
         .match-card { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px; }
         .match-card h4 { color: var(--neon-cyan); font-size: 16px; margin-bottom: 5px; }
@@ -97,24 +97,28 @@
     </div>
 
     <div class="container">
+        <!-- Match Section -->
         <div id="matchSection" class="section active">
-            
-            <!-- 3 Line Compact Gift Code Section inside Match Section -->
-            <div class="gift-box-3line">
-                <h4>🎁 Redeem Gift Code</h4>
-                <input type="text" id="redeemCodeInput" class="form-control" placeholder="Enter Gift Code" style="margin-bottom: 8px; padding: 8px;">
-                <button class="submit-btn" style="background: var(--neon-pink); color: #fff; padding: 8px; margin-top: 0;" onclick="claimGiftCode()">Claim Bonus</button>
-            </div>
-
             <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">Live & Upcoming Matches</h3>
             <div id="matchListContainer"><p style="color: var(--text-muted);">Loading matches...</p></div>
         </div>
 
+        <!-- My Match Section -->
         <div id="myMatchSection" class="section">
             <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">My Registered Matches</h3>
             <div id="myMatchListContainer"><p style="color: var(--text-muted);">Loading joined matches...</p></div>
         </div>
 
+        <!-- Gift Code Section (3-Line Compact layout) -->
+        <div id="giftCodeSection" class="section">
+            <div class="gift-box-3line">
+                <h4>🎁 Redeem Gift Code</h4>
+                <input type="text" id="redeemCodeInput" class="form-control" placeholder="Enter Gift Code" style="margin-bottom: 8px; padding: 8px;">
+                <button class="submit-btn" style="background: var(--neon-pink); color: #fff; padding: 8px; margin-top: 0;" onclick="claimGiftCode()">Claim Bonus</button>
+            </div>
+        </div>
+
+        <!-- Add Balance Section -->
         <div id="addBalanceSection" class="section">
             <h3 style="color: var(--neon-green);">Add Balance via bKash</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0;">Send Money: <strong style="color: #fff;">01902009133</strong></p>
@@ -128,6 +132,7 @@
             <div class="history-list" id="addBalanceHistory"><p style="color: var(--text-muted); font-size: 12px;">No requests found.</p></div>
         </div>
 
+        <!-- Withdraw Section -->
         <div id="withdrawSection" class="section">
             <h3 style="color: var(--neon-pink);">Withdraw Funds</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0;">শুধু বিকাশ পার্সোনাল নাম্বার।</p>
@@ -151,13 +156,12 @@
         </div>
     </div>
 
-    <!-- Join Match Modal (With Match Notice Display) -->
+    <!-- Join Match Modal -->
     <div class="modal-overlay" id="joinModal" style="display: none;">
         <div class="modal-card">
             <h3>Join Match</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;" id="joinMatchInfo"></p>
             
-            <!-- Notice Box inside Join Modal -->
             <div id="modalMatchNoticeBox" style="background: rgba(0,243,255,0.1); border-left: 3px solid var(--neon-cyan); padding: 8px; font-size: 12px; margin-bottom: 12px; border-radius: 0 4px 4px 0; display: none;"></div>
 
             <input type="text" id="gamePlayerName" class="form-control" placeholder="Game Player Name">
@@ -167,8 +171,8 @@
         </div>
     </div>
 
-    <!-- Auth Modal -->
-    <div class="modal-overlay" id="authModal">
+    <!-- Auth Modal (Hidden by default to prevent unwanted popups on refresh) -->
+    <div class="modal-overlay" id="authModal" style="display: none;">
         <div class="modal-card">
             <h3 id="modalTitle">Login to ZEG-G</h3>
             <input type="email" id="authEmail" class="form-control" placeholder="Email Address">
@@ -184,6 +188,7 @@
         </div>
     </div>
 
+    <!-- 3 Line Drawer Menu (Gift Code added right below Withdraw) -->
     <div class="drawer" id="sideDrawer">
         <div class="drawer-close" onclick="toggleDrawer()">✕</div>
         <ul class="drawer-links">
@@ -191,6 +196,7 @@
             <li onclick="switchTab('myMatchSection'); toggleDrawer();">My Match</li>
             <li onclick="switchTab('addBalance'); toggleDrawer();">Add Balance</li>
             <li onclick="switchTab('withdraw'); toggleDrawer();">Withdraw</li>
+            <li onclick="switchTab('giftCodeSection'); toggleDrawer();" style="color: var(--neon-pink); font-weight: bold;">🎁 Gift Code</li>
             <li id="drawerAuthItem" onclick="openAuthModal(); toggleDrawer();">Login / Register</li>
             <li style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; padding-top: 12px; color: var(--neon-cyan);">
                 <strong>সহায়তা কেন্দ্র</strong><br>
@@ -237,6 +243,7 @@
             
             if(tabId === 'matchSection') { document.getElementById('matchSection').classList.add('active'); loadWebMatches(); }
             if(tabId === 'myMatchSection') { document.getElementById('myMatchSection').classList.add('active'); loadMyMatches(); }
+            if(tabId === 'giftCodeSection') { document.getElementById('giftCodeSection').classList.add('active'); }
             if(tabId === 'addBalance') { document.getElementById('addBalanceSection').classList.add('active'); loadUserHistory(); }
             if(tabId === 'withdraw') { document.getElementById('withdrawSection').classList.add('active'); loadUserHistory(); }
         }
@@ -307,6 +314,7 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
+        // Auth state listener - Refresh korle jate bar bar login modal na ase, tar jonne user thakle modal off thakbe
         onAuthStateChanged(auth, async (user) => {
             const authNavBtn = document.getElementById('authNavBtn');
             const drawerAuthItem = document.getElementById('drawerAuthItem');
@@ -325,12 +333,12 @@
                 snapReg.forEach(d => { userJoinedMatchCodes.push(d.data().matchCode); });
 
                 loadUserHistory();
-                closeAuthModal();
+                closeAuthModal(); // User thakle login modal automatic close thakbe
             } else {
                 authNavBtn.innerText = "Login"; authNavBtn.onclick = openAuthModal;
                 drawerAuthItem.innerText = "Login / Register"; drawerAuthItem.onclick = openAuthModal;
                 document.getElementById('userBalance').innerText = "৳0.00";
-                openAuthModal();
+                // Login na thaklei shudhu modal dekhabe, refresh marle user logout na thakle ar modal asbe na
             }
             loadWebMatches();
             loadMyMatches();
@@ -544,7 +552,7 @@
             const snapWith = await getDocs(qWith);
             withHistContainer.innerHTML = snapWith.empty ? `<p style="color: var(--text-muted); font-size: 12px;">No requests found.</p>` : "";
             snapWith.forEach(d => {
-                const item = d.data();
+                const item.data();
                 let statusText = item.status === 'Approved' ? 'Approved' : (item.status === 'Fail' ? 'Fail' : 'Pending');
                 let color = item.status === 'Approved' ? 'var(--neon-green)' : (item.status === 'Fail' ? 'var(--neon-pink)' : 'var(--neon-cyan)');
                 withHistContainer.innerHTML += `
