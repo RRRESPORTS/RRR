@@ -41,6 +41,9 @@
         .match-details { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
         .join-btn { background: var(--neon-green); color: #000; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; }
 
+        .history-list { margin-top: 15px; max-height: 300px; overflow-y: auto; }
+        .history-item { background: var(--card-bg); border: 1px solid #374151; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100; }
         .nav-item { text-align: center; color: var(--text-muted); font-size: 12px; cursor: pointer; }
         .nav-item.active { color: var(--neon-cyan); }
@@ -105,6 +108,8 @@
                 <input type="number" id="addAmount" class="form-control" placeholder="Amount (৳)">
                 <button class="submit-btn" onclick="submitAddBalance()">Submit Request</button>
             </div>
+            <h4 style="margin-top: 15px; color: var(--neon-cyan); font-size: 14px;">Add Balance History & Status</h4>
+            <div class="history-list" id="addBalanceHistory"><p style="color: var(--text-muted); font-size: 12px;">No requests found.</p></div>
         </div>
 
         <div id="withdrawSection" class="section">
@@ -116,10 +121,12 @@
                 <input type="number" id="withdrawAmount" class="form-control" placeholder="Amount (৳)">
                 <button class="submit-btn" style="background: var(--neon-pink); color: #fff;" onclick="submitWithdraw()">Request Withdraw</button>
             </div>
+            <h4 style="margin-top: 15px; color: var(--neon-cyan); font-size: 14px;">Withdraw History & Status</h4>
+            <div class="history-list" id="withdrawHistory"><p style="color: var(--text-muted); font-size: 12px;">No requests found.</p></div>
         </div>
     </div>
 
-    <!-- Join Match Modal with Game ID & Name -->
+    <!-- Join Match Modal -->
     <div class="modal-overlay" id="joinModal">
         <div class="modal-card">
             <h3>Join Match</h3>
@@ -195,8 +202,8 @@
             
             if(tabId === 'matchSection') { document.getElementById('matchSection').classList.add('active'); loadWebMatches(); }
             if(tabId === 'myMatchSection') { document.getElementById('myMatchSection').classList.add('active'); loadMyMatches(); }
-            if(tabId === 'addBalance') document.getElementById('addBalanceSection').classList.add('active');
-            if(tabId === 'withdraw') document.getElementById('withdrawSection').classList.add('active');
+            if(tabId === 'addBalance') { document.getElementById('addBalanceSection').classList.add('active'); loadUserHistory(); }
+            if(tabId === 'withdraw') { document.getElementById('withdrawSection').classList.add('active'); loadUserHistory(); }
         }
 
         window.toggleDrawer = function() { document.getElementById('sideDrawer').classList.toggle('open'); }
@@ -237,6 +244,7 @@
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if(docSnap.exists()) document.getElementById('userBalance').innerText = `৳${docSnap.data().balance || 0.00}`;
                 });
+                loadUserHistory();
             } else {
                 authNavBtn.innerText = "Login"; authNavBtn.onclick = openAuthModal;
                 drawerAuthItem.innerText = "Login / Register"; drawerAuthItem.onclick = openAuthModal;
@@ -246,13 +254,9 @@
             loadMyMatches();
         });
 
-        // Countdown Timer Function
         function startCountdown(matchTimeStr, elementId) {
             const countDownDate = new Date(matchTimeStr).getTime();
-            if(isNaN(countDownDate)) {
-                document.getElementById(elementId).innerText = "Time Expired / Invalid";
-                return;
-            }
+            if(isNaN(countDownDate)) { document.getElementById(elementId).innerText = "Time Expired"; return; }
 
             const x = setInterval(function() {
                 const now = new Date().getTime();
@@ -314,9 +318,7 @@
                                 <button class="join-btn" ${isFull ? 'style="background: gray; cursor: not-allowed;"' : ''} onclick="${isFull ? '' : `openJoinModal('${m.matchCode}', '${m.matchName}',${m.entryFee})`}">${isFull ? 'Match Full' : 'Join Match'}</button>
                             </div>`;
                         
-                        if(m.matchTime) {
-                            startCountdown(m.matchTime, timerId);
-                        }
+                        if(m.matchTime) startCountdown(m.matchTime, timerId);
                     });
                 }
             } catch(e) {}
@@ -349,7 +351,6 @@
             }
 
             try {
-                // Deduct fee properly from user balance
                 await updateDoc(userRef, { balance: userBal - selectedMatchForJoin.fee });
 
                 const matchRef = doc(db, "matches", selectedMatchForJoin.code);
@@ -357,7 +358,6 @@
                 const currentJoined = matchSnap.data().joinedCount || 0;
                 await updateDoc(matchRef, { joinedCount: currentJoined + 1 });
 
-                // Save registration
                 await addDoc(collection(db, "matchRegistrations"), {
                     userId: auth.currentUser.uid,
                     matchCode: selectedMatchForJoin.code,
@@ -403,25 +403,58 @@
             } catch(e) {}
         }
 
+        async function loadUserHistory() {
+            if(!auth.currentUser) return;
+            
+            // Add Balance History
+            const addHistContainer = document.getElementById('addBalanceHistory');
+            const qAdd = query(collection(db, "addBalanceRequests"), where("userId", "==", auth.currentUser.uid));
+            const snapAdd = await getDocs(qAdd);
+            addHistContainer.innerHTML = snapAdd.empty ? `<p style="color: var(--text-muted); font-size: 12px;">No requests found.</p>` : "";
+            snapAdd.forEach(d => {
+                const item = d.data();
+                let statusText = item.status === 'Approved' ? 'Approved' : (item.status === 'Fail' ? 'Fail' : 'Pending');
+                let color = item.status === 'Approved' ? 'var(--neon-green)' : (item.status === 'Fail' ? 'var(--neon-pink)' : 'var(--neon-cyan)');
+                addHistContainer.innerHTML += `
+                    <div class="history-item">
+                        <div>Trx: ${item.trxId} | ৳${item.amount}</div>
+                        <div style="font-weight: bold; color: ${color};">${statusText}</div>
+                    </div>`;
+            });
+
+            // Withdraw History
+            const withHistContainer = document.getElementById('withdrawHistory');
+            const qWith = query(collection(db, "withdrawRequests"), where("userId", "==", auth.currentUser.uid));
+            const snapWith = await getDocs(qWith);
+            withHistContainer.innerHTML = snapWith.empty ? `<p style="color: var(--text-muted); font-size: 12px;">No requests found.</p>` : "";
+            snapWith.forEach(d => {
+                const item = d.data();
+                let statusText = item.status === 'Approved' ? 'Approved' : (item.status === 'Fail' ? 'Fail' : 'Pending');
+                let color = item.status === 'Approved' ? 'var(--neon-green)' : (item.status === 'Fail' ? 'var(--neon-pink)' : 'var(--neon-cyan)');
+                withHistContainer.innerHTML += `
+                    <div class="history-item">
+                        <div>No: ${item.number} | ৳${item.amount}</div>
+                        <div style="font-weight: bold; color: ${color};">${statusText}</div>
+                    </div>`;
+            });
+        }
+
         window.submitAddBalance = async function() {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
             const trxId = document.getElementById('bkashTrxID').value.trim();
             const amount = Number(document.getElementById('addAmount').value);
 
             if(!trxId || !amount) { alert("TrxID ebong Amount দিন।"); return; }
-            
-            if(amount < 5 || amount > 100) {
-                alert("Add Balance minimum ৳5 ebong maximum ৳100 hote hobe.");
-                return;
-            }
+            if(amount < 5 || amount > 100) { alert("Add Balance minimum ৳5 ebong maximum ৳100 hote hobe."); return; }
 
             try {
                 await addDoc(collection(db, "addBalanceRequests"), {
                     userId: auth.currentUser.uid, email: auth.currentUser.email,
-                    trxId: trxId, amount: amount, timestamp: new Date()
+                    trxId: trxId, amount: amount, status: 'Pending', timestamp: new Date()
                 });
                 alert("Request sent!");
                 document.getElementById('bkashTrxID').value = ""; document.getElementById('addAmount').value = "";
+                loadUserHistory();
             } catch(e) {}
         }
 
@@ -431,11 +464,7 @@
             const amount = Number(document.getElementById('withdrawAmount').value);
 
             if(!number || !amount) { alert("Number ebong Amount দিন।"); return; }
-
-            if(amount < 30 || amount > 200) {
-                alert("Withdraw limit: Minimum ৳30 ebong Maximum ৳200");
-                return;
-            }
+            if(amount < 30 || amount > 200) { alert("Withdraw limit: Minimum ৳30 ebong Maximum ৳200"); return; }
 
             const userRef = doc(db, "users", auth.currentUser.uid);
             const userSnap = await getDoc(userRef);
@@ -447,16 +476,17 @@
             }
 
             try {
-                // Deduct balance instantly and send request
+                // Instantly deduct balance when withdraw request is made
                 await updateDoc(userRef, { balance: currentBal - amount });
 
                 await addDoc(collection(db, "withdrawRequests"), {
                     userId: auth.currentUser.uid, email: auth.currentUser.email,
-                    number: number, amount: amount, timestamp: new Date()
+                    number: number, amount: amount, status: 'Pending', timestamp: new Date()
                 });
 
                 alert("উইথড্র রিকুয়েষ্ট গ্রহন করা হলো।");
                 document.getElementById('withdrawNumber').value = ""; document.getElementById('withdrawAmount').value = "";
+                loadUserHistory();
             } catch(e) { alert("Error: " + e.message); }
         }
     </script>
