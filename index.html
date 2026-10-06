@@ -3,97 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZEG-G TOURNAMENT</title>
+    <title>RRR ESPORTS</title>
     <style>
         :root {
-            --bg-color: #0b0f19;
-            --card-bg: #111827;
-            --neon-green: #00ff66;
+            --bg-color: #07090e;
+            --card-bg: #0d121f;
+            --neon-red: #ff1e42;
+            --neon-orange: #ff7700;
             --neon-cyan: #00f3ff;
-            --neon-pink: #ff007f;
             --text-main: #ffffff;
             --text-muted: #9ca3af;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 90px; }
         
-        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--card-bg); border-bottom: 1px solid rgba(0, 243, 255, 0.2); position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 20px; font-weight: bold; color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0,243,255,0.5); }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--card-bg); border-bottom: 2px solid var(--neon-red); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(255, 30, 66, 0.2); }
+        .logo { font-size: 22px; font-weight: 900; color: var(--neon-red); text-shadow: 0 0 12px rgba(255,30,66,0.6); letter-spacing: 1px; }
         .header-right { display: flex; align-items: center; gap: 15px; }
-        .login-btn { background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 5px 15px; border-radius: 5px; cursor: pointer; }
-        .menu-icon { font-size: 24px; cursor: pointer; color: var(--neon-pink); }
+        .login-btn { background: transparent; border: 1px solid var(--neon-red); color: var(--neon-red); padding: 5px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .login-btn:hover { background: var(--neon-red); color: #fff; }
+        .menu-icon { font-size: 24px; cursor: pointer; color: var(--neon-orange); }
 
-        .notice-bar { background: linear-gradient(90deg, #1f2937, #111827); border-bottom: 1px solid rgba(0, 255, 102, 0.3); padding: 10px 15px; display: flex; align-items: center; overflow: hidden; white-space: nowrap; }
-        .notice-title { background: var(--neon-green); color: #000; font-weight: bold; padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-right: 10px; text-transform: uppercase; flex-shrink: 0; }
+        .notice-bar { background: linear-gradient(90deg, #1f1115, #0d121f); border-bottom: 1px solid rgba(255, 119, 0, 0.3); padding: 10px 15px; display: flex; align-items: center; overflow: hidden; white-space: nowrap; }
+        .notice-title { background: var(--neon-orange); color: #000; font-weight: bold; padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-right: 10px; text-transform: uppercase; flex-shrink: 0; }
         .notice-content { color: var(--neon-cyan); font-size: 13px; display: inline-block; animation: marquee 15s linear infinite; }
         @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
-        .balance-container { background: linear-gradient(135deg, #1f2937, #111827); margin: 15px; padding: 20px; border-radius: 12px; border: 1px solid rgba(0,255,102,0.3); display: flex; justify-content: space-between; align-items: center; }
-        .bal-info h4 { color: var(--text-muted); font-size: 14px; }
-        .bal-info h2 { color: var(--neon-green); font-size: 24px; }
+        .balance-container { background: linear-gradient(135deg, #161d2d, #0d121f); margin: 15px; padding: 20px; border-radius: 12px; border: 1px solid rgba(255,30,66,0.3); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
+        .bal-info h4 { color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bal-info h2 { color: var(--neon-cyan); font-size: 24px; font-weight: bold; text-shadow: 0 0 10px rgba(0,243,255,0.3); }
         .bal-btns button { padding: 8px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 5px; }
-        .btn-add { background: var(--neon-green); color: #000; }
-        .btn-withdraw { background: var(--neon-pink); color: #fff; }
+        .btn-add { background: var(--neon-orange); color: #000; }
+        .btn-withdraw { background: var(--neon-red); color: #fff; }
 
         .container { padding: 0 15px; }
         .section { display: none; }
         .section.active { display: block; }
         
-        .gift-box-3line { background: var(--card-bg); border: 1px solid var(--neon-pink); border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(255,0,127,0.1); }
-        .gift-box-3line h4 { color: var(--neon-pink); font-size: 15px; margin-bottom: 10px; font-weight: bold; }
+        .gift-box-3line { background: var(--card-bg); border: 1px solid var(--neon-orange); border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(255,119,0,0.1); }
+        .gift-box-3line h4 { color: var(--neon-orange); font-size: 15px; margin-bottom: 10px; font-weight: bold; }
 
-        .match-card { background: var(--card-bg); border: 1px solid rgba(0,243,255,0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px; }
-        .match-card h4 { color: var(--neon-cyan); font-size: 16px; margin-bottom: 5px; }
+        .match-card { background: var(--card-bg); border: 1px solid rgba(255, 30, 66, 0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .match-card h4 { color: var(--neon-red); font-size: 16px; margin-bottom: 5px; font-weight: 800; }
         .match-details { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
         
-        /* প্রোগ্রেস বার স্টাইল */
         .slot-progress-container { margin: 10px 0; }
-        .progress-bar { width: 100%; height: 12px; background-color: #1f2937; border-radius: 6px; overflow: hidden; margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.05); }
-        .progress-fill { height: 100%; background-color: var(--neon-pink); border-radius: 6px 0 0 6px; transition: width 0.3s ease; }
+        .progress-bar { width: 100%; height: 12px; background-color: #161d2d; border-radius: 6px; overflow: hidden; margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.05); }
+        .progress-fill { height: 100%; background-color: var(--neon-red); border-radius: 6px 0 0 6px; transition: width 0.3s ease; box-shadow: 0 0 8px var(--neon-red); }
         .slot-text-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); font-weight: 600; }
 
-        .join-btn { background: var(--neon-green); color: #000; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 8px; }
+        .join-btn { background: var(--neon-orange); color: #000; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 8px; font-size: 14px; text-transform: uppercase; transition: 0.2s; }
+        .join-btn:hover { opacity: 0.9; }
         .view-players-btn { background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 6px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 6px; }
 
         .history-list { margin-top: 15px; max-height: 300px; overflow-y: auto; }
-        .history-item { background: var(--card-bg); border: 1px solid #374151; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .history-item { background: var(--card-bg); border: 1px solid #1f2937; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
 
-        .social-footer { margin-top: 30px; padding: 20px; background: var(--card-bg); border-top: 1px solid rgba(0,243,255,0.2); text-align: center; }
-        .social-footer h4 { color: var(--neon-cyan); margin-bottom: 12px; font-size: 14px; }
+        .social-footer { margin-top: 30px; padding: 20px; background: var(--card-bg); border-top: 1px solid rgba(255,30,66,0.2); text-align: center; }
+        .social-footer h4 { color: var(--neon-orange); margin-bottom: 12px; font-size: 14px; }
         .social-links-grid { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
         .social-btn { padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
         .btn-yt { background: #ff0000; color: #fff; }
         .btn-fb { background: #1877f2; color: #fff; }
         .btn-tg { background: #0088cc; color: #fff; }
 
-        .powered-footer { text-align: center; padding: 15px; font-size: 12px; color: var(--text-muted); background: #080b11; border-top: 1px solid rgba(255,255,255,0.05); }
-        .powered-footer span { color: var(--neon-cyan); font-weight: bold; }
+        .powered-footer { text-align: center; padding: 15px; font-size: 12px; color: var(--text-muted); background: #040609; border-top: 1px solid rgba(255,255,255,0.05); }
+        .powered-footer span { color: var(--neon-red); font-weight: bold; }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid rgba(255,30,66,0.2); z-index: 100; box-shadow: 0 -4px 15px rgba(0,0,0,0.5); }
         .nav-item { text-align: center; color: var(--text-muted); font-size: 12px; cursor: pointer; }
-        .nav-item.active { color: var(--neon-cyan); }
+        .nav-item.active { color: var(--neon-red); }
         .nav-item div { font-size: 18px; }
 
-        .drawer { position: fixed; top: 0; right: -250px; width: 250px; height: 100%; background: #111827; box-shadow: -5px 0 15px rgba(0,0,0,0.5); z-index: 1000; transition: 0.3s; padding: 20px; border-left: 1px solid var(--neon-pink); }
+        .drawer { position: fixed; top: 0; right: -250px; width: 250px; height: 100%; background: #0d121f; box-shadow: -5px 0 15px rgba(0,0,0,0.8); z-index: 1000; transition: 0.3s; padding: 20px; border-left: 2px solid var(--neon-red); }
         .drawer.open { right: 0; }
-        .drawer-close { font-size: 20px; cursor: pointer; text-align: right; margin-bottom: 20px; color: var(--neon-pink); }
+        .drawer-close { font-size: 20px; cursor: pointer; text-align: right; margin-bottom: 20px; color: var(--neon-red); }
         .drawer-links { list-style: none; }
         .drawer-links li { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; font-size: 14px; }
         .drawer-links li:hover { color: var(--neon-cyan); }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-card { background: var(--card-bg); border: 1px solid var(--neon-cyan); padding: 25px; border-radius: 12px; width: 90%; max-width: 350px; }
-        .modal-card h3 { color: var(--neon-cyan); margin-bottom: 15px; text-align: center; }
-        .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; }
-        .submit-btn { width: 100%; padding: 12px; background: var(--neon-green); border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; color: #000; }
+        .modal-card { background: var(--card-bg); border: 1px solid var(--neon-red); padding: 25px; border-radius: 12px; width: 90%; max-width: 350px; box-shadow: 0 0 20px rgba(255,30,66,0.2); }
+        .modal-card h3 { color: var(--neon-red); margin-bottom: 15px; text-align: center; font-weight: 800; }
+        .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #161d2d; border: 1px solid #2d3748; color: #fff; border-radius: 6px; }
+        .form-control:focus { border-color: var(--neon-cyan); outline: none; }
+        .submit-btn { width: 100%; padding: 12px; background: var(--neon-orange); border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; color: #000; font-size: 14px; }
         .switch-text { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 15px; cursor: pointer; }
-        .switch-text span { color: var(--neon-pink); font-weight: bold; }
+        .switch-text span { color: var(--neon-red); font-weight: bold; }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">ZEG-G TOURNAMENT</div>
+        <div class="logo">⚡ RRR ESPORTS</div>
         <div class="header-right">
             <button class="login-btn" id="authNavBtn">Login</button>
             <div class="menu-icon" id="menuToggleBtn">☰</div>
@@ -118,12 +120,12 @@
 
     <div class="container">
         <div id="matchSection" class="section active">
-            <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">Live & Upcoming Matches</h3>
+            <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">🔥 Live & Upcoming Matches</h3>
             <div id="matchListContainer"><p style="color: var(--text-muted);">Loading matches...</p></div>
         </div>
 
         <div id="myMatchSection" class="section">
-            <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">My Registered Matches</h3>
+            <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">🎮 My Registered Matches</h3>
             <div id="myMatchListContainer"><p style="color: var(--text-muted);">Loading joined matches...</p></div>
         </div>
 
@@ -131,15 +133,15 @@
             <div class="gift-box-3line">
                 <h4>🎁 Redeem Gift Code</h4>
                 <input type="text" id="redeemCodeInput" class="form-control" placeholder="Enter Gift Code" style="margin-bottom: 8px; padding: 8px;">
-                <button class="submit-btn" id="claimGiftBtn" style="background: var(--neon-pink); color: #fff; padding: 8px; margin-top: 0;">Claim Bonus</button>
+                <button class="submit-btn" id="claimGiftBtn" style="background: var(--neon-red); color: #fff; padding: 8px; margin-top: 0;">Claim Bonus</button>
             </div>
         </div>
 
         <div id="addBalanceSection" class="section">
-            <h3 style="color: var(--neon-green);">Add Balance via bKash</h3>
+            <h3 style="color: var(--neon-orange);">Add Balance via bKash</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0;">Send Money: <strong style="color: #fff;">01902009133</strong></p>
-            <p style="font-size: 12px; color: var(--neon-pink); margin-bottom: 5px;">Limit: Minimum ৳5 - Maximum ৳100</p>
-            <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #374151; margin-top: 10px;">
+            <p style="font-size: 12px; color: var(--neon-red); margin-bottom: 5px;">Limit: Minimum ৳5 - Maximum ৳100</p>
+            <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #1f2937; margin-top: 10px;">
                 <input type="text" id="bkashTrxID" class="form-control" placeholder="Transaction ID (TrxID)">
                 <input type="number" id="addAmount" class="form-control" placeholder="Amount (৳)">
                 <button class="submit-btn" id="submitAddBalBtn">Submit Request</button>
@@ -149,13 +151,13 @@
         </div>
 
         <div id="withdrawSection" class="section">
-            <h3 style="color: var(--neon-pink);">Withdraw Funds</h3>
+            <h3 style="color: var(--neon-red);">Withdraw Funds</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0;">শুধু বিকাশ পার্সোনাল নাম্বার।</p>
-            <p style="font-size: 12px; color: var(--neon-pink); margin-bottom: 5px;">Limit: Minimum ৳30 - Maximum ৳200</p>
-            <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #374151; margin-top: 10px;">
+            <p style="font-size: 12px; color: var(--neon-orange); margin-bottom: 5px;">Limit: Minimum ৳30 - Maximum ৳200</p>
+            <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #1f2937; margin-top: 10px;">
                 <input type="text" id="withdrawNumber" class="form-control" placeholder="bKash Number">
                 <input type="number" id="withdrawAmount" class="form-control" placeholder="Amount (৳)">
-                <button class="submit-btn" id="submitWithdrawBtn" style="background: var(--neon-pink); color: #fff;">Request Withdraw</button>
+                <button class="submit-btn" id="submitWithdrawBtn" style="background: var(--neon-red); color: #fff;">Request Withdraw</button>
             </div>
             <h4 style="margin-top: 15px; color: var(--neon-cyan); font-size: 14px;">Withdraw History & Status</h4>
             <div class="history-list" id="withdrawHistory"><p style="color: var(--text-muted); font-size: 12px;">No requests found.</p></div>
@@ -172,14 +174,14 @@
     </div>
 
     <div class="powered-footer">
-        powered by <span>ZEG-G</span>
+        powered by <span>RRR ESPORTS</span>
     </div>
 
     <div class="modal-overlay" id="joinModal" style="display: none;">
         <div class="modal-card">
             <h3>Join Match</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;" id="joinMatchInfo"></p>
-            <div id="modalMatchNoticeBox" style="background: rgba(0,243,255,0.1); border-left: 3px solid var(--neon-cyan); padding: 8px; font-size: 12px; margin-bottom: 12px; border-radius: 0 4px 4px 0; display: none;"></div>
+            <div id="modalMatchNoticeBox" style="background: rgba(255,119,0,0.1); border-left: 3px solid var(--neon-orange); padding: 8px; font-size: 12px; margin-bottom: 12px; border-radius: 0 4px 4px 0; display: none;"></div>
             <input type="text" id="gamePlayerName" class="form-control" placeholder="Game Player Name">
             <input type="text" id="gamePlayerID" class="form-control" placeholder="Game Player ID / UID">
             <button class="submit-btn" id="confirmJoinBtn">Confirm & Pay Entry Fee</button>
@@ -193,13 +195,13 @@
             <div id="playersListContainer" style="max-height: 250px; overflow-y: auto; margin: 10px 0; font-size: 13px;">
                 <p style="color: var(--text-muted); text-align: center;">Loading...</p>
             </div>
-            <div class="switch-text" id="closePlayersModal" style="color: var(--neon-pink); margin-top: 15px; cursor: pointer;">Close</div>
+            <div class="switch-text" id="closePlayersModal" style="color: var(--neon-red); margin-top: 15px; cursor: pointer;">Close</div>
         </div>
     </div>
 
     <div class="modal-overlay" id="profileModal" style="display: none;">
         <div class="modal-card" onclick="event.stopPropagation()">
-            <h3 style="color: var(--neon-green);">👤 User Profile</h3>
+            <h3 style="color: var(--neon-orange);">👤 User Profile</h3>
             <div style="font-size: 13px; margin-bottom: 12px; line-height: 1.6; color: var(--text-muted);">
                 <div><strong>Gmail:</strong> <span id="profileEmail" style="color: #fff;">-</span></div>
             </div>
@@ -212,13 +214,13 @@
                 <input type="text" id="profileEditUID" class="form-control" placeholder="Enter new UID">
             </div>
             <button class="submit-btn" id="updateProfileBtn" style="background: var(--neon-cyan); color: #000;">Update Profile</button>
-            <div class="switch-text" id="closeProfileModal" style="color: var(--neon-pink); margin-top: 10px; cursor: pointer;">Close</div>
+            <div class="switch-text" id="closeProfileModal" style="color: var(--neon-red); margin-top: 10px; cursor: pointer;">Close</div>
         </div>
     </div>
 
     <div class="modal-overlay" id="authModal" style="display: flex;">
         <div class="modal-card" onclick="event.stopPropagation()">
-            <h3 id="modalTitle">Login to ZEG-G</h3>
+            <h3 id="modalTitle">Login to RRR ESPORTS</h3>
             <input type="email" id="authEmail" class="form-control" placeholder="Email Address">
             <input type="password" id="authPassword" class="form-control" placeholder="Password">
             <div id="registerExtraFields" style="display: none;">
@@ -233,19 +235,19 @@
     <div class="drawer" id="sideDrawer">
         <div class="drawer-close" id="drawerCloseBtn">✕</div>
         <ul class="drawer-links">
-            <li id="menuProfile" style="color: var(--neon-green); font-weight: bold;">👤 Profile</li>
+            <li id="menuProfile" style="color: var(--neon-orange); font-weight: bold;">👤 Profile</li>
             <li id="menuMatch">Match</li>
             <li id="menuMyMatch">My Match</li>
             <li id="menuAddBal">Add Balance</li>
             <li id="menuWithdraw">Withdraw</li>
-            <li id="menuGift" style="color: var(--neon-pink); font-weight: bold;">🎁 Gift Code</li>
+            <li id="menuGift" style="color: var(--neon-red); font-weight: bold;">🎁 Gift Code</li>
             <li id="drawerAuthItem">Login / Register</li>
             <li style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; padding-top: 12px; color: var(--neon-cyan);">
                 <strong>সহায়তা কেন্দ্র</strong><br>
                 <span style="font-size: 12px; color: var(--text-muted);">WhatsApp - 01902009133</span><br>
                 <span style="font-size: 12px; color: var(--text-muted);">Telegram - Aveen_Reed</span>
             </li>
-            <li id="menuAdmin" style="color: var(--neon-pink); font-weight: bold;">Admin Panel</li>
+            <li id="menuAdmin" style="color: var(--neon-red); font-weight: bold;">Admin Panel</li>
         </ul>
     </div>
 
@@ -304,7 +306,7 @@
 
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
-            document.getElementById('modalTitle').innerText = isLoginMode ? "Login to ZEG-G" : "Register New Account";
+            document.getElementById('modalTitle').innerText = isLoginMode ? "Login to RRR ESPORTS" : "Register New Account";
             document.getElementById('authSubmitBtn').innerText = isLoginMode ? "Login" : "Sign Up";
             document.getElementById('switchText').innerHTML = isLoginMode ? "Don't have an account? <span>Register</span>" : "Already have an account? <span>Login</span>";
             document.getElementById('registerExtraFields').style.display = isLoginMode ? 'none' : 'block';
@@ -454,9 +456,9 @@
                 if (distance < 0) {
                     clearInterval(x);
                     if (joinedCount > 0) {
-                        el.innerHTML = `<span style="color: var(--neon-green);">Match Started / Running</span>`;
+                        el.innerHTML = `<span style="color: var(--neon-orange);">Match Started / Running</span>`;
                     } else {
-                        el.innerHTML = `<span style="color: var(--neon-pink); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি</span>`;
+                        el.innerHTML = `<span style="color: var(--neon-red); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি</span>`;
                     }
                     return;
                 }
@@ -490,14 +492,13 @@
                         const isFull = joined >= total;
                         const hasAlreadyJoined = userJoinedMatchCodes.includes(m.matchCode);
 
-                        // প্রোগ্রেস বারের পার্সেন্টেজ হিসাব (Joined এর ওপর ভিত্তি করে লাল অংশ বড় হবে)
                         const percentage = total > 0 ? (joined / total) * 100 : 0;
 
                         let roomInfoHtml = "";
                         if (hasAlreadyJoined) {
                             if (m.roomId && m.roomId.trim() !== "") {
                                 roomInfoHtml = `
-                                    <div style="margin-top: 8px; padding: 8px; background: rgba(0,255,102,0.1); border-radius: 5px; color: var(--neon-green);">
+                                    <div style="margin-top: 8px; padding: 8px; background: rgba(255,119,0,0.1); border-radius: 5px; color: var(--neon-orange);">
                                         <strong>Room ID:</strong> ${m.roomId} | <strong>Pass:</strong> ${m.roomPass || 'N/A'}
                                     </div>`;
                             } else {
@@ -511,7 +512,7 @@
                         let btnHtml = "";
                         const btnId = `joinBtn_${m.matchCode}`;
                         if (hasAlreadyJoined) {
-                            btnHtml = `<button class="join-btn" style="background: #374151; color: var(--neon-green); cursor: not-allowed;" disabled>Already Joined</button>`;
+                            btnHtml = `<button class="join-btn" style="background: #161d2d; color: var(--neon-orange); cursor: not-allowed;" disabled>Already Joined</button>`;
                         } else if (isFull) {
                             btnHtml = `<button class="join-btn" style="background: gray; cursor: not-allowed;" disabled>Match Full</button>`;
                         } else {
@@ -525,7 +526,7 @@
                         if (m.type === 'perkill') {
                             prizeDisplayHtml = `
                                 <span>Total Prize: ${m.prizePool || 'N/A'}</span>
-                                <span style="color: var(--neon-pink);">Per Kill: ৳${m.perKillAmount || 0}</span>
+                                <span style="color: var(--neon-orange);">Per Kill: ৳${m.perKillAmount || 0}</span>
                             `;
                         } else {
                             prizeDisplayHtml = `
@@ -539,11 +540,10 @@
                                 <div class="match-details">
                                     <span>Entry Fee: ৳${m.entryFee}</span>
                                 </div>
-                                <div class="match-details" style="font-weight: bold; color: var(--neon-green);">
+                                <div class="match-details" style="font-weight: bold; color: var(--neon-orange);">
                                     ${prizeDisplayHtml}
                                 </div>
                                 
-                                <!-- স্লট প্রোগ্রেস বার সেকশন -->
                                 <div class="slot-progress-container">
                                     <div class="progress-bar">
                                         <div class="progress-fill" style="width: ${percentage}%;"></div>
@@ -555,7 +555,7 @@
                                 </div>
 
                                 <div class="match-details" style="margin-top: 8px;">
-                                    <span style="color: var(--neon-cyan);">Status / Time: <strong id="${timerId}" style="color: var(--neon-pink);">Calculating...</strong></span>
+                                    <span style="color: var(--neon-cyan);">Status / Time: <strong id="${timerId}" style="color: var(--neon-red);">Calculating...</strong></span>
                                 </div>
                                 ${roomInfoHtml}
                                 ${btnHtml}
@@ -566,7 +566,7 @@
                             const countDownDate = new Date(m.matchTime).getTime();
                             const now = new Date().getTime();
                             if (countDownDate - now < 0 && joined === 0) {
-                                document.getElementById(timerId).innerHTML = `<span style="color: var(--neon-pink); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি</span>`;
+                                document.getElementById(timerId).innerHTML = `<span style="color: var(--neon-red); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি</span>`;
                             } else {
                                 startCountdown(m.matchTime, joined, timerId);
                             }
@@ -608,16 +608,16 @@
                     querySnapshot.forEach((docSnap) => {
                         const data = docSnap.data();
                         container.innerHTML += `
-                            <div style="background: #1f2937; padding: 10px; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid var(--neon-cyan); display: flex; justify-content: space-between; align-items: center;">
+                            <div style="background: #161d2d; padding: 10px; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid var(--neon-cyan); display: flex; justify-content: space-between; align-items: center;">
                                 <div>
-                                    <strong style="color: var(--neon-green);">#${count++} ${data.playerName || 'N/A'}</strong><br>
+                                    <strong style="color: var(--neon-orange);">#${count++} ${data.playerName || 'N/A'}</strong><br>
                                     <span style="color: var(--text-muted); font-size: 11px;">UID: ${data.playerID || 'N/A'}</span>
                                 </div>
                             </div>`;
                     });
                 }
             } catch(e) {
-                container.innerHTML = `<p style="color: var(--neon-pink); text-align: center;">Error loading players!</p>`;
+                container.innerHTML = `<p style="color: var(--neon-red); text-align: center;">Error loading players!</p>`;
             }
         }
 
@@ -712,7 +712,7 @@
                                     <span>Game Name: ${reg.playerName}</span>
                                     <span>Game ID: ${reg.playerID}</span>
                                 </div>
-                                <p style="color: var(--neon-green); font-size: 13px;">Status: Joined Successfully</p>
+                                <p style="color: var(--neon-orange); font-size: 13px;">Status: Joined Successfully</p>
                             </div>`;
                     });
                 }
@@ -729,7 +729,7 @@
             snapAdd.forEach(d => {
                 const item = d.data();
                 let statusText = item.status === 'Approved' ? 'Approved' : (item.status === 'Fail' ? 'Fail' : 'Pending');
-                let color = item.status === 'Approved' ? 'var(--neon-green)' : (item.status === 'Fail' ? 'var(--neon-pink)' : 'var(--neon-cyan)');
+                let color = item.status === 'Approved' ? 'var(--neon-orange)' : (item.status === 'Fail' ? 'var(--neon-red)' : 'var(--neon-cyan)');
                 addHistContainer.innerHTML += `
                     <div class="history-item">
                         <div>Trx: ${item.trxId} | ৳${item.amount}</div>
@@ -744,7 +744,7 @@
             snapWith.forEach(d => {
                 const item = d.data();
                 let statusText = item.status === 'Approved' ? 'Approved' : (item.status === 'Fail' ? 'Fail' : 'Pending');
-                let color = item.status === 'Approved' ? 'var(--neon-green)' : (item.status === 'Fail' ? 'var(--neon-pink)' : 'var(--neon-cyan)');
+                let color = item.status === 'Approved' ? 'var(--neon-orange)' : (item.status === 'Fail' ? 'var(--neon-red)' : 'var(--neon-cyan)');
                 withHistContainer.innerHTML += `
                     <div class="history-item">
                         <div>No: ${item.number} | ৳${item.amount}</div>
