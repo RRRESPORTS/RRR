@@ -17,8 +17,11 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 90px; }
         
-        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--card-bg); border-bottom: 2px solid var(--neon-red); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(255, 30, 66, 0.2); }
-        .logo { font-size: 22px; font-weight: 900; color: var(--neon-red); text-shadow: 0 0 12px rgba(255,30,66,0.6); letter-spacing: 1px; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: var(--card-bg); border-bottom: 2px solid var(--neon-red); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(255, 30, 66, 0.2); }
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+        .site-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--neon-red); box-shadow: 0 0 10px rgba(255,30,66,0.5); }
+        .logo { font-size: 20px; font-weight: 900; color: var(--neon-red); text-shadow: 0 0 12px rgba(255,30,66,0.6); letter-spacing: 1px; }
+        
         .header-right { display: flex; align-items: center; gap: 15px; }
         .login-btn { background: transparent; border: 1px solid var(--neon-red); color: var(--neon-red); padding: 5px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .login-btn:hover { background: var(--neon-red); color: #fff; }
@@ -95,13 +98,18 @@
 <body>
 
     <header>
-        <div class="logo">⚡ RRR ESPORTS</div>
+        <div class="logo-area">
+            <!-- Gol akare logo add kora holo -->
+            <img src="https://i.ibb.co.com/example/logo.png" alt="Logo" class="site-logo" id="siteLogoImg">
+            <div class="logo">⚡ RRR ESPORTS</div>
+        </div>
         <div class="header-right">
             <button class="login-btn" id="authNavBtn">Login</button>
             <div class="menu-icon" id="menuToggleBtn">☰</div>
         </div>
     </header>
 
+    <!-- Notice Bar Barabar rekhe dewa holo -->
     <div class="notice-bar" id="noticeBarContainer" style="display: none;">
         <div class="notice-title">Notice</div>
         <div class="notice-content" id="noticeTextDisplay">Loading notice...</div>
@@ -855,7 +863,7 @@
             const number = document.getElementById('withdrawNumber').value.trim();
             const amount = Number(document.getElementById('withdrawAmount').value);
 
-            if(!number || !amount) { alert("Number ebong Amount দিন।"); return; }
+            if(!number || !amount) { alert("সঠিক নাম্বার বা পরিমান দিন।"); return; }
             if(amount < 30 || amount > 200) { alert("Withdraw limit: Minimum ৳30 ebong Maximum ৳200"); return; }
 
             const userRef = doc(db, "users", auth.currentUser.uid);
