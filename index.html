@@ -19,12 +19,7 @@
         
         header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--card-bg); border-bottom: 2px solid var(--neon-red); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(255, 30, 66, 0.2); }
         .logo { font-size: 22px; font-weight: 900; color: var(--neon-red); text-shadow: 0 0 12px rgba(255,30,66,0.6); letter-spacing: 1px; }
-        .header-right { display: flex; align-items: center; gap: 10px; }
-        
-        /* Mail Icon Button in Header */
-        .header-mail-btn { background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 4px; transition: 0.2s; }
-        .header-mail-btn:hover { background: var(--neon-cyan); color: #000; }
-
+        .header-right { display: flex; align-items: center; gap: 15px; }
         .login-btn { background: transparent; border: 1px solid var(--neon-red); color: var(--neon-red); padding: 5px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .login-btn:hover { background: var(--neon-red); color: #fff; }
         .menu-icon { font-size: 24px; cursor: pointer; color: var(--neon-orange); }
@@ -102,7 +97,6 @@
     <header>
         <div class="logo">⚡ RRR ESPORTS</div>
         <div class="header-right">
-            <button class="header-mail-btn" id="headerMailBtn">✉️ Mail</button>
             <button class="login-btn" id="authNavBtn">Login</button>
             <div class="menu-icon" id="menuToggleBtn">☰</div>
         </div>
@@ -169,14 +163,13 @@
             <div class="history-list" id="withdrawHistory"><p style="color: var(--text-muted); font-size: 12px;">No requests found.</p></div>
         </div>
 
-        <!-- Mail Section -->
-        <div id="mailSection" class="section">
-            <h3 style="color: var(--neon-cyan);">✉️ Support Mail / Contact</h3>
-            <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0;">আপনার কোনো সমস্যা বা জিজ্ঞাসা থাকলে সরাসরি আমাদের মেইল করুন।</p>
-            <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #1f2937; margin-top: 10px;">
-                <input type="text" id="userMailSubject" class="form-control" placeholder="Subject (e.g., Payment Problem)">
-                <textarea id="userMailMessage" class="form-control" placeholder="Write your message here..." rows="4" style="width:100%; padding:10px; margin:8px 0; background:#161d2d; border:1px solid #2d3748; color:#fff; border-radius:6px;"></textarea>
-                <button class="submit-btn" id="sendSupportMailBtn" style="background: var(--neon-cyan); color: #000;">Send Mail</button>
+        <div id="supportMailSection" class="section">
+            <h3 style="color: var(--neon-cyan); margin-bottom: 10px;">✉️ Support & Email Us</h3>
+            <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #1f2937;">
+                <input type="text" id="supportUserName" class="form-control" placeholder="Your Name">
+                <input type="email" id="supportUserEmail" class="form-control" placeholder="Your Email">
+                <textarea id="supportUserMsg" class="form-control" placeholder="Write your message or issue..." rows="3"></textarea>
+                <button class="submit-btn" id="sendSupportMailBtn" style="background: var(--neon-cyan); color: #000;">Send Message</button>
             </div>
         </div>
     </div>
@@ -257,8 +250,8 @@
             <li id="menuMyMatch">My Match</li>
             <li id="menuAddBal">Add Balance</li>
             <li id="menuWithdraw">Withdraw</li>
-            <li id="menuMailDrawer" style="color: var(--neon-cyan);">✉️ Support Mail</li>
             <li id="menuGift" style="color: var(--neon-red); font-weight: bold;">🎁 Gift Code</li>
+            <li id="menuSupportMail" style="color: var(--neon-cyan);">✉️ Support Email</li>
             <li id="drawerAuthItem">Login / Register</li>
             <li style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; padding-top: 12px; color: var(--neon-cyan);">
                 <strong>সহায়তা কেন্দ্র</strong><br>
@@ -308,7 +301,7 @@
             if(tabId === 'giftCodeSection') { document.getElementById('giftCodeSection').classList.add('active'); }
             if(tabId === 'addBalance') { document.getElementById('addBalanceSection').classList.add('active'); loadUserHistory(); }
             if(tabId === 'withdraw') { document.getElementById('withdrawSection').classList.add('active'); loadUserHistory(); }
-            if(tabId === 'mailSection') { document.getElementById('mailSection').classList.add('active'); }
+            if(tabId === 'supportMailSection') { document.getElementById('supportMailSection').classList.add('active'); }
         }
 
         function toggleDrawer() { document.getElementById('sideDrawer').classList.toggle('open'); }
@@ -405,27 +398,27 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        async function sendSupportMail() {
-            if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
-            
-            const subject = document.getElementById('userMailSubject').value.trim();
-            const message = document.getElementById('userMailMessage').value.trim();
+        async function sendSupportMessage() {
+            const name = document.getElementById('supportUserName').value.trim();
+            const email = document.getElementById('supportUserEmail').value.trim();
+            const message = document.getElementById('supportUserMsg').value.trim();
 
-            if(!subject || !message) { alert("সাবজেক্ট এবং মেসেজ লিখুন।"); return; }
+            if(!name || !email || !message) {
+                alert("দয়া করে সব ফিল্ড পূরণ করুন!");
+                return;
+            }
 
             try {
                 await addDoc(collection(db, "supportMails"), {
-                    userId: auth.currentUser.uid,
-                    email: auth.currentUser.email,
-                    subject: subject,
+                    name: name,
+                    email: email,
                     message: message,
-                    status: "Unread",
                     timestamp: new Date()
                 });
-
-                alert("আপনার মেইল সফলভাবে পাঠানো হয়েছে! খুব শীঘ্রই অ্যাডমিন আপনার সাথে যোগাযোগ করবে।");
-                document.getElementById('userMailSubject').value = "";
-                document.getElementById('userMailMessage').value = "";
+                alert("আপনার মেসেজটি সফলভাবে অ্যাডমিনের কাছে পাঠানো হয়েছে!");
+                document.getElementById('supportUserName').value = "";
+                document.getElementById('supportUserEmail').value = "";
+                document.getElementById('supportUserMsg').value = "";
             } catch(e) {
                 alert("Error: " + e.message);
             }
@@ -544,7 +537,7 @@
                             if (m.roomId && m.roomId.trim() !== "") {
                                 roomInfoHtml = `
                                     <div style="margin-top: 8px; padding: 8px; background: rgba(255,119,0,0.1); border-radius: 5px; color: var(--neon-orange);">
-                                        <strong>Room ID:</strong> ${m.roomId} \vert{} <strong>Pass:</strong>${m.roomPass || 'N/A'}
+                                        <strong>Room ID:</strong> ${m.roomId} | <strong>Pass:</strong> ${m.roomPass || 'N/A'}
                                     </div>`;
                             } else {
                                 roomInfoHtml = `
@@ -581,7 +574,7 @@
 
                         container.innerHTML += `
                             <div class="match-card">
-                                <h4>${m.matchName} (Code:${m.matchCode})</h4>
+                                <h4>${m.matchName} (Code: ${m.matchCode})</h4>
                                 <div class="match-details">
                                     <span>Entry Fee: ৳${m.entryFee}</span>
                                 </div>
@@ -602,7 +595,8 @@
                                 <div class="match-details" style="margin-top: 8px;">
                                     <span style="color: var(--neon-cyan);">Status / Time: <strong id="${timerId}" style="color: var(--neon-red);">Calculating...</strong></span>
                                 </div>
-                                ${roomInfoHtml}${btnHtml}
+                                ${roomInfoHtml}
+                                ${btnHtml}
                                 <button class="view-players-btn" id="${viewBtnId}">👥 View Joined Players (${joined})</button>
                             </div>`;
                         
@@ -654,7 +648,7 @@
                         container.innerHTML += `
                             <div style="background: #161d2d; padding: 10px; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid var(--neon-cyan); display: flex; justify-content: space-between; align-items: center;">
                                 <div>
-                                    <strong style="color: var(--neon-orange);">#${count++}${data.playerName || 'N/A'}</strong><br>
+                                    <strong style="color: var(--neon-orange);">#${count++} ${data.playerName || 'N/A'}</strong><br>
                                     <span style="color: var(--text-muted); font-size: 11px;">UID: ${data.playerID || 'N/A'}</span>
                                 </div>
                             </div>`;
@@ -751,7 +745,7 @@
                         const reg = d.data();
                         container.innerHTML += `
                             <div class="match-card">
-                                <h4>${reg.matchName} (Code:${reg.matchCode})</h4>
+                                <h4>${reg.matchName} (Code: ${reg.matchCode})</h4>
                                 <div class="match-details">
                                     <span>Game Name: ${reg.playerName}</span>
                                     <span>Game ID: ${reg.playerID}</span>
@@ -776,7 +770,7 @@
                 let color = item.status === 'Approved' ? 'var(--neon-orange)' : (item.status === 'Fail' ? 'var(--neon-red)' : 'var(--neon-cyan)');
                 addHistContainer.innerHTML += `
                     <div class="history-item">
-                        <div>Trx: ${item.trxId} \vert{} ৳${item.amount}</div>
+                        <div>Trx: ${item.trxId} | ৳${item.amount}</div>
                         <div style="font-weight: bold; color: ${color};">${statusText}</div>
                     </div>`;
             });
@@ -791,7 +785,7 @@
                 let color = item.status === 'Approved' ? 'var(--neon-orange)' : (item.status === 'Fail' ? 'var(--neon-red)' : 'var(--neon-cyan)');
                 withHistContainer.innerHTML += `
                     <div class="history-item">
-                        <div>No: ${item.number} \vert{} ৳${item.amount}</div>
+                        <div>No: ${item.number} | ৳${item.amount}</div>
                         <div style="font-weight: bold; color: ${color};">${statusText}</div>
                     </div>`;
             });
@@ -882,8 +876,6 @@
         }
 
         document.getElementById('authNavBtn').onclick = openAuthModal;
-        document.getElementById('headerMailBtn').onclick = () => switchTab('mailSection');
-        document.getElementById('sendSupportMailBtn').onclick = sendSupportMail;
         document.getElementById('menuToggleBtn').onclick = toggleDrawer;
         document.getElementById('navAddBalBtn').onclick = () => switchTab('addBalance');
         document.getElementById('navWithdrawBtn').onclick = () => switchTab('withdraw');
@@ -900,13 +892,15 @@
         document.getElementById('updateProfileBtn').onclick = updateProfileInfo;
         document.getElementById('closeProfileModal').onclick = closeProfileModal;
 
+        document.getElementById('sendSupportMailBtn').onclick = sendSupportMessage;
+
         document.getElementById('menuMatch').onclick = () => { switchTab('matchSection'); toggleDrawer(); };
         document.getElementById('menuMyMatch').onclick = () => { switchTab('myMatchSection'); toggleDrawer(); };
         document.getElementById('menuAddBal').onclick = () => { switchTab('addBalance'); toggleDrawer(); };
         document.getElementById('menuWithdraw').onclick = () => { switchTab('withdraw'); toggleDrawer(); };
-        document.getElementById('menuMailDrawer').onclick = () => { switchTab('mailSection'); toggleDrawer(); };
         document.getElementById('menuGift').onclick = () => { switchTab('giftCodeSection'); toggleDrawer(); };
-        document.getElementById('menuAdmin').onclick = () => { window.location.href = 'admin.html'; };
+        document.getElementById('menuSupportMail').onclick = () => { switchTab('supportMailSection'); toggleDrawer(); };
+        document.getElementById('menuAdmin').onclick = () => { window.location.href = 'Admin.html'; };
 
         document.getElementById('navHome').onclick = () => switchTab('matchSection');
         document.getElementById('navMyMatch').onclick = () => switchTab('myMatchSection');
