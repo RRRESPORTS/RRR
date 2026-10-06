@@ -214,17 +214,16 @@
             <h3 style="color: var(--neon-orange);">👤 User Profile</h3>
             <div style="font-size: 13px; margin-bottom: 12px; line-height: 1.6; color: var(--text-muted);">
                 <div><strong>Gmail:</strong> <span id="profileEmail" style="color: #fff;">-</span></div>
+                <div><strong>Game Name:</strong> <span id="profileGameName" style="color: var(--neon-cyan);">-</span></div>
+                <div><strong>Game UID:</strong> <span id="profileGameUID" style="color: var(--neon-cyan);">-</span></div>
             </div>
+            <hr style="border: 0; border-top: 1px solid #1f2937; margin: 10px 0;">
+            <h4 style="font-size: 13px; color: var(--neon-red); margin-bottom: 8px;">Change Password</h4>
             <div style="margin-bottom: 10px;">
-                <label style="font-size: 12px; color: var(--neon-cyan);">Change Game Name:</label>
-                <input type="text" id="profileEditName" class="form-control" placeholder="Enter new Game Name">
+                <input type="password" id="newPasswordInput" class="form-control" placeholder="Enter New Password">
             </div>
-            <div style="margin-bottom: 15px;">
-                <label style="font-size: 12px; color: var(--neon-cyan);">Change Game UID:</label>
-                <input type="text" id="profileEditUID" class="form-control" placeholder="Enter new UID">
-            </div>
-            <button class="submit-btn" id="updateProfileBtn" style="background: var(--neon-cyan); color: #000;">Update Profile</button>
-            <div class="switch-text" id="closeProfileModal" style="color: var(--neon-red); margin-top: 10px; cursor: pointer;">Close</div>
+            <button class="submit-btn" id="updatePasswordBtn" style="background: var(--neon-red); color: #fff;">Update Password</button>
+            <div class="switch-text" id="closeProfileModal" style="color: var(--text-muted); margin-top: 10px; cursor: pointer;">Close</div>
         </div>
     </div>
 
@@ -271,7 +270,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -314,7 +313,10 @@
             toggleDrawer();
             document.getElementById('profileModal').style.display = 'flex';
         }
-        function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
+        function closeProfileModal() { 
+            document.getElementById('profileModal').style.display = 'none'; 
+            document.getElementById('newPasswordInput').value = "";
+        }
 
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
@@ -349,25 +351,27 @@
             } catch (e) { alert("Error: " + e.message); }
         }
 
-        async function updateProfileInfo() {
-            if(!auth.currentUser) return;
-            const newName = document.getElementById('profileEditName').value.trim();
-            const newUID = document.getElementById('profileEditUID').value.trim();
-            
-            if(!newName || !newUID) { 
-                alert("Game Name এবং UID উভয় ফিল্ড পূরণ করা বাধ্যতামূলক!"); 
-                return; 
+        async function updateUserPassword() {
+            const user = auth.currentUser;
+            if(!user) return;
+
+            const newPassword = document.getElementById('newPasswordInput').value.trim();
+            if(!newPassword) {
+                alert("দয়া করে নতুন পাসওয়ার্ড লিখুন!");
+                return;
+            }
+
+            if(newPassword.length < 6) {
+                alert("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে!");
+                return;
             }
 
             try {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { 
-                    playerName: newName, 
-                    playerUID: newUID 
-                });
-                alert("Game Name & UID successfully updated!");
+                await updatePassword(user, newPassword);
+                alert("পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!");
                 closeProfileModal();
-            } catch(e) { 
-                alert("Error: " + e.message); 
+            } catch(e) {
+                alert("Error: " + e.message + " (Note: নিরাপত্তার স্বার্থে সম্প্রতি লগইন করা না থাকলে পাসওয়ার্ড বদলাতে পুনরায় লগইন করতে হতে পারে।)");
             }
         }
 
@@ -456,9 +460,8 @@
                         const data = docSnap.data();
                         document.getElementById('userBalance').innerText = `৳${data.balance || 0.00}`;
                         document.getElementById('profileEmail').innerText = data.email || user.email;
-                        
-                        document.getElementById('profileEditName').value = data.playerName || "";
-                        document.getElementById('profileEditUID').value = data.playerUID || "";
+                        document.getElementById('profileGameName').innerText = data.playerName || "-";
+                        document.getElementById('profileGameUID').innerText = data.playerUID || "-";
                     }
                 });
 
@@ -889,7 +892,7 @@
         document.getElementById('drawerCloseBtn').onclick = toggleDrawer;
 
         document.getElementById('menuProfile').onclick = openProfileModal;
-        document.getElementById('updateProfileBtn').onclick = updateProfileInfo;
+        document.getElementById('updatePasswordBtn').onclick = updateUserPassword;
         document.getElementById('closeProfileModal').onclick = closeProfileModal;
 
         document.getElementById('sendSupportMailBtn').onclick = sendSupportMessage;
