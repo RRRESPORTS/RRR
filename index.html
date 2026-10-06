@@ -863,7 +863,7 @@
             const number = document.getElementById('withdrawNumber').value.trim();
             const amount = Number(document.getElementById('withdrawAmount').value);
 
-            if(!number || !amount) { alert("Number ebong Amount দিন।"); return; }
+            if(!number || !amount) { alert("নাম্বার এবং পরিমান দিন।"); return; }
             if(amount < 30 || amount > 200) { alert("Withdraw limit: Minimum ৳30 ebong Maximum ৳200"); return; }
 
             const userRef = doc(db, "users", auth.currentUser.uid);
