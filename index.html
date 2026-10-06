@@ -100,7 +100,7 @@
     <header>
         <div class="logo-area">
             <!-- Gol akare logo add kora holo -->
-            <img src="https://i.ibb.co.com/example/logo.png" alt="Logo" class="site-logo" id="siteLogoImg">
+            <img src="https://i.ibb.co.com/21vYcLVc/image.png" alt="Logo" class="site-logo" id="siteLogoImg">
             <div class="logo">⚡ RRR ESPORTS</div>
         </div>
         <div class="header-right">
@@ -109,7 +109,7 @@
         </div>
     </header>
 
-    <!-- Notice Bar Barabar rekhe dewa holo -->
+    <!-- Notice Bar -->
     <div class="notice-bar" id="noticeBarContainer" style="display: none;">
         <div class="notice-title">Notice</div>
         <div class="notice-content" id="noticeTextDisplay">Loading notice...</div>
@@ -863,7 +863,7 @@
             const number = document.getElementById('withdrawNumber').value.trim();
             const amount = Number(document.getElementById('withdrawAmount').value);
 
-            if(!number || !amount) { alert("সঠিক নাম্বার বা পরিমান দিন।"); return; }
+            if(!number || !amount) { alert("Number ebong Amount দিন।"); return; }
             if(amount < 30 || amount > 200) { alert("Withdraw limit: Minimum ৳30 ebong Maximum ৳200"); return; }
 
             const userRef = doc(db, "users", auth.currentUser.uid);
