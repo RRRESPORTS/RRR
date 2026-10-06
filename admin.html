@@ -108,11 +108,6 @@
                 <p>টাকা ডিপোজিট রিকুয়েষ্ট চেক ও এপ্রুভ করুন</p>
             </div>
 
-            <div class="dash-card" style="border-color: var(--neon-orange);" onclick="openCardSection('cardAddSMS')">
-                <h3>Add Gateway SMS</h3>
-                <p>অটো ডিপোজিটের জন্য বিকাশ SMS ডাটাবেজে যুক্ত করুন</p>
-            </div>
-
             <div class="dash-card" onclick="openCardSection('cardWithdraw')">
                 <span class="card-badge" id="badgeWithdraw">0</span>
                 <h3>Withdraw Request</h3>
@@ -198,16 +193,6 @@
                 <button class="back-btn" onclick="goBackHome()">← Back</button>
             </div>
             <div class="list-container" id="addBalanceRequestsList"><p style="color: var(--text-muted); text-align: center;">Loading...</p></div>
-        </div>
-
-        <div id="cardAddSMS" class="admin-section">
-            <div class="section-header">
-                <h3>Add Gateway SMS (Auto Deposit)</h3>
-                <button class="back-btn" onclick="goBackHome()">← Back</button>
-            </div>
-            <input type="text" id="smsTrxId" class="form-control" placeholder="Transaction ID (TrxID)">
-            <input type="number" id="smsAmount" class="form-control" placeholder="Amount (৳)">
-            <button class="admin-btn" style="background: var(--neon-orange); color: #000;" onclick="addNewIncomingSMS()">Add SMS to Database</button>
         </div>
 
         <div id="cardWithdraw" class="admin-section">
@@ -309,23 +294,6 @@
                 alert("গিফট কোড সফলভাবে তৈরি হয়েছে!");
                 document.getElementById("giftCodeText").value = "";
                 document.getElementById("giftCodeAmount").value = "";
-            } catch(e) { alert("Error: " + e.message); }
-        }
-
-        window.addNewIncomingSMS = async function() {
-            const trxId = document.getElementById("smsTrxId").value.trim();
-            const amount = Number(document.getElementById("smsAmount").value);
-            if(!trxId || !amount) { alert("TrxID এবং Amount দিন।"); return; }
-            try {
-                await addDoc(collection(db, "incomingSMS"), {
-                    trxId: trxId,
-                    amount: amount,
-                    used: false,
-                    timestamp: new Date()
-                });
-                alert("SMS সফলভাবে যুক্ত হয়েছে! এখন ইউজার অটো ডিপোজিট করতে পারবে।");
-                document.getElementById("smsTrxId").value = "";
-                document.getElementById("smsAmount").value = "";
             } catch(e) { alert("Error: " + e.message); }
         }
 
