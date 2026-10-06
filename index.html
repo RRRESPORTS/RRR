@@ -901,8 +901,8 @@
         document.getElementById('menuGift').onclick = () => { switchTab('giftCodeSection'); toggleDrawer(); };
         document.getElementById('menuSupportMail').onclick = () => { switchTab('supportMailSection'); toggleDrawer(); };
         
-        // Admin Panel Link (ensure Admin.html exists in your repository)
-        document.getElementById('menuAdmin').onclick = () => { window.location.href = 'Admin.html'; };
+        // Admin Panel Link (fixed case-sensitivity to match admin.html)
+        document.getElementById('menuAdmin').onclick = () => { window.location.href = 'admin.html'; };
 
         document.getElementById('navHome').onclick = () => switchTab('matchSection');
         document.getElementById('navMyMatch').onclick = () => switchTab('myMatchSection');
