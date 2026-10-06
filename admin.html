@@ -123,6 +123,11 @@
                 <h3>Search User & Block/Unblock</h3>
                 <p>ইউজার সার্চ করুন এবং ব্লক/আনব্লক করুন</p>
             </div>
+
+            <div class="dash-card" style="border-color: var(--neon-cyan);" onclick="openCardSection('cardSupportMails')">
+                <h3>Support Mails / Messages</h3>
+                <p>ইউজারদের পাঠানো সাপোর্ট মেইল বা মেসেজগুলো দেখুন</p>
+            </div>
         </div>
 
         <div id="cardNotice" class="admin-section">
@@ -221,6 +226,14 @@
             <input type="text" id="searchUidInput" class="form-control" placeholder="Enter Game UID">
             <button class="admin-btn" onclick="searchUserByUID()">Search User</button>
             <div id="searchResultBox" style="margin-top: 10px; font-size: 13px; color: var(--text-muted);"></div>
+        </div>
+
+        <div id="cardSupportMails" class="admin-section">
+            <div class="section-header">
+                <h3>Support Mails / Messages</h3>
+                <button class="back-btn" onclick="goBackHome()">← Back</button>
+            </div>
+            <div class="list-container" id="supportMailsList"><p style="color: var(--text-muted); text-align: center;">Loading support mails...</p></div>
         </div>
     </div>
 
@@ -520,6 +533,19 @@
             } else {
                 badgeWithdraw.style.display = "none";
             }
+
+            // Support Mails Load
+            const supportListContainer = document.getElementById("supportMailsList");
+            const snapSupport = await getDocs(collection(db, "supportMails"));
+            supportListContainer.innerHTML = snapSupport.empty ? `<p style="color:var(--text-muted); text-align:center;">কোনো সাপোর্ট মেইল বা মেসেজ নেই।</p>` : "";
+            snapSupport.forEach(d => {
+                const mail = d.data();
+                supportListContainer.innerHTML += `
+                    <div class="room-item-box" style="border-left-color: var(--neon-pink);">
+                        <strong style="color: var(--neon-cyan);">${mail.name}</strong> (${mail.email})<br>
+                        <p style="font-size: 13px; color: #fff; margin-top: 5px;">${mail.message}</p>
+                    </div>`;
+            });
         }
     </script>
 </body>
