@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RRR ESPORTS</title>
+    <title>RRR ESPORTS - Admin Panel</title>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -72,7 +72,7 @@
 
     <div id="adminDashboard">
         <div class="dashboard-header">
-            <h2>ZEG-G ADMIN PANEL</h2>
+            <h2>RRR ESPORTS ADMIN PANEL</h2>
             <button onclick="logoutAdmin()" style="background: var(--neon-pink); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">Logout</button>
         </div>
 
@@ -106,6 +106,11 @@
                 <span class="card-badge" id="badgeAddBal">0</span>
                 <h3>Add Balance Request</h3>
                 <p>টাকা ডিপোজিট রিকুয়েষ্ট চেক ও এপ্রুভ করুন</p>
+            </div>
+
+            <div class="dash-card" style="border-color: var(--neon-orange);" onclick="openCardSection('cardAddSMS')">
+                <h3>Add Gateway SMS</h3>
+                <p>অটো ডিপোজিটের জন্য বিকাশ SMS ডাটাবেজে যুক্ত করুন</p>
             </div>
 
             <div class="dash-card" onclick="openCardSection('cardWithdraw')">
@@ -143,7 +148,7 @@
                 <h3>Create Gift Code</h3>
                 <button class="back-btn" onclick="goBackHome()">← Back</button>
             </div>
-            <input type="text" id="giftCodeText" class="form-control" placeholder="Gift Code (e.g., ZEG50)">
+            <input type="text" id="giftCodeText" class="form-control" placeholder="Gift Code (e.g., RRR50)">
             <input type="number" id="giftCodeAmount" class="form-control" placeholder="Bonus Amount (৳)">
             <button class="admin-btn" style="background: var(--neon-pink); color: #fff;" onclick="createGiftCode()">Create Code</button>
         </div>
@@ -195,6 +200,16 @@
             <div class="list-container" id="addBalanceRequestsList"><p style="color: var(--text-muted); text-align: center;">Loading...</p></div>
         </div>
 
+        <div id="cardAddSMS" class="admin-section">
+            <div class="section-header">
+                <h3>Add Gateway SMS (Auto Deposit)</h3>
+                <button class="back-btn" onclick="goBackHome()">← Back</button>
+            </div>
+            <input type="text" id="smsTrxId" class="form-control" placeholder="Transaction ID (TrxID)">
+            <input type="number" id="smsAmount" class="form-control" placeholder="Amount (৳)">
+            <button class="admin-btn" style="background: var(--neon-orange); color: #000;" onclick="addNewIncomingSMS()">Add SMS to Database</button>
+        </div>
+
         <div id="cardWithdraw" class="admin-section">
             <div class="section-header">
                 <h3>Withdraw Request</h3>
@@ -226,7 +241,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
@@ -297,6 +312,23 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
+        window.addNewIncomingSMS = async function() {
+            const trxId = document.getElementById("smsTrxId").value.trim();
+            const amount = Number(document.getElementById("smsAmount").value);
+            if(!trxId || !amount) { alert("TrxID এবং Amount দিন।"); return; }
+            try {
+                await addDoc(collection(db, "incomingSMS"), {
+                    trxId: trxId,
+                    amount: amount,
+                    used: false,
+                    timestamp: new Date()
+                });
+                alert("SMS সফলভাবে যুক্ত হয়েছে! এখন ইউজার অটো ডিপোজিট করতে পারবে।");
+                document.getElementById("smsTrxId").value = "";
+                document.getElementById("smsAmount").value = "";
+            } catch(e) { alert("Error: " + e.message); }
+        }
+
         window.addNewMatchToDB = async function(matchType) {
             let code, name, fee, slots, notice, time;
             let matchData = {};
@@ -352,24 +384,6 @@
 
         window.deleteMatch = async function(matchId) {
             if(confirm("ম্যাচটি ডিলিট করতে চান?")) { await deleteDoc(doc(db, "matches", matchId)); loadAdminData(); }
-        }
-
-        window.processAddBalance = async function(reqId, userId, amount, status) {
-            try {
-                const reqRef = doc(db, "addBalanceRequests", reqId);
-                if(status === 'Approved') {
-                    const userRef = doc(db, "users", userId);
-                    const userSnap = await getDoc(userRef);
-                    let currentBal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
-                    await updateDoc(userRef, { balance: currentBal + Number(amount) });
-                    await updateDoc(reqRef, { status: 'Approved' });
-                    alert("ব্যালেন্স এপ্রুভ করা হয়েছে!");
-                } else {
-                    await updateDoc(reqRef, { status: 'Fail' });
-                    alert("রিকুয়েষ্টটি ফেইল করা হয়েছে।");
-                }
-                loadAdminData();
-            } catch(e) { alert("Error: " + e.message); }
         }
 
         window.processWithdraw = async function(reqId, userId, amount, status) {
@@ -488,7 +502,7 @@
             let pendingAddBalCount = 0;
             const addBalContainer = document.getElementById("addBalanceRequestsList");
             const snapBal = await getDocs(collection(db, "addBalanceRequests"));
-            addBalContainer.innerHTML = `<p style="color:var(--text-muted); text-align:center;" id="noAddBalMsg">কোনো রিকুয়েষ্ট নেই।</p>`;
+            addBalContainer.innerHTML = `<p style="color:var(--text-muted); text-align:center;" id="noAddBalMsg">কোনো রিকুয়েষ্ট নেই (অটোমেটিক সিস্টেম চালু আছে)।</p>`;
             
             snapBal.forEach(d => {
                 const data = d.data();
@@ -498,10 +512,6 @@
                     addBalContainer.innerHTML += `
                         <div class="list-item">
                             <div>Trx: ${data.trxId} | ৳${data.amount}</div>
-                            <div class="btn-group">
-                                <button class="btn-approve" onclick="processAddBalance('${d.id}', '${data.userId}', ${data.amount}, 'Approved')">Approve</button>
-                                <button class="btn-fail" onclick="processAddBalance('${d.id}', '${data.userId}', ${data.amount}, 'Fail')">Fail</button>
-                            </div>
                         </div>`;
                 }
             });
