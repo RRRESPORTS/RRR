@@ -508,23 +508,41 @@
             let pendingWithdrawCount = 0;
             const withdrawContainer = document.getElementById("withdrawRequestsList");
             const snapWith = await getDocs(collection(db, "withdrawRequests"));
-            withdrawContainer.innerHTML = `<p style="color:var(--text-muted); text-align:center;">কোনো রিকুয়েষ্ট নেই।</p>`;
+            withdrawContainer.innerHTML = `<p style="color: var(--text-muted); text-align: center;">কোনো উইথড্র রিকুয়েষ্ট নেই।</p>`;
             
-            snapWith.forEach(d => {
+            for (const d of snapWith.docs) {
                 const data = d.data();
                 if(data.status === 'Pending') {
                     pendingWithdrawCount++;
                     if(pendingWithdrawCount === 1) withdrawContainer.innerHTML = "";
+                    
+                    // ইউজারের UID সংগ্রহ করার জন্য users কালেকশন থেকে ডাটা ফেচ করা হচ্ছে
+                    let userUID = "N/A";
+                    try {
+                        if(data.userId) {
+                            const userSnap = await getDoc(doc(db, "users", data.userId));
+                            if(userSnap.exists()) {
+                                userUID = userSnap.data().playerUID || "N/A";
+                            }
+                        }
+                    } catch(err) {}
+
                     withdrawContainer.innerHTML += `
-                        <div class="list-item">
-                            <div>${data.number} | ৳${data.amount}</div>
-                            <div class="btn-group">
-                                <button class="btn-approve" onclick="processWithdraw('${d.id}', '${data.userId}', ${data.amount}, 'Approved')">Approve</button>
-                                <button class="btn-fail" onclick="processWithdraw('${d.id}', '${data.userId}', ${data.amount}, 'Fail')">Fail</button>
+                        <div class="list-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong style="color: var(--neon-cyan);">Number:</strong> <span style="color: #fff;">${data.number}</span><br>
+                                    <strong style="color: var(--neon-cyan);">Amount:</strong> <span style="color: var(--neon-orange);">৳${data.amount}</span><br>
+                                    <strong style="color: var(--neon-cyan);">UID:</strong> <span style="color: var(--neon-green);">${userUID}</span>
+                                </div>
+                                <div class="btn-group">
+                                    <button class="btn-approve" onclick="processWithdraw('${d.id}', '${data.userId}', ${data.amount}, 'Approved')">Approve</button>
+                                    <button class="btn-fail" onclick="processWithdraw('${d.id}', '${data.userId}', ${data.amount}, 'Fail')">Fail</button>
+                                </div>
                             </div>
                         </div>`;
                 }
-            });
+            }
 
             const badgeWithdraw = document.getElementById("badgeWithdraw");
             if(pendingWithdrawCount > 0) {
