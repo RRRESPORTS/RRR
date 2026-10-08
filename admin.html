@@ -348,7 +348,7 @@
             }
 
             try {
-                // Clear previous registrations for this match code so users can join afresh
+                // Delete previous registrations for this match code so users can join again
                 const qReg = query(collection(db, "matchRegistrations"), where("matchCode", "==", code));
                 const regSnap = await getDocs(qReg);
                 if(!regSnap.empty) {
@@ -360,7 +360,7 @@
                 }
 
                 await setDoc(doc(db, "matches", code), matchData);
-                alert("ম্যাচ সফলভাবে তৈরি হয়েছে এবং পূর্বের জয়েন হিস্ট্রি রিসেট করা হয়েছে!");
+                alert("ম্যাচ সফলভাবে তৈরি হয়েছে এবং পূর্বের জয়েন হিস্ট্রি রিসেট করা হয়েছে!");
                 goBackHome();
             } catch(e) { alert("Error: " + e.message); }
         }
