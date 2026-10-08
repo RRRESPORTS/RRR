@@ -239,7 +239,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc, query, where, addDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
@@ -348,8 +348,19 @@
             }
 
             try {
+                // Clear previous registrations for this match code so users can join afresh
+                const qReg = query(collection(db, "matchRegistrations"), where("matchCode", "==", code));
+                const regSnap = await getDocs(qReg);
+                if(!regSnap.empty) {
+                    const batch = writeBatch(db);
+                    regSnap.forEach((regDoc) => {
+                        batch.delete(regDoc.ref);
+                    });
+                    await batch.commit();
+                }
+
                 await setDoc(doc(db, "matches", code), matchData);
-                alert("ম্যাচ সফলভাবে তৈরি হয়েছে!");
+                alert("ম্যাচ সফলভাবে তৈরি হয়েছে এবং পূর্বের জয়েন হিস্ট্রি রিসেট করা হয়েছে!");
                 goBackHome();
             } catch(e) { alert("Error: " + e.message); }
         }
@@ -516,7 +527,6 @@
                     pendingWithdrawCount++;
                     if(pendingWithdrawCount === 1) withdrawContainer.innerHTML = "";
                     
-                    // ইউজারের UID সংগ্রহ করার জন্য users কালেকশন থেকে ডাটা ফেচ করা হচ্ছে
                     let userUID = "N/A";
                     try {
                         if(data.userId) {
@@ -552,7 +562,6 @@
                 badgeWithdraw.style.display = "none";
             }
 
-            // Support Mails Load
             const supportListContainer = document.getElementById("supportMailsList");
             const snapSupport = await getDocs(collection(db, "supportMails"));
             supportListContainer.innerHTML = snapSupport.empty ? `<p style="color:var(--text-muted); text-align:center;">কোনো সাপোর্ট মেইল বা মেসেজ নেই।</p>` : "";
