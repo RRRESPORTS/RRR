@@ -505,7 +505,8 @@
                 const snapReg = await getDocs(qReg);
                 snapReg.forEach(d => { userJoinedMatchCodes.push(d.data().matchCode); });
 
-                loadUserHistory();
+                loadWebMatches();
+                loadMyMatches();
                 closeAuthModal();
             } else {
                 authNavBtn.innerText = "Login"; 
@@ -513,10 +514,10 @@
                 drawerAuthItem.innerText = "Login / Register"; 
                 drawerAuthItem.onclick = openAuthModal;
                 document.getElementById('userBalance').innerText = "৳0.00";
+                loadWebMatches();
+                loadMyMatches();
                 openAuthModal();
             }
-            loadWebMatches();
-            loadMyMatches();
         });
 
         function startCountdown(matchTimeStr, joinedCount, elementId) {
@@ -563,13 +564,13 @@
                     container.innerHTML = "";
                     snap.forEach((d) => {
                         const m = d.data();
-                        const joined = m.joinedCount || 0;
-                        const total = m.totalSlots || 0;
+                        const joined = Number(m.joinedCount || 0);
+                        const total = Number(m.totalSlots || 12); // Default to 12 slots if not specified
                         const available = Math.max(0, total - joined);
                         const isFull = joined >= total;
-                        const hasAlreadyJoined = userJoinedMatchCodes.includes(m.matchCode);
+                        const hasAlreadyJoined = auth.currentUser ? userJoinedMatchCodes.includes(m.matchCode) : false;
 
-                        const percentage = total > 0 ? (joined / total) * 100 : 0;
+                        const percentage = total > 0 ? Math.min(100, (joined / total) * 100) : 0;
 
                         let roomInfoHtml = "";
                         if (hasAlreadyJoined) {
@@ -626,7 +627,7 @@
                                         <div class="progress-fill" style="width: ${percentage}%;"></div>
                                     </div>
                                     <div class="slot-text-info">
-                                        <span>${joined} Joined</span>
+                                        <span>${joined}/${total} Joined</span>
                                         <span>${available} Available</span>
                                     </div>
                                 </div>
@@ -746,7 +747,7 @@
 
                 const matchRef = doc(db, "matches", selectedMatchForJoin.code);
                 const matchSnap = await getDoc(matchRef);
-                const currentJoined = matchSnap.data().joinedCount || 0;
+                const currentJoined = Number(matchSnap.data().joinedCount || 0);
                 await updateDoc(matchRef, { joinedCount: currentJoined + 1 });
 
                 await addDoc(collection(db, "matchRegistrations"), {
