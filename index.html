@@ -520,7 +520,7 @@
             }
         });
 
-        function startCountdown(matchTimeStr, joinedCount, elementId) {
+        function startCountdown(matchTimeStr, joinedCount, totalSlots, elementId) {
             const countDownDate = new Date(matchTimeStr).getTime();
             if(isNaN(countDownDate)) { document.getElementById(elementId).innerText = "Time Expired"; return; }
 
@@ -533,7 +533,7 @@
 
                 if (distance < 0) {
                     clearInterval(x);
-                    if (joinedCount > 0) {
+                    if (joinedCount >= totalSlots && totalSlots > 0) {
                         el.innerHTML = `<span style="color: var(--neon-orange);">Match Started / Running</span>`;
                     } else {
                         el.innerHTML = `<span style="color: var(--neon-red); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি</span>`;
@@ -643,10 +643,10 @@
                         if(m.matchTime) {
                             const countDownDate = new Date(m.matchTime).getTime();
                             const now = new Date().getTime();
-                            if (countDownDate - now < 0 && joined === 0) {
+                            if (countDownDate - now < 0 && joined < total) {
                                 document.getElementById(timerId).innerHTML = `<span style="color: var(--neon-red); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি</span>`;
                             } else {
-                                startCountdown(m.matchTime, joined, timerId);
+                                startCountdown(m.matchTime, joined, total, timerId);
                             }
                         }
 
