@@ -166,6 +166,12 @@
                 <h3>Add Normal Match</h3>
                 <button class="back-btn" onclick="goBackHome()">← Back</button>
             </div>
+            <select id="mCategory" class="form-control">
+                <option value="BR MATCH">BR MATCH</option>
+                <option value="CS MATCH">CS MATCH</option>
+                <option value="LONE WOLF">LONE WOLF</option>
+                <option value="LOST TO WIN">LOST TO WIN</option>
+            </select>
             <input type="text" id="mCode" class="form-control" placeholder="Match Code (e.g. M01)">
             <input type="text" id="mName" class="form-control" placeholder="Match Name">
             <input type="number" id="mFee" class="form-control" placeholder="Entry Fee (৳)">
@@ -181,6 +187,12 @@
                 <h3>Add Per Kill Match</h3>
                 <button class="back-btn" onclick="goBackHome()">← Back</button>
             </div>
+            <select id="pkCategory" class="form-control">
+                <option value="BR MATCH">BR MATCH</option>
+                <option value="CS MATCH">CS MATCH</option>
+                <option value="LONE WOLF">LONE WOLF</option>
+                <option value="LOST TO WIN">LOST TO WIN</option>
+            </select>
             <input type="text" id="pkCode" class="form-control" placeholder="Match Code (e.g. PK01)">
             <input type="text" id="pkName" class="form-control" placeholder="Match Name (e.g. Free Fire Per Kill)">
             <input type="number" id="pkFee" class="form-control" placeholder="Entry Fee (৳)">
@@ -311,10 +323,11 @@
         }
 
         window.addNewMatchToDB = async function(matchType) {
-            let code, name, fee, slots, notice, time;
+            let code, name, fee, slots, notice, time, category;
             let matchData = {};
 
             if(matchType === 'normal') {
+                category = document.getElementById("mCategory").value;
                 code = document.getElementById("mCode").value.trim();
                 name = document.getElementById("mName").value.trim();
                 fee = Number(document.getElementById("mFee").value);
@@ -324,12 +337,13 @@
 
                 if(!code || !name) { alert("কোড এবং নাম দিন।"); return; }
                 matchData = {
-                    matchCode: code, matchName: name, entryFee: fee,
+                    category: category, matchCode: code, matchName: name, entryFee: fee,
                     firstPrize: document.getElementById("mFirstPrize").value.trim(),
                     matchTime: time, totalSlots: slots, joinedCount: 0, 
                     roomId: "", roomPass: "", matchNotice: notice, type: "normal"
                 };
             } else {
+                category = document.getElementById("pkCategory").value;
                 code = document.getElementById("pkCode").value.trim();
                 name = document.getElementById("pkName").value.trim();
                 fee = Number(document.getElementById("pkFee").value);
@@ -339,7 +353,7 @@
 
                 if(!code || !name) { alert("কোড এবং নাম দিন।"); return; }
                 matchData = {
-                    matchCode: code, matchName: name, entryFee: fee,
+                    category: category, matchCode: code, matchName: name, entryFee: fee,
                     prizePool: document.getElementById("pkPrizePool").value.trim(),
                     perKillAmount: Number(document.getElementById("pkPerKill").value),
                     matchTime: time, totalSlots: slots, joinedCount: 0, 
@@ -348,7 +362,6 @@
             }
 
             try {
-                // Delete previous registrations for this match code so users can join again
                 const qReg = query(collection(db, "matchRegistrations"), where("matchCode", "==", code));
                 const regSnap = await getDocs(qReg);
                 if(!regSnap.empty) {
