@@ -62,13 +62,22 @@
         .history-list { margin-top: 15px; max-height: 300px; overflow-y: auto; }
         .history-item { background: var(--card-bg); border: 1px solid #1f2937; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
 
-        .social-footer { margin-top: 30px; padding: 20px; background: var(--card-bg); border-top: 1px solid rgba(255,30,66,0.2); text-align: center; }
+        /* Contact Support Section Style */
+        .contact-support-footer { margin-top: 30px; padding: 20px; background: var(--card-bg); border-top: 1px solid rgba(255,30,66,0.2); text-align: center; }
+        .contact-support-footer h4 { color: var(--neon-cyan); margin-bottom: 10px; font-size: 15px; }
+        .contact-info-text { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.6; }
+        .contact-btn-grid { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 15px; }
+        .contact-btn { padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-wa-action { background: #25d366; color: #fff; }
+        .btn-tg-action { background: #0088cc; color: #fff; }
+
+        .social-footer { padding: 15px 20px; background: #0a0e17; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; }
         .social-footer h4 { color: var(--neon-orange); margin-bottom: 12px; font-size: 14px; }
         .social-links-grid { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
         .social-btn { padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
         .btn-yt { background: #ff0000; color: #fff; }
         .btn-fb { background: #1877f2; color: #fff; }
-        .btn-wa { background: #25d366; color: #fff; }
+        .btn-wa-channel { background: #25d366; color: #fff; }
 
         .powered-footer { text-align: center; padding: 15px; font-size: 12px; color: var(--text-muted); background: #040609; border-top: 1px solid rgba(255,255,255,0.05); }
         .powered-footer span { color: var(--neon-red); font-weight: bold; }
@@ -181,12 +190,26 @@
         </div>
     </div>
 
+    <!-- Contact & 24/7 Support Section (Added above Connect With Us) -->
+    <div class="contact-support-footer">
+        <h4>📞 Contact - 24/7 Support</h4>
+        <div class="contact-info-text">
+            আমাদের 24/7 সাপোর্ট পেতে যোগাযোগ করুন:<br>
+            <strong>WhatsApp:</strong> 01902009133<br>
+            <strong>Telegram:</strong> @RRR_ESPORTS_1
+        </div>
+        <div class="contact-btn-grid">
+            <a href="https://wa.me/8801902009133" target="_blank" class="contact-btn btn-wa-action">WhatsApp Chat</a>
+            <a href="https://t.me/RRR_ESPORTS_1" target="_blank" class="contact-btn btn-tg-action">Telegram Chat</a>
+        </div>
+    </div>
+
     <div class="social-footer">
         <h4>Connect With Us</h4>
         <div class="social-links-grid">
             <a href="https://youtube.com/@rrresports-1?si=1lBdELyQA7iZyS7W" target="_blank" class="social-btn btn-yt">YouTube</a>
             <a href="https://www.facebook.com/profile.php?id=61595134351554" target="_blank" class="social-btn btn-fb">Facebook</a>
-            <a href="https://whatsapp.com/channel/0029VbDnCqyLI8YYIFUxB41W" target="_blank" class="social-btn btn-wa">WhatsApp Channel</a>
+            <a href="https://whatsapp.com/channel/0029VbDnCqyLI8YYIFUxB41W" target="_blank" class="social-btn btn-wa-channel">WhatsApp Channel</a>
         </div>
     </div>
 
@@ -419,7 +442,6 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // WhatsApp Direct Message Function
         function sendWhatsAppMessage() {
             const gameName = document.getElementById('supportGameName').value.trim();
             const gameUID = document.getElementById('supportGameUID').value.trim();
@@ -472,7 +494,6 @@
                         document.getElementById('profileGameName').innerText = data.playerName || "-";
                         document.getElementById('profileGameUID').innerText = data.playerUID || "-";
                         
-                        // Auto-fill support form fields if user data exists
                         if(document.getElementById('supportGameName').value === "") {
                             document.getElementById('supportGameName').value = data.playerName || "";
                         }
@@ -912,7 +933,6 @@
         document.getElementById('updatePasswordBtn').onclick = updateUserPassword;
         document.getElementById('closeProfileModal').onclick = closeProfileModal;
 
-        // WhatsApp Send Button Action
         document.getElementById('sendWhatsAppMsgBtn').onclick = sendWhatsAppMessage;
 
         document.getElementById('menuMatch').onclick = () => { switchTab('matchSection'); toggleDrawer(); };
@@ -924,7 +944,6 @@
         
         document.getElementById('menuAdmin').onclick = () => { window.location.href = 'admin.html'; };
 
-        // Bottom Navigation Event Listeners
         document.getElementById('navHome').onclick = () => switchTab('matchSection');
         document.getElementById('navMyMatch').onclick = () => switchTab('myMatchSection');
         document.getElementById('navSupport').onclick = () => switchTab('supportMailSection');
