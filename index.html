@@ -372,20 +372,25 @@
         let allMatchesCache = [];
         let deferredPrompt;
 
-        // PWA Install Prompt Logic
+        // PWA Install Prompt Logic (Force Show Banner added)
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             document.getElementById('installBanner').style.display = 'block';
         });
 
+        // Force show banner so it appears immediately
+        setTimeout(() => {
+            document.getElementById('installBanner').style.display = 'block';
+        }, 1000);
+
         document.getElementById('installAppBtn').addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 deferredPrompt = null;
-                document.getElementById('installBanner').style.display = 'none';
             }
+            document.getElementById('installBanner').style.display = 'none';
         });
 
         document.getElementById('closeInstallBtn').addEventListener('click', () => {
@@ -1061,4 +1066,4 @@
         document.getElementById('navProfile').onclick = () => openProfileModal();
     </script>
 </body>
-    </html>
+</html>
