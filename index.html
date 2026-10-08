@@ -62,7 +62,6 @@
         .history-list { margin-top: 15px; max-height: 300px; overflow-y: auto; }
         .history-item { background: var(--card-bg); border: 1px solid #1f2937; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
 
-        /* Contact Support Section Style */
         .contact-support-footer { margin-top: 30px; padding: 20px; background: var(--card-bg); border-top: 1px solid rgba(255,30,66,0.2); text-align: center; }
         .contact-support-footer h4 { color: var(--neon-cyan); margin-bottom: 10px; font-size: 15px; }
         .contact-info-text { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.6; }
@@ -190,7 +189,6 @@
         </div>
     </div>
 
-    <!-- Contact & 24/7 Support Section (Added above Connect With Us) -->
     <div class="contact-support-footer">
         <h4>📞 Contact - 24/7 Support</h4>
         <div class="contact-info-text">
@@ -301,7 +299,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, updateDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
