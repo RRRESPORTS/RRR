@@ -268,11 +268,12 @@
         </ul>
     </div>
 
+    <!-- Updated Bottom Navigation Bar -->
     <div class="bottom-nav">
         <div class="nav-item active" id="navHome"><div>🏠</div>Home</div>
         <div class="nav-item" id="navMyMatch"><div>🎮</div>My Match</div>
-        <div class="nav-item" id="navAdd"><div>💳</div>Add Balance</div>
-        <div class="nav-item" id="navWith"><div>💸</div>Withdraw</div>
+        <div class="nav-item" id="navSupport"><div>✉️</div>Support Email</div>
+        <div class="nav-item" id="navProfile"><div>👤</div>Profile</div>
     </div>
 
     <script type="module">
@@ -302,12 +303,23 @@
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
             
-            if(tabId === 'matchSection') { document.getElementById('matchSection').classList.add('active'); loadWebMatches(); }
-            if(tabId === 'myMatchSection') { document.getElementById('myMatchSection').classList.add('active'); loadMyMatches(); }
+            if(tabId === 'matchSection') { 
+                document.getElementById('matchSection').classList.add('active'); 
+                document.getElementById('navHome').classList.add('active');
+                loadWebMatches(); 
+            }
+            if(tabId === 'myMatchSection') { 
+                document.getElementById('myMatchSection').classList.add('active'); 
+                document.getElementById('navMyMatch').classList.add('active');
+                loadMyMatches(); 
+            }
             if(tabId === 'giftCodeSection') { document.getElementById('giftCodeSection').classList.add('active'); }
             if(tabId === 'addBalance') { document.getElementById('addBalanceSection').classList.add('active'); loadUserHistory(); }
             if(tabId === 'withdraw') { document.getElementById('withdrawSection').classList.add('active'); loadUserHistory(); }
-            if(tabId === 'supportMailSection') { document.getElementById('supportMailSection').classList.add('active'); }
+            if(tabId === 'supportMailSection') { 
+                document.getElementById('supportMailSection').classList.add('active'); 
+                document.getElementById('navSupport').classList.add('active');
+            }
         }
 
         function toggleDrawer() { document.getElementById('sideDrawer').classList.toggle('open'); }
@@ -317,7 +329,6 @@
 
         function openProfileModal() {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
-            toggleDrawer();
             document.getElementById('profileModal').style.display = 'flex';
         }
         function closeProfileModal() { 
@@ -913,10 +924,11 @@
         
         document.getElementById('menuAdmin').onclick = () => { window.location.href = 'admin.html'; };
 
+        // Bottom Navigation Event Listeners
         document.getElementById('navHome').onclick = () => switchTab('matchSection');
         document.getElementById('navMyMatch').onclick = () => switchTab('myMatchSection');
-        document.getElementById('navAdd').onclick = () => switchTab('addBalance');
-        document.getElementById('navWith').onclick = () => switchTab('withdraw');
+        document.getElementById('navSupport').onclick = () => switchTab('supportMailSection');
+        document.getElementById('navProfile').onclick = () => openProfileModal();
     </script>
 </body>
 </html>
