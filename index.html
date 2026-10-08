@@ -171,12 +171,12 @@
         </div>
 
         <div id="supportMailSection" class="section">
-            <h3 style="color: var(--neon-cyan); margin-bottom: 10px;">✉️ Support & Email Us</h3>
+            <h3 style="color: var(--neon-cyan); margin-bottom: 10px;">💬 WhatsApp Support</h3>
             <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #1f2937;">
-                <input type="text" id="supportUserName" class="form-control" placeholder="Your Name">
-                <input type="email" id="supportUserEmail" class="form-control" placeholder="Your Email">
-                <textarea id="supportUserMsg" class="form-control" placeholder="Write your message or issue..." rows="3"></textarea>
-                <button class="submit-btn" id="sendSupportMailBtn" style="background: var(--neon-cyan); color: #000;">Send Message</button>
+                <input type="text" id="supportGameName" class="form-control" placeholder="Game ID Name">
+                <input type="text" id="supportGameUID" class="form-control" placeholder="Game UID">
+                <textarea id="supportCommentMsg" class="form-control" placeholder="মন্তব্য (আপনার সমস্যা বা কথা এখানে লিখুন)..." rows="3"></textarea>
+                <button class="submit-btn" id="sendWhatsAppMsgBtn" style="background: #25d366; color: #fff;">Send Message on WhatsApp</button>
             </div>
         </div>
     </div>
@@ -257,7 +257,7 @@
             <li id="menuAddBal">Add Balance</li>
             <li id="menuWithdraw">Withdraw</li>
             <li id="menuGift" style="color: var(--neon-red); font-weight: bold;">🎁 Gift Code</li>
-            <li id="menuSupportMail" style="color: var(--neon-cyan);">✉️ Support Email</li>
+            <li id="menuSupportMail" style="color: var(--neon-cyan);">💬 Support WhatsApp</li>
             <li id="drawerAuthItem">Login / Register</li>
             <li style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; padding-top: 12px; color: var(--neon-cyan);">
                 <strong>সহায়তা কেন্দ্র</strong><br>
@@ -268,18 +268,17 @@
         </ul>
     </div>
 
-    <!-- Updated Bottom Navigation Bar -->
     <div class="bottom-nav">
         <div class="nav-item active" id="navHome"><div>🏠</div>Home</div>
         <div class="nav-item" id="navMyMatch"><div>🎮</div>My Match</div>
-        <div class="nav-item" id="navSupport"><div>✉️</div>Support Email</div>
+        <div class="nav-item" id="navSupport"><div>💬</div>Support</div>
         <div class="nav-item" id="navProfile"><div>👤</div>Profile</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, updateDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
@@ -420,30 +419,22 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        async function sendSupportMessage() {
-            const name = document.getElementById('supportUserName').value.trim();
-            const email = document.getElementById('supportUserEmail').value.trim();
-            const message = document.getElementById('supportUserMsg').value.trim();
+        // WhatsApp Direct Message Function
+        function sendWhatsAppMessage() {
+            const gameName = document.getElementById('supportGameName').value.trim();
+            const gameUID = document.getElementById('supportGameUID').value.trim();
+            const comment = document.getElementById('supportCommentMsg').value.trim();
 
-            if(!name || !email || !message) {
-                alert("দয়া করে সব ফিল্ড পূরণ করুন!");
+            if(!gameName || !gameUID || !comment) {
+                alert("দয়া করে Game ID Name, Game UID এবং মন্তব্য সব ফিল্ড পূরণ করুন!");
                 return;
             }
 
-            try {
-                await addDoc(collection(db, "supportMails"), {
-                    name: name,
-                    email: email,
-                    message: message,
-                    timestamp: new Date()
-                });
-                alert("আপনার মেসেজটি সফলভাবে অ্যাডমিনের কাছে পাঠানো হয়েছে!");
-                document.getElementById('supportUserName').value = "";
-                document.getElementById('supportUserEmail').value = "";
-                document.getElementById('supportUserMsg').value = "";
-            } catch(e) {
-                alert("Error: " + e.message);
-            }
+            const message = `*Support Message - RRR ESPORTS*\n\n*Game ID Name:* ${gameName}\n*Game UID:* ${gameUID}\n*মন্তব্য:* ${comment}`;
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/8801902009133?text=${encodedMessage}`;
+
+            window.open(whatsappUrl, '_blank');
         }
 
         onSnapshot(doc(db, "settings", "notice"), (docSnap) => {
@@ -480,6 +471,14 @@
                         document.getElementById('profileEmail').innerText = data.email || user.email;
                         document.getElementById('profileGameName').innerText = data.playerName || "-";
                         document.getElementById('profileGameUID').innerText = data.playerUID || "-";
+                        
+                        // Auto-fill support form fields if user data exists
+                        if(document.getElementById('supportGameName').value === "") {
+                            document.getElementById('supportGameName').value = data.playerName || "";
+                        }
+                        if(document.getElementById('supportGameUID').value === "") {
+                            document.getElementById('supportGameUID').value = data.playerUID || "";
+                        }
                     }
                 });
 
@@ -913,7 +912,8 @@
         document.getElementById('updatePasswordBtn').onclick = updateUserPassword;
         document.getElementById('closeProfileModal').onclick = closeProfileModal;
 
-        document.getElementById('sendSupportMailBtn').onclick = sendSupportMessage;
+        // WhatsApp Send Button Action
+        document.getElementById('sendWhatsAppMsgBtn').onclick = sendWhatsAppMessage;
 
         document.getElementById('menuMatch').onclick = () => { switchTab('matchSection'); toggleDrawer(); };
         document.getElementById('menuMyMatch').onclick = () => { switchTab('myMatchSection'); toggleDrawer(); };
