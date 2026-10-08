@@ -135,8 +135,48 @@
 
     <div class="container">
         <div id="matchSection" class="section active">
-            <h3 style="margin-bottom: 10px; color: var(--neon-cyan);">🔥 Live & Upcoming Matches</h3>
-            <div id="matchListContainer"><p style="color: var(--text-muted);">Loading matches...</p></div>
+            <h3 style="margin-bottom: 15px; color: var(--neon-cyan); text-align: center; font-weight: 800;">🔥 FREE FIRE MATCHES</h3>
+            
+            <!-- Category Cards Layout -->
+            <div id="categoryCardsContainer" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                <div onclick="filterMatchesByCategory('BR MATCH')" style="background: linear-gradient(135deg, #1f1115, #0d121f); border: 2px solid var(--neon-red); border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 4px 15px rgba(255,30,66,0.2);">
+                    <div>
+                        <h3 style="color: #fff; font-size: 18px; font-weight: 900; letter-spacing: 0.5px;">BR MATCH</h3>
+                        <p style="color: var(--text-muted); font-size: 12px; margin-top: 3px;" id="count_br">Loading...</p>
+                    </div>
+                    <div style="font-size: 22px; color: var(--neon-red);">⚔️</div>
+                </div>
+
+                <div onclick="filterMatchesByCategory('CS MATCH')" style="background: linear-gradient(135deg, #161d2d, #0d121f); border: 2px solid var(--neon-cyan); border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,243,255,0.2);">
+                    <div>
+                        <h3 style="color: #fff; font-size: 18px; font-weight: 900; letter-spacing: 0.5px;">CS MATCH</h3>
+                        <p style="color: var(--text-muted); font-size: 12px; margin-top: 3px;" id="count_cs">Loading...</p>
+                    </div>
+                    <div style="font-size: 22px; color: var(--neon-cyan);">🛡️</div>
+                </div>
+
+                <div onclick="filterMatchesByCategory('LONE WOLF')" style="background: linear-gradient(135deg, #1f1711, #0d121f); border: 2px solid var(--neon-orange); border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 4px 15px rgba(255,119,0,0.2);">
+                    <div>
+                        <h3 style="color: #fff; font-size: 18px; font-weight: 900; letter-spacing: 0.5px;">LONE WOLF</h3>
+                        <p style="color: var(--text-muted); font-size: 12px; margin-top: 3px;" id="count_lw">Loading...</p>
+                    </div>
+                    <div style="font-size: 22px; color: var(--neon-orange);">🐺</div>
+                </div>
+
+                <div onclick="filterMatchesByCategory('LOST TO WIN')" style="background: linear-gradient(135deg, #1a1122, #0d121f); border: 2px solid #b000ff; border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 4px 15px rgba(176,0,255,0.2);">
+                    <div>
+                        <h3 style="color: #fff; font-size: 18px; font-weight: 900; letter-spacing: 0.5px;">LOST TO WIN</h3>
+                        <p style="color: var(--text-muted); font-size: 12px; margin-top: 3px;" id="count_ltw">Loading...</p>
+                    </div>
+                    <div style="font-size: 22px; color: #b000ff;">🏆</div>
+                </div>
+            </div>
+
+            <!-- Back Button for Filter View -->
+            <button id="backToCategoriesBtn" style="display: none; background: var(--neon-red); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; margin-bottom: 12px; cursor: pointer;" onclick="showAllCategoriesView()">← Back to Categories</button>
+
+            <h3 id="currentCategoryTitle" style="margin-bottom: 10px; color: var(--neon-cyan); display: none;"></h3>
+            <div id="matchListContainer"></div>
         </div>
 
         <div id="myMatchSection" class="section">
@@ -318,6 +358,7 @@
         let isLoginMode = true;
         let selectedMatchForJoin = null;
         let userJoinedMatchCodes = [];
+        let allMatchesCache = [];
 
         function switchTab(tabId) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -409,7 +450,7 @@
                 alert("পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!");
                 closeProfileModal();
             } catch(e) {
-                alert("Error: " + e.message + " (Note: নিরাপত্তার স্বার্থে সম্প্রতি লগইন করা না থাকলে পাসওয়ার্ড বদলাতে পুনরায় লগইন করতে হতে পারে।)");
+                alert("Error: " + e.message);
             }
         }
 
@@ -555,114 +596,153 @@
         }
 
         async function loadWebMatches() {
-            const container = document.getElementById('matchListContainer');
             try {
                 const snap = await getDocs(collection(db, "matches"));
-                if(snap.empty) {
-                    container.innerHTML = `<p style="color: var(--text-muted);">No matches available.</p>`;
-                } else {
-                    container.innerHTML = "";
-                    snap.forEach((d) => {
-                        const m = d.data();
-                        const joined = Number(m.joinedCount || 0);
-                        const total = Number(m.totalSlots || 12); // Default to 12 slots if not specified
-                        const available = Math.max(0, total - joined);
-                        const isFull = joined >= total;
-                        const hasAlreadyJoined = auth.currentUser ? userJoinedMatchCodes.includes(m.matchCode) : false;
+                allMatchesCache = [];
+                let counts = { "BR MATCH": 0, "CS MATCH": 0, "LONE WOLF": 0, "LOST TO WIN": 0 };
 
-                        const percentage = total > 0 ? Math.min(100, (joined / total) * 100) : 0;
+                snap.forEach((d) => {
+                    const m = d.data();
+                    allMatchesCache.push({ id: d.id, ...m });
+                    let cat = m.category || "BR MATCH";
+                    if(counts[cat] !== undefined) counts[cat]++;
+                });
 
-                        let roomInfoHtml = "";
-                        if (hasAlreadyJoined) {
-                            if (m.roomId && m.roomId.trim() !== "") {
-                                roomInfoHtml = `
-                                    <div style="margin-top: 8px; padding: 8px; background: rgba(255,119,0,0.1); border-radius: 5px; color: var(--neon-orange);">
-                                        <strong>Room ID:</strong> ${m.roomId} | <strong>Pass:</strong> ${m.roomPass || 'N/A'}
-                                    </div>`;
-                            } else {
-                                roomInfoHtml = `
-                                    <div style="margin-top: 8px; padding: 8px; background: rgba(0,243,255,0.05); border-radius: 5px; color: var(--neon-cyan); font-size: 12px;">
-                                        ম্যাচ শুরু হওয়ার ২-৩ মিনিট আগে রুম আইডি ও পাসওয়ার্ড দেওয়া হবে।
-                                    </div>`;
-                            }
-                        }
+                document.getElementById('count_br').innerText = `${counts["BR MATCH"]} Matches Found`;
+                document.getElementById('count_cs').innerText = `${counts["CS MATCH"]} Matches Found`;
+                document.getElementById('count_lw').innerText = `${counts["LONE WOLF"]} Matches Found`;
+                document.getElementById('count_ltw').innerText = `${counts["LOST TO WIN"]} Matches Found`;
 
-                        let btnHtml = "";
-                        const btnId = `joinBtn_${m.matchCode}`;
-                        if (hasAlreadyJoined) {
-                            btnHtml = `<button class="join-btn" style="background: #161d2d; color: var(--neon-orange); cursor: not-allowed;" disabled>Already Joined</button>`;
-                        } else if (isFull) {
-                            btnHtml = `<button class="join-btn" style="background: gray; cursor: not-allowed;" disabled>Match Full</button>`;
-                        } else {
-                            btnHtml = `<button class="join-btn" id="${btnId}">Join Match</button>`;
-                        }
-
-                        const viewBtnId = `viewBtn_${m.matchCode}`;
-                        const timerId = `timer_${m.matchCode}`;
-
-                        let prizeDisplayHtml = "";
-                        if (m.type === 'perkill') {
-                            prizeDisplayHtml = `
-                                <span>Total Prize: ${m.prizePool || 'N/A'}</span>
-                                <span style="color: var(--neon-orange);">Per Kill: ৳${m.perKillAmount || 0}</span>
-                            `;
-                        } else {
-                            prizeDisplayHtml = `
-                                <span style="grid-column: span 2;">Total Prize: ৳${m.firstPrize || m.prize || 'N/A'}</span>
-                            `;
-                        }
-
-                        container.innerHTML += `
-                            <div class="match-card">
-                                <h4>${m.matchName} (Code: ${m.matchCode})</h4>
-                                <div class="match-details">
-                                    <span>Entry Fee: ৳${m.entryFee}</span>
-                                </div>
-                                <div class="match-details" style="font-weight: bold; color: var(--neon-orange);">
-                                    ${prizeDisplayHtml}
-                                </div>
-                                
-                                <div class="slot-progress-container">
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${percentage}%;"></div>
-                                    </div>
-                                    <div class="slot-text-info">
-                                        <span>${joined}/${total} Joined</span>
-                                        <span>${available} Available</span>
-                                    </div>
-                                </div>
-
-                                <div class="match-details" style="margin-top: 8px;">
-                                    <span style="color: var(--neon-cyan);">Status / Time: <strong id="${timerId}" style="color: var(--neon-red);">Calculating...</strong></span>
-                                </div>
-                                ${roomInfoHtml}
-                                ${btnHtml}
-                                <button class="view-players-btn" id="${viewBtnId}">👥 View Joined Players (${joined})</button>
-                            </div>`;
-                        
-                        if(m.matchTime) {
-                            const countDownDate = new Date(m.matchTime).getTime();
-                            const now = new Date().getTime();
-                            if (countDownDate - now < 0 && joined < total) {
-                                document.getElementById(timerId).innerHTML = `<span style="color: var(--neon-red); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি</span>`;
-                            } else {
-                                startCountdown(m.matchTime, joined, total, timerId);
-                            }
-                        }
-
-                        setTimeout(() => {
-                            const bElem = document.getElementById(btnId);
-                            if(bElem) {
-                                bElem.onclick = () => openJoinModal(m.matchCode, m.matchName, m.entryFee, m.matchNotice);
-                            }
-                            const vElem = document.getElementById(viewBtnId);
-                            if(vElem) {
-                                vElem.onclick = () => openJoinedPlayersModal(m.matchCode, m.matchName);
-                            }
-                        }, 100);
-                    });
-                }
+                showAllCategoriesView();
             } catch(e) {}
+        }
+
+        window.showAllCategoriesView = function() {
+            document.getElementById('categoryCardsContainer').style.display = 'flex';
+            document.getElementById('backToCategoriesBtn').style.display = 'none';
+            document.getElementById('currentCategoryTitle').style.display = 'none';
+            document.getElementById('matchListContainer').innerHTML = "";
+        }
+
+        window.filterMatchesByCategory = function(categoryName) {
+            document.getElementById('categoryCardsContainer').style.display = 'none';
+            document.getElementById('backToCategoriesBtn').style.display = 'block';
+            
+            const titleEl = document.getElementById('currentCategoryTitle');
+            titleEl.innerText = `📁 ${categoryName} Matches`;
+            titleEl.style.display = 'block';
+
+            const container = document.getElementById('matchListContainer');
+            container.innerHTML = "";
+
+            const filtered = allMatchesCache.filter(m => (m.category || "BR MATCH") === categoryName);
+
+            if(filtered.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 20px;">এই ক্যাটাগরিতে কোনো ম্যাচ নেই।</p>`;
+                return;
+            }
+
+            filtered.forEach((m) => {
+                renderMatchCardHTML(m, container);
+            });
+        }
+
+        function renderMatchCardHTML(m, container) {
+            const joined = Number(m.joinedCount || 0);
+            const total = Number(m.totalSlots || 12);
+            const available = Math.max(0, total - joined);
+            const isFull = joined >= total;
+            const hasAlreadyJoined = auth.currentUser ? userJoinedMatchCodes.includes(m.matchCode) : false;
+            const percentage = total > 0 ? Math.min(100, (joined / total) * 100) : 0;
+
+            let roomInfoHtml = "";
+            if (hasAlreadyJoined) {
+                if (m.roomId && m.roomId.trim() !== "") {
+                    roomInfoHtml = `
+                        <div style="margin-top: 8px; padding: 8px; background: rgba(255,119,0,0.1); border-radius: 5px; color: var(--neon-orange);">
+                            <strong>Room ID:</strong> ${m.roomId} | <strong>Pass:</strong> ${m.roomPass || 'N/A'}
+                        </div>`;
+                } else {
+                    roomInfoHtml = `
+                        <div style="margin-top: 8px; padding: 8px; background: rgba(0,243,255,0.05); border-radius: 5px; color: var(--neon-cyan); font-size: 12px;">
+                            ম্যাচ শুরু হওয়ার ২-৩ মিনিট আগে রুম আইডি ও পাসওয়ার্ড দেওয়া হবে।
+                        </div>`;
+                }
+            }
+
+            let btnHtml = "";
+            const btnId = `joinBtn_${m.matchCode}`;
+            if (hasAlreadyJoined) {
+                btnHtml = `<button class="join-btn" style="background: #161d2d; color: var(--neon-orange); cursor: not-allowed;" disabled>Already Joined</button>`;
+            } else if (isFull) {
+                btnHtml = `<button class="join-btn" style="background: gray; cursor: not-allowed;" disabled>Match Full</button>`;
+            } else {
+                btnHtml = `<button class="join-btn" id="${btnId}">Join Match</button>`;
+            }
+
+            const viewBtnId = `viewBtn_${m.matchCode}`;
+            const timerId = `timer_${m.matchCode}`;
+
+            let prizeDisplayHtml = "";
+            if (m.type === 'perkill') {
+                prizeDisplayHtml = `
+                    <span>Total Prize: ${m.prizePool || 'N/A'}</span>
+                    <span style="color: var(--neon-orange);">Per Kill: ৳${m.perKillAmount || 0}</span>
+                `;
+            } else {
+                prizeDisplayHtml = `
+                    <span style="grid-column: span 2;">Total Prize: ৳${m.firstPrize || m.prize || 'N/A'}</span>
+                `;
+            }
+
+            container.innerHTML += `
+                <div class="match-card">
+                    <h4>${m.matchName} (Code: ${m.matchCode})</h4>
+                    <div class="match-details">
+                        <span>Entry Fee: ৳${m.entryFee}</span>
+                    </div>
+                    <div class="match-details" style="font-weight: bold; color: var(--neon-orange);">
+                        ${prizeDisplayHtml}
+                    </div>
+                    
+                    <div class="slot-progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${percentage}%;"></div>
+                        </div>
+                        <div class="slot-text-info">
+                            <span>${joined}/${total} Joined</span>
+                            <span>${available} Available</span>
+                        </div>
+                    </div>
+
+                    <div class="match-details" style="margin-top: 8px;">
+                        <span style="color: var(--neon-cyan);">Status / Time: <strong id="${timerId}" style="color: var(--neon-red);">Calculating...</strong></span>
+                    </div>
+                    ${roomInfoHtml}
+                    ${btnHtml}
+                    <button class="view-players-btn" id="${viewBtnId}">👥 View Joined Players (${joined})</button>
+                </div>`;
+            
+            if(m.matchTime) {
+                const countDownDate = new Date(m.matchTime).getTime();
+                const now = new Date().getTime();
+                if (countDownDate - now < 0 && joined < total) {
+                    document.getElementById(timerId).innerHTML = `<span style="color: var(--neon-red); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি</span>`;
+                } else {
+                    startCountdown(m.matchTime, joined, total, timerId);
+                }
+            }
+
+            setTimeout(() => {
+                const bElem = document.getElementById(btnId);
+                if(bElem) {
+                    bElem.onclick = () => openJoinModal(m.matchCode, m.matchName, m.entryFee, m.matchNotice);
+                }
+                const vElem = document.getElementById(viewBtnId);
+                if(vElem) {
+                    vElem.onclick = () => openJoinedPlayersModal(m.matchCode, m.matchName);
+                }
+            }, 100);
         }
 
         async function openJoinedPlayersModal(matchCode, matchName) {
