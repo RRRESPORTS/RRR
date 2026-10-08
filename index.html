@@ -116,6 +116,20 @@
         <button id="closeInstallBtn" style="background: #374151; color: #fff; border: none; padding: 8px 15px; font-weight: bold; border-radius: 6px; cursor: pointer;">Cancel</button>
     </div>
 
+    <!-- Direct Download APK Popup Modal -->
+    <div id="appDownloadPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; justify-content: center; align-items: center;">
+        <div style="background: var(--card-bg); border: 2px solid var(--neon-red); padding: 25px; border-radius: 15px; width: 90%; max-width: 330px; text-align: center; box-shadow: 0 0 25px rgba(255,30,66,0.4); position: relative;">
+            <span id="closePopupBtn" style="position: absolute; top: 10px; right: 15px; font-size: 20px; color: var(--neon-red); cursor: pointer; font-weight: bold;">✕</span>
+            <div style="font-size: 40px; margin-bottom: 10px;">⚡</div>
+            <h3 style="color: #fff; margin-bottom: 8px; font-weight: 800;">Download RRR ESPORTS</h3>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">আমাদের অফিসিয়াল অ্যান্ড্রয়েড অ্যাপটি ডাউনলোড করুন এবং সহজে ম্যাচ খেলুন!</p>
+            <a href="https://appsgeyser.io/20258646/RRR ESPORTS" target="_blank" 
+               style="background: linear-gradient(135deg, var(--neon-red), var(--neon-orange)); color: #fff; padding: 12px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: block; box-shadow: 0 4px 15px rgba(255,30,66,0.3);">
+                📥 Download APK Now
+            </a>
+        </div>
+    </div>
+
     <header>
         <div class="logo-area">
             <img src="https://i.ibb.co.com/21vYcLVc/image.png" alt="Logo" class="site-logo" id="siteLogoImg">
@@ -379,10 +393,15 @@
             document.getElementById('installBanner').style.display = 'block';
         });
 
-        // Force show banner so it appears immediately
+        // Force show banner and APK download popup
         setTimeout(() => {
             document.getElementById('installBanner').style.display = 'block';
-        }, 1000);
+            
+            // Auto show APK download popup if not closed before
+            if (!localStorage.getItem('popupClosed')) {
+                document.getElementById('appDownloadPopup').style.display = 'flex';
+            }
+        }, 1500);
 
         document.getElementById('installAppBtn').addEventListener('click', async () => {
             if (deferredPrompt) {
@@ -395,6 +414,11 @@
 
         document.getElementById('closeInstallBtn').addEventListener('click', () => {
             document.getElementById('installBanner').style.display = 'none';
+        });
+
+        document.getElementById('closePopupBtn').addEventListener('click', () => {
+            document.getElementById('appDownloadPopup').style.display = 'none';
+            localStorage.setItem('popupClosed', 'true');
         });
 
         function switchTab(tabId) {
