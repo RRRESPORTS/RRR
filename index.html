@@ -601,7 +601,10 @@
 
                 const qReg = query(collection(db, "matchRegistrations"), where("userId", "==", user.uid));
                 const snapReg = await getDocs(qReg);
-                snapReg.forEach(d => { userJoinedMatchCodes.push(d.data().matchCode); });
+                snapReg.forEach(d => { 
+                    const regData = d.data();
+                    userJoinedMatchCodes.push(regData.matchDocId || regData.matchCode); 
+                });
 
                 loadWebMatches();
                 loadMyMatches();
@@ -710,7 +713,7 @@
             const total = Number(m.totalSlots || 12);
             const available = Math.max(0, total - joined);
             const isFull = joined >= total;
-            const hasAlreadyJoined = auth.currentUser ? userJoinedMatchCodes.includes(m.matchCode) : false;
+            const hasAlreadyJoined = auth.currentUser ? userJoinedMatchCodes.includes(m.id) : false;
             const percentage = total > 0 ? Math.min(100, (joined / total) * 100) : 0;
 
             let roomInfoHtml = "";
@@ -729,7 +732,7 @@
             }
 
             let btnHtml = "";
-            const btnId = `joinBtn_${m.matchCode}`;
+            const btnId = `joinBtn_${m.id}`;
             if (hasAlreadyJoined) {
                 btnHtml = `<button class="join-btn" style="background: #161d2d; color: var(--neon-orange); cursor: not-allowed;" disabled>Already Joined</button>`;
             } else if (isFull) {
@@ -738,8 +741,8 @@
                 btnHtml = `<button class="join-btn" id="${btnId}">Join Match</button>`;
             }
 
-            const viewBtnId = `viewBtn_${m.matchCode}`;
-            const timerId = `timer_${m.matchCode}`;
+            const viewBtnId = `viewBtn_${m.id}`;
+            const timerId = `timer_${m.id}`;
 
             let prizeDisplayHtml = "";
             if (m.type === 'perkill') {
@@ -794,16 +797,16 @@
             setTimeout(() => {
                 const bElem = document.getElementById(btnId);
                 if(bElem) {
-                    bElem.onclick = () => openJoinModal(m.matchCode, m.matchName, m.entryFee, m.matchNotice);
+                    bElem.onclick = () => openJoinModal(m.id, m.matchCode, m.matchName, m.entryFee, m.matchNotice);
                 }
                 const vElem = document.getElementById(viewBtnId);
                 if(vElem) {
-                    vElem.onclick = () => openJoinedPlayersModal(m.matchCode, m.matchName);
+                    vElem.onclick = () => openJoinedPlayersModal(m.id, m.matchName);
                 }
             }, 100);
         }
 
-        async function openJoinedPlayersModal(matchCode, matchName) {
+        async function openJoinedPlayersModal(matchDocId, matchName) {
             const modal = document.getElementById('playersListModal');
             const title = document.getElementById('playersModalTitle');
             const container = document.getElementById('playersListContainer');
@@ -813,7 +816,7 @@
             modal.style.display = 'flex';
 
             try {
-                const q = query(collection(db, "matchRegistrations"), where("matchCode", "==", matchCode));
+                const q = query(collection(db, "matchRegistrations"), where("matchDocId", "==", matchDocId));
                 const querySnapshot = await getDocs(q);
 
                 if(querySnapshot.empty) {
@@ -841,9 +844,9 @@
             document.getElementById('playersListModal').style.display = 'none';
         };
 
-        async function openJoinModal(code, name, fee, notice) {
+        function openJoinModal(docId, code, name, fee, notice) {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
-            selectedMatchForJoin = { code, name, fee };
+            selectedMatchForJoin = { docId, code, name, fee };
             document.getElementById('joinMatchInfo').innerText = `${name} (Fee: ৳${fee})`;
             
             const noticeBox = document.getElementById('modalMatchNoticeBox');
@@ -852,12 +855,6 @@
                 noticeBox.style.display = "block";
             } else {
                 noticeBox.style.display = "none";
-            }
-
-            const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
-            if(userSnap.exists()) {
-                document.getElementById('gamePlayerName').value = userSnap.data().playerName || "";
-                document.getElementById('gamePlayerID').value = userSnap.data().playerUID || "";
             }
 
             document.getElementById('joinModal').style.display = 'flex';
@@ -872,14 +869,13 @@
             if(!playerName || !playerID) { alert("Game Name এবং ID দিন।"); return; }
 
             const confirmBtn = document.getElementById('confirmJoinBtn');
-            confirmBtn.disabled = true; // Double click block korar jonno
+            confirmBtn.disabled = true;
 
             try {
-                // ১. চেক করুন ইউজার ইতিপূর্বেই এই ম্যাচে জয়েন করেছে কি না (Double Join Prevention)
                 const checkQuery = query(
                     collection(db, "matchRegistrations"), 
                     where("userId", "==", auth.currentUser.uid), 
-                    where("matchCode", "==", selectedMatchForJoin.code)
+                    where("matchDocId", "==", selectedMatchForJoin.docId)
                 );
                 const checkSnap = await getDocs(checkQuery);
                 if(!checkSnap.empty) {
@@ -889,8 +885,7 @@
                     return;
                 }
 
-                // ২. লাইভ ম্যাচ স্লট চেক করা (Slot Full Check)
-                const matchRef = doc(db, "matches", selectedMatchForJoin.code);
+                const matchRef = doc(db, "matches", selectedMatchForJoin.docId);
                 const matchSnap = await getDoc(matchRef);
                 if(!matchSnap.exists()) {
                     alert("ম্যাচটি পাওয়া যায়নি!");
@@ -910,7 +905,6 @@
                     return;
                 }
 
-                // ৩. ব্যালেন্স চেক করা
                 const userRef = doc(db, "users", auth.currentUser.uid);
                 const userSnap = await getDoc(userRef);
                 const userBal = Number(userSnap.data().balance || 0);
@@ -923,12 +917,12 @@
                     return;
                 }
 
-                // ৪. ব্যালেন্স কাটা এবং জয়েনিং আপডেট করা
                 await updateDoc(userRef, { balance: userBal - selectedMatchForJoin.fee });
                 await updateDoc(matchRef, { joinedCount: currentJoined + 1 });
 
                 await addDoc(collection(db, "matchRegistrations"), {
                     userId: auth.currentUser.uid,
+                    matchDocId: selectedMatchForJoin.docId,
                     matchCode: selectedMatchForJoin.code,
                     matchName: selectedMatchForJoin.name,
                     playerName: playerName,
@@ -936,8 +930,8 @@
                     timestamp: new Date()
                 });
 
-                if(!userJoinedMatchCodes.includes(selectedMatchForJoin.code)) {
-                    userJoinedMatchCodes.push(selectedMatchForJoin.code);
+                if(!userJoinedMatchCodes.includes(selectedMatchForJoin.docId)) {
+                    userJoinedMatchCodes.push(selectedMatchForJoin.docId);
                 }
 
                 alert("Successfully joined the match!");
@@ -970,15 +964,17 @@
                         let roomInfoHtml = `<div style="margin-top: 8px; padding: 8px; background: rgba(0,243,255,0.05); border-radius: 5px; color: var(--neon-cyan); font-size: 12px;">ম্যাচ শুরু হওয়ার ২-৩ মিনিট আগে রুম আইডি ও পাসওয়ার্ড দেওয়া হবে।</div>`;
                         
                         try {
-                            const matchDocRef = doc(db, "matches", reg.matchCode);
-                            const matchDocSnap = await getDoc(matchDocRef);
-                            if(matchDocSnap.exists()) {
-                                const matchData = matchDocSnap.data();
-                                if(matchData.roomId && matchData.roomId.trim() !== "") {
-                                    roomInfoHtml = `
-                                        <div style="margin-top: 8px; padding: 8px; background: rgba(255,119,0,0.1); border-radius: 5px; color: var(--neon-orange);">
-                                            <strong>Room ID:</strong> ${matchData.roomId} | <strong>Pass:</strong> ${matchData.roomPass || 'N/A'}
-                                        </div>`;
+                            if(reg.matchDocId) {
+                                const matchDocRef = doc(db, "matches", reg.matchDocId);
+                                const matchDocSnap = await getDoc(matchDocRef);
+                                if(matchDocSnap.exists()) {
+                                    const matchData = matchDocSnap.data();
+                                    if(matchData.roomId && matchData.roomId.trim() !== "") {
+                                        roomInfoHtml = `
+                                            <div style="margin-top: 8px; padding: 8px; background: rgba(255,119,0,0.1); border-radius: 5px; color: var(--neon-orange);">
+                                                <strong>Room ID:</strong> ${matchData.roomId} | <strong>Pass:</strong> ${matchData.roomPass || 'N/A'}
+                                            </div>`;
+                                    }
                                 }
                             }
                         } catch(err) {}
