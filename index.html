@@ -8,6 +8,15 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff1e42">
     <style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RRR ESPORTS</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff1e42">
+    <style>
         :root {
             --bg-color: #07090e;
             --card-bg: #0d121f;
@@ -108,7 +117,6 @@
 </head>
 <body>
 
-    <!-- Install App Banner Popup (Top Positioned) -->
     <div id="installBanner" style="display: none; position: fixed; top: 15px; left: 15px; right: 15px; background: #111827; border: 2px solid var(--neon-red); padding: 15px; border-radius: 12px; z-index: 9999; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.8);">
         <p style="color: #fff; font-size: 14px; margin-bottom: 10px; font-weight: bold;">Install the RRR ESPORTS App</p>
         <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px;">Would you like to install the app to your device?</p>
@@ -116,7 +124,6 @@
         <button id="closeInstallBtn" style="background: #374151; color: #fff; border: none; padding: 8px 15px; font-weight: bold; border-radius: 6px; cursor: pointer;">Cancel</button>
     </div>
 
-    <!-- Direct Download APK Popup Modal -->
     <div id="appDownloadPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; justify-content: center; align-items: center;">
         <div style="background: var(--card-bg); border: 2px solid var(--neon-red); padding: 25px; border-radius: 15px; width: 90%; max-width: 330px; text-align: center; box-shadow: 0 0 25px rgba(255,30,66,0.4); position: relative;">
             <span id="closePopupBtn" style="position: absolute; top: 10px; right: 15px; font-size: 20px; color: var(--neon-red); cursor: pointer; font-weight: bold;">✕</span>
@@ -141,7 +148,6 @@
         </div>
     </header>
 
-    <!-- Notice Bar -->
     <div class="notice-bar" id="noticeBarContainer" style="display: none;">
         <div class="notice-title">Notice</div>
         <div class="notice-content" id="noticeTextDisplay">Loading notice...</div>
@@ -162,7 +168,6 @@
         <div id="matchSection" class="section active">
             <h3 style="margin-bottom: 15px; color: var(--neon-cyan); text-align: center; font-weight: 800;">🔥 FREE FIRE MATCHES</h3>
             
-            <!-- Category Cards Layout -->
             <div id="categoryCardsContainer" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
                 <div onclick="filterMatchesByCategory('BR MATCH')" style="background: linear-gradient(135deg, #1f1115, #0d121f); border: 2px solid var(--neon-red); border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 4px 15px rgba(255,30,66,0.2);">
                     <div>
@@ -197,7 +202,6 @@
                 </div>
             </div>
 
-            <!-- Back Button for Filter View -->
             <button id="backToCategoriesBtn" style="display: none; background: var(--neon-red); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; margin-bottom: 12px; cursor: pointer;" onclick="showAllCategoriesView()">← Back to Categories</button>
 
             <h3 id="currentCategoryTitle" style="margin-bottom: 10px; color: var(--neon-cyan); display: none;"></h3>
@@ -386,18 +390,15 @@
         let allMatchesCache = [];
         let deferredPrompt;
 
-        // PWA Install Prompt Logic (Force Show Banner added)
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             document.getElementById('installBanner').style.display = 'block';
         });
 
-        // Force show banner and APK download popup
         setTimeout(() => {
             document.getElementById('installBanner').style.display = 'block';
             
-            // Auto show APK download popup if not closed before
             if (!localStorage.getItem('popupClosed')) {
                 document.getElementById('appDownloadPopup').style.display = 'flex';
             }
