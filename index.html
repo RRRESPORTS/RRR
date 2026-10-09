@@ -373,20 +373,17 @@
         let allMatchesCache = [];
         let deferredPrompt;
 
-        // PWA Native Prompt Capture (Shows banner normally, but routes Install button to AppGeyser)
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             document.getElementById('installBanner').style.display = 'block';
         });
 
-        // 3-line menu "App Install" click opens the banner popup
         document.getElementById('menuAppInstall').onclick = () => {
             document.getElementById('installBanner').style.display = 'block';
             toggleDrawer();
         };
 
-        // When user clicks the red "Install" button inside the banner, open AppGeyser link
         document.getElementById('installAppBtn').onclick = () => {
             window.open("https://appsgeyser.io/20258646/RRR ESPORTS", "_blank");
             document.getElementById('installBanner').style.display = 'none';
@@ -897,8 +894,25 @@
                     container.innerHTML = `<p style="color: var(--text-muted);">You haven't joined any matches yet.</p>`;
                 } else {
                     container.innerHTML = "";
-                    snap.forEach(d => {
+                    for(let d of snap.docs) {
                         const reg = d.data();
+                        
+                        let roomInfoHtml = `<div style="margin-top: 8px; padding: 8px; background: rgba(0,243,255,0.05); border-radius: 5px; color: var(--neon-cyan); font-size: 12px;">ম্যাচ শুরু হওয়ার ২-৩ মিনিট আগে রুম আইডি ও পাসওয়ার্ড দেওয়া হবে।</div>`;
+                        
+                        try {
+                            const matchDocRef = doc(db, "matches", reg.matchCode);
+                            const matchDocSnap = await getDoc(matchDocRef);
+                            if(matchDocSnap.exists()) {
+                                const matchData = matchDocSnap.data();
+                                if(matchData.roomId && matchData.roomId.trim() !== "") {
+                                    roomInfoHtml = `
+                                        <div style="margin-top: 8px; padding: 8px; background: rgba(255,119,0,0.1); border-radius: 5px; color: var(--neon-orange);">
+                                            <strong>Room ID:</strong> ${matchData.roomId} | <strong>Pass:</strong> ${matchData.roomPass || 'N/A'}
+                                        </div>`;
+                                }
+                            }
+                        } catch(err) {}
+
                         container.innerHTML += `
                             <div class="match-card">
                                 <h4>${reg.matchName} (Code: ${reg.matchCode})</h4>
@@ -906,9 +920,10 @@
                                     <span>Game Name: ${reg.playerName}</span>
                                     <span>Game ID: ${reg.playerID}</span>
                                 </div>
-                                <p style="color: var(--neon-orange); font-size: 13px;">Status: Joined Successfully</p>
+                                ${roomInfoHtml}
+                                <p style="color: var(--neon-orange); font-size: 13px; margin-top: 6px;">Status: Joined Successfully</p>
                             </div>`;
-                    });
+                    }
                 }
             } catch(e) {}
         }
