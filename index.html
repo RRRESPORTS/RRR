@@ -63,9 +63,6 @@
         .join-btn:hover { opacity: 0.9; }
         .view-players-btn { background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 6px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 6px; }
 
-        .history-list { margin-top: 15px; max-height: 300px; overflow-y: auto; }
-        .history-item { background: var(--card-bg); border: 1px solid #1f2937; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
-
         .contact-support-footer { margin-top: 30px; padding: 20px; background: var(--card-bg); border-top: 1px solid rgba(255,30,66,0.2); text-align: center; }
         .contact-support-footer h4 { color: var(--neon-cyan); margin-bottom: 10px; font-size: 15px; }
         .contact-info-text { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.6; }
@@ -629,8 +626,8 @@
             }
         });
 
-        // Standard Countdown with Slot Check
-        function startCountdown(matchTimeStr, joinedCount, totalSlots, elementId) {
+        // Countdown with Repeat Match Logic
+        function startCountdown(matchTimeStr, joinedCount, totalSlots, elementId, isRepeat) {
             const countDownDate = new Date(matchTimeStr).getTime();
             if(isNaN(countDownDate)) { document.getElementById(elementId).innerText = "Time Expired"; return; }
 
@@ -642,6 +639,32 @@
                 if(!el) { clearInterval(x); return; }
 
                 if (distance < 0) {
+                    const elapsedAfterMatch = Math.abs(distance);
+                    const twoMinutes = 2 * 60 * 1000;
+
+                    if (isRepeat && elapsedAfterMatch < twoMinutes) {
+                        el.innerHTML = `<span style="color: var(--neon-orange); font-weight: bold;">🔥 Match Running</span><br><span style="font-size: 11px; color: var(--text-muted);">ম্যাচ টিতে ২ মিনিট পর Join করতে পারবেন।</span>`;
+                        return;
+                    }
+
+                    if (isRepeat && elapsedAfterMatch >= twoMinutes) {
+                        const cycleDuration = 24 * 60 * 60 * 1000;
+                        const nextCycleTime = countDownDate + Math.ceil(elapsedAfterMatch / cycleDuration) * cycleDuration;
+                        const nextDistance = nextCycleTime - now;
+
+                        const days = Math.floor(nextDistance / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((nextDistance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((nextDistance % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((nextDistance % (1000 * 60)) / 1000);
+
+                        let timeStr = "";
+                        if(days > 0) timeStr += days + "d ";
+                        timeStr += hours + "h " + minutes + "m " + seconds + "s";
+                        
+                        el.innerHTML = `<span style="color: var(--neon-green);">Next Join in: ${timeStr}</span>`;
+                        return;
+                    }
+
                     clearInterval(x);
                     if (Number(joinedCount) < Number(totalSlots)) {
                         el.innerHTML = `<span style="color: var(--neon-red); font-size: 11px; font-weight: bold;">⚠️ স্লট ফুল না হওয়ায় ম্যাচটি শুরু হয়নি।</span>`;
@@ -773,7 +796,7 @@
 
             container.innerHTML += `
                 <div class="match-card">
-                    <h4>${m.matchName} (Code: ${m.matchCode})</h4>
+                    <h4>${m.matchName} (Code: ${m.matchCode}) ${m.isRepeat ? '<span style="color:var(--neon-orange); font-size:11px;">[Repeat]</span>' : ''}</h4>
                     <div class="match-details">
                         <span>Entry Fee: ৳${m.entryFee}</span>
                     </div>
@@ -800,7 +823,7 @@
                 </div>`;
             
             if(m.matchTime) {
-                startCountdown(m.matchTime, joined, total, timerId);
+                startCountdown(m.matchTime, joined, total, timerId, m.isRepeat);
             }
 
             setTimeout(() => {
@@ -1167,4 +1190,4 @@
         document.getElementById('navProfile').onclick = () => openProfileModal();
     </script>
 </body>
-    </html>
+</html>
