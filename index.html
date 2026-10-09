@@ -108,7 +108,7 @@
 </head>
 <body>
 
-    <!-- Install App Banner Popup (Overrides Install to AppGeyser Link) -->
+    <!-- Install App Banner Popup -->
     <div id="installBanner" style="display: none; position: fixed; top: 15px; left: 15px; right: 15px; background: #111827; border: 2px solid var(--neon-red); padding: 15px; border-radius: 12px; z-index: 9999; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.8);">
         <p style="color: #fff; font-size: 14px; margin-bottom: 10px; font-weight: bold;">Install the RRR ESPORTS App</p>
         <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px;">আমাদের অফিসিয়াল অ্যান্ড্রয়েড অ্যাপটি ডাউনলোড করুন!</p>
@@ -507,9 +507,25 @@
                 if(!codeSnap.exists()) { alert("ভুল বা মেয়াদোত্তীর্ণ গিফট কোড!"); return; }
 
                 const codeData = codeSnap.data();
-                if(codeData.isUsed) { alert("এই কোডটি ইতিমধ্যে ব্যবহার করা হয়েছে!"); return; }
+                const usedByList = codeData.usedByList || [];
+                const maxUses = Number(codeData.maxUses || 10);
+                const usedCount = Number(codeData.usedCount || 0);
 
-                await updateDoc(codeRef, { isUsed: true, usedBy: auth.currentUser.uid });
+                if(usedByList.includes(auth.currentUser.uid)) { 
+                    alert("আপনি ইতিমধ্যে এই গিফট কোডটি ব্যবহার করেছেন!"); 
+                    return; 
+                }
+
+                if(usedCount >= maxUses) { 
+                    alert("দুঃখিত! এই গিফট কোডের ব্যবহারের সীমা (Limit) শেষ হয়ে গেছে!"); 
+                    return; 
+                }
+
+                usedByList.push(auth.currentUser.uid);
+                await updateDoc(codeRef, { 
+                    usedCount: usedCount + 1, 
+                    usedByList: usedByList 
+                });
 
                 const userRef = doc(db, "users", auth.currentUser.uid);
                 const userSnap = await getDoc(userRef);
@@ -717,7 +733,7 @@
             if (hasAlreadyJoined) {
                 btnHtml = `<button class="join-btn" style="background: #161d2d; color: var(--neon-orange); cursor: not-allowed;" disabled>Already Joined</button>`;
             } else if (isFull) {
-                btnHtml = `<button class="join-btn" style="background: gray; cursor: not-allowed;" disabled>Match Full</button>`;
+                btnHtml = `<button class="join-btn" style="background: #374151; color: var(--neon-red); cursor: not-allowed; border: 1px solid var(--neon-red);" disabled>Slot Full</button>`;
             } else {
                 btnHtml = `<button class="join-btn" id="${btnId}">Join Match</button>`;
             }
@@ -848,28 +864,67 @@
         }
 
         async function confirmJoinMatch() {
+            if(!auth.currentUser || !selectedMatchForJoin) return;
+            
             const playerName = document.getElementById('gamePlayerName').value.trim();
             const playerID = document.getElementById('gamePlayerID').value.trim();
 
             if(!playerName || !playerID) { alert("Game Name এবং ID দিন।"); return; }
 
-            const userRef = doc(db, "users", auth.currentUser.uid);
-            const userSnap = await getDoc(userRef);
-            const userBal = Number(userSnap.data().balance || 0);
-
-            if(userBal < selectedMatchForJoin.fee) {
-                alert("আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই! দয়া করে Add Balance করুন।");
-                closeJoinModal();
-                switchTab('addBalance');
-                return;
-            }
+            const confirmBtn = document.getElementById('confirmJoinBtn');
+            confirmBtn.disabled = true; // Double click block korar jonno
 
             try {
-                await updateDoc(userRef, { balance: userBal - selectedMatchForJoin.fee });
+                // ১. চেক করুন ইউজার ইতিপূর্বেই এই ম্যাচে জয়েন করেছে কি না (Double Join Prevention)
+                const checkQuery = query(
+                    collection(db, "matchRegistrations"), 
+                    where("userId", "==", auth.currentUser.uid), 
+                    where("matchCode", "==", selectedMatchForJoin.code)
+                );
+                const checkSnap = await getDocs(checkQuery);
+                if(!checkSnap.empty) {
+                    alert("আপনি ইতিমধ্যে এই ম্যাচে জয়েন করেছেন!");
+                    confirmBtn.disabled = false;
+                    closeJoinModal();
+                    return;
+                }
 
+                // ২. লাইভ ম্যাচ স্লট চেক করা (Slot Full Check)
                 const matchRef = doc(db, "matches", selectedMatchForJoin.code);
                 const matchSnap = await getDoc(matchRef);
-                const currentJoined = Number(matchSnap.data().joinedCount || 0);
+                if(!matchSnap.exists()) {
+                    alert("ম্যাচটি পাওয়া যায়নি!");
+                    confirmBtn.disabled = false;
+                    return;
+                }
+
+                const matchData = matchSnap.data();
+                const currentJoined = Number(matchData.joinedCount || 0);
+                const totalSlots = Number(matchData.totalSlots || 12);
+
+                if(currentJoined >= totalSlots) {
+                    alert("দুঃখিত! এই ম্যাচের স্লট ইতিমধ্যে ফুল হয়ে গেছে।");
+                    confirmBtn.disabled = false;
+                    closeJoinModal();
+                    loadWebMatches();
+                    return;
+                }
+
+                // ৩. ব্যালেন্স চেক করা
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                const userSnap = await getDoc(userRef);
+                const userBal = Number(userSnap.data().balance || 0);
+
+                if(userBal < selectedMatchForJoin.fee) {
+                    alert("আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই! দয়া করে Add Balance করুন।");
+                    confirmBtn.disabled = false;
+                    closeJoinModal();
+                    switchTab('addBalance');
+                    return;
+                }
+
+                // ৪. ব্যালেন্স কাটা এবং জয়েনিং আপডেট করা
+                await updateDoc(userRef, { balance: userBal - selectedMatchForJoin.fee });
                 await updateDoc(matchRef, { joinedCount: currentJoined + 1 });
 
                 await addDoc(collection(db, "matchRegistrations"), {
@@ -881,13 +936,19 @@
                     timestamp: new Date()
                 });
 
-                userJoinedMatchCodes.push(selectedMatchForJoin.code);
+                if(!userJoinedMatchCodes.includes(selectedMatchForJoin.code)) {
+                    userJoinedMatchCodes.push(selectedMatchForJoin.code);
+                }
 
                 alert("Successfully joined the match!");
                 closeJoinModal();
                 loadWebMatches();
                 loadMyMatches();
-            } catch(e) { alert("Error: " + e.message); }
+            } catch(e) { 
+                alert("Error: " + e.message); 
+            } finally {
+                confirmBtn.disabled = false;
+            }
         }
 
         async function loadMyMatches() {
@@ -1089,4 +1150,4 @@
         document.getElementById('navProfile').onclick = () => openProfileModal();
     </script>
 </body>
-    </html>
+</html>
