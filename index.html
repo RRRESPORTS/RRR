@@ -146,7 +146,7 @@
 
     <div class="container">
         <div id="matchSection" class="section active">
-            <h3 style="margin-bottom: 15px; color: var(--neon-cyan); text-align: center; font-weight: 800;">🔥 FREE FIRE MATCHES</h3>
+            <h3 style="margin-bottom: 15px; color: var(--neon-cyan); text-align: center; font-weight: 800;">🔥 ESPORTS TOURNAMENTS</h3>
             
             <!-- Category Cards Layout -->
             <div id="categoryCardsContainer" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
@@ -180,6 +180,14 @@
                         <p style="color: var(--text-muted); font-size: 12px; margin-top: 3px;" id="count_ltw">Loading...</p>
                     </div>
                     <div style="font-size: 22px; color: #b000ff;">🏆</div>
+                </div>
+
+                <div onclick="filterMatchesByCategory('LUDO MATCH')" style="background: linear-gradient(135deg, #11221a, #0d121f); border: 2px solid #00ff88; border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,255,136,0.2);">
+                    <div>
+                        <h3 style="color: #fff; font-size: 18px; font-weight: 900; letter-spacing: 0.5px;">LUDO MATCH</h3>
+                        <p style="color: var(--text-muted); font-size: 12px; margin-top: 3px;" id="count_ludo">Loading...</p>
+                    </div>
+                    <div style="font-size: 22px; color: #00ff88;">🎲</div>
                 </div>
             </div>
 
@@ -632,7 +640,7 @@
             try {
                 const snap = await getDocs(collection(db, "matches"));
                 allMatchesCache = [];
-                let counts = { "BR MATCH": 0, "CS MATCH": 0, "LONE WOLF": 0, "LOST TO WIN": 0 };
+                let counts = { "BR MATCH": 0, "CS MATCH": 0, "LONE WOLF": 0, "LOST TO WIN": 0, "LUDO MATCH": 0 };
 
                 snap.forEach((d) => {
                     const m = d.data();
@@ -645,6 +653,7 @@
                 document.getElementById('count_cs').innerText = `${counts["CS MATCH"]} Matches Found`;
                 document.getElementById('count_lw').innerText = `${counts["LONE WOLF"]} Matches Found`;
                 document.getElementById('count_ltw').innerText = `${counts["LOST TO WIN"]} Matches Found`;
+                document.getElementById('count_ludo').innerText = `${counts["LUDO MATCH"]} Matches Found`;
 
                 showAllCategoriesView();
             } catch(e) {}
@@ -1080,4 +1089,4 @@
         document.getElementById('navProfile').onclick = () => openProfileModal();
     </script>
 </body>
-</html>
+    </html>
