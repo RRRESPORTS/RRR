@@ -14,6 +14,7 @@
             --neon-red: #ff1e42;
             --neon-orange: #ff7700;
             --neon-cyan: #00f3ff;
+            --neon-green: #00ff88;
             --text-main: #ffffff;
             --text-muted: #9ca3af;
         }
@@ -583,6 +584,7 @@
             try {
                 let records = [];
 
+                // 1. Add Balance Requests
                 const qAdd = query(collection(db, "addBalanceRequests"), where("userId", "==", auth.currentUser.uid));
                 const snapAdd = await getDocs(qAdd);
                 snapAdd.forEach(d => {
@@ -596,6 +598,7 @@
                     });
                 });
 
+                // 2. Withdraw Requests
                 const qWith = query(collection(db, "withdrawRequests"), where("userId", "==", auth.currentUser.uid));
                 const snapWith = await getDocs(qWith);
                 snapWith.forEach(d => {
@@ -609,6 +612,7 @@
                     });
                 });
 
+                // 3. Match Registrations (Fee deducted)
                 const qReg = query(collection(db, "matchRegistrations"), where("userId", "==", auth.currentUser.uid));
                 const snapReg = await getDocs(qReg);
                 for(let d of snapReg.docs) {
@@ -628,6 +632,7 @@
                     });
                 }
 
+                // 4. Gift Code Bonuses
                 const qGift = query(collection(db, "giftCodeHistory"), where("userId", "==", auth.currentUser.uid));
                 const snapGift = await getDocs(qGift);
                 snapGift.forEach(d => {
@@ -637,6 +642,21 @@
                         amount: `+৳${data.amount}`,
                         color: 'var(--neon-green)',
                         desc: `Redeemed Code: ${data.code}`,
+                        time: data.timestamp ? data.timestamp.toDate() : new Date()
+                    });
+                });
+
+                // 5. Admin Balance Adjustments (Added/Deducted by Admin)
+                const qAdminAdj = query(collection(db, "adminAdjustments"), where("userId", "==", auth.currentUser.uid));
+                const snapAdminAdj = await getDocs(qAdminAdj);
+                snapAdminAdj.forEach(d => {
+                    const data = d.data();
+                    const isAdd = data.type === 'Add';
+                    records.push({
+                        type: isAdd ? 'Admin Added Balance' : 'Admin Deducted Balance',
+                        amount: `${isAdd ? '+' : '-'}৳${data.amount}`,
+                        color: isAdd ? 'var(--neon-green)' : 'var(--neon-red)',
+                        desc: `Note: ${data.reason || 'Admin Adjustment'}`,
                         time: data.timestamp ? data.timestamp.toDate() : new Date()
                     });
                 });
@@ -733,8 +753,8 @@
             }
         });
 
-        // Standard Countdown
-        function startCountdown(matchTimeStr, elementId) {
+        // Standard Countdown with Slot Check
+        function startCountdown(matchTimeStr, joinedCount, totalSlots, elementId) {
             const countDownDate = new Date(matchTimeStr).getTime();
             if(isNaN(countDownDate)) { document.getElementById(elementId).innerText = "Time Expired"; return; }
 
@@ -747,7 +767,11 @@
 
                 if (distance < 0) {
                     clearInterval(x);
-                    el.innerText = "Match Time Expired";
+                    if (Number(joinedCount) < Number(totalSlots)) {
+                        el.innerHTML = `<span style="color: var(--neon-red); font-size: 11px; font-weight: bold;">⚠️ স্লট ফুল না হওয়ায় ম্যাচটি শুরু হয়নি।</span>`;
+                    } else {
+                        el.innerText = "Match Time Expired";
+                    }
                     return;
                 }
 
@@ -783,7 +807,6 @@
                 document.getElementById('count_ltw').innerText = `${counts["LOST TO WIN"]} Matches Found`;
                 document.getElementById('count_ludo').innerText = `${counts["LUDO MATCH"]} Matches Found`;
 
-                // যদি ইউজার ক্যাটাগরির ভেতরে থাকে, তবে হোম পেজে না পাঠিয়ে ওই ক্যাটাগরি ভিউ রিফ্রেশ করবে
                 const currentTitle = document.getElementById('currentCategoryTitle').innerText;
                 if(currentTitle && currentTitle.includes("Matches")) {
                     const catName = currentTitle.replace("📁 ", "").replace(" Matches", "");
@@ -901,7 +924,7 @@
                 </div>`;
             
             if(m.matchTime) {
-                startCountdown(m.matchTime, timerId);
+                startCountdown(m.matchTime, joined, total, timerId);
             }
 
             setTimeout(() => {
@@ -1047,7 +1070,6 @@
                 alert("Successfully joined the match!");
                 closeJoinModal();
 
-                // ব্যাকগ্রাউন্ডে ক্যাশ ডাটা আপডেট করে নেওয়া এবং বর্তমান ক্যাটাগরি ভিউ ঠিক রাখা
                 const snap = await getDocs(collection(db, "matches"));
                 allMatchesCache = [];
                 snap.forEach((d) => {
