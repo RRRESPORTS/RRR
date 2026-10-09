@@ -608,7 +608,9 @@
                 const snapReg = await getDocs(qReg);
                 snapReg.forEach(d => { 
                     const regData = d.data();
-                    userJoinedMatchCodes.push(regData.matchDocId || regData.matchCode); 
+                    if(regData.matchDocId) {
+                        userJoinedMatchCodes.push(regData.matchDocId);
+                    }
                 });
 
                 loadWebMatches();
