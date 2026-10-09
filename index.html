@@ -733,7 +733,7 @@
             }
         });
 
-        // Standard Countdown (Without auto-repeating or match running state)
+        // Standard Countdown
         function startCountdown(matchTimeStr, elementId) {
             const countDownDate = new Date(matchTimeStr).getTime();
             if(isNaN(countDownDate)) { document.getElementById(elementId).innerText = "Time Expired"; return; }
@@ -783,7 +783,14 @@
                 document.getElementById('count_ltw').innerText = `${counts["LOST TO WIN"]} Matches Found`;
                 document.getElementById('count_ludo').innerText = `${counts["LUDO MATCH"]} Matches Found`;
 
-                showAllCategoriesView();
+                // যদি ইউজার ক্যাটাগরির ভেতরে থাকে, তবে হোম পেজে না পাঠিয়ে ওই ক্যাটাগরি ভিউ রিফ্রেশ করবে
+                const currentTitle = document.getElementById('currentCategoryTitle').innerText;
+                if(currentTitle && currentTitle.includes("Matches")) {
+                    const catName = currentTitle.replace("📁 ", "").replace(" Matches", "");
+                    filterMatchesByCategory(catName);
+                } else {
+                    showAllCategoriesView();
+                }
             } catch(e) {}
         }
 
@@ -1039,7 +1046,20 @@
 
                 alert("Successfully joined the match!");
                 closeJoinModal();
-                loadWebMatches();
+
+                // ব্যাকগ্রাউন্ডে ক্যাশ ডাটা আপডেট করে নেওয়া এবং বর্তমান ক্যাটাগরি ভিউ ঠিক রাখা
+                const snap = await getDocs(collection(db, "matches"));
+                allMatchesCache = [];
+                snap.forEach((d) => {
+                    allMatchesCache.push({ id: d.id, ...d.data() });
+                });
+
+                const currentTitle = document.getElementById('currentCategoryTitle').innerText;
+                if(currentTitle && currentTitle.includes("Matches")) {
+                    const catName = currentTitle.replace("📁 ", "").replace(" Matches", "");
+                    filterMatchesByCategory(catName);
+                }
+
                 loadMyMatches();
             } catch(e) { 
                 alert("Error: " + e.message); 
