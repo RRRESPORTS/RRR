@@ -8,15 +8,6 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff1e42">
     <style>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RRR ESPORTS</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ff1e42">
-    <style>
         :root {
             --bg-color: #07090e;
             --card-bg: #0d121f;
@@ -105,7 +96,7 @@
         .drawer-links li { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; font-size: 14px; }
         .drawer-links li:hover { color: var(--neon-cyan); }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .modal-card { background: var(--card-bg); border: 1px solid var(--neon-red); padding: 25px; border-radius: 12px; width: 90%; max-width: 350px; box-shadow: 0 0 20px rgba(255,30,66,0.2); }
         .modal-card h3 { color: var(--neon-red); margin-bottom: 15px; text-align: center; font-weight: 800; }
         .form-control { width: 100%; padding: 10px; margin: 8px 0; background: #161d2d; border: 1px solid #2d3748; color: #fff; border-radius: 6px; }
@@ -117,21 +108,15 @@
 </head>
 <body>
 
-    <div id="installBanner" style="display: none; position: fixed; top: 15px; left: 15px; right: 15px; background: #111827; border: 2px solid var(--neon-red); padding: 15px; border-radius: 12px; z-index: 9999; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.8);">
-        <p style="color: #fff; font-size: 14px; margin-bottom: 10px; font-weight: bold;">Install the RRR ESPORTS App</p>
-        <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px;">Would you like to install the app to your device?</p>
-        <button id="installAppBtn" style="background: var(--neon-red); color: #fff; border: none; padding: 8px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-right: 10px;">Install</button>
-        <button id="closeInstallBtn" style="background: #374151; color: #fff; border: none; padding: 8px 15px; font-weight: bold; border-radius: 6px; cursor: pointer;">Cancel</button>
-    </div>
-
-    <div id="appDownloadPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; justify-content: center; align-items: center;">
-        <div style="background: var(--card-bg); border: 2px solid var(--neon-red); padding: 25px; border-radius: 15px; width: 90%; max-width: 330px; text-align: center; box-shadow: 0 0 25px rgba(255,30,66,0.4); position: relative;">
+    <!-- Direct Download APK Popup Modal (Opens only from 3-line menu) -->
+    <div id="appDownloadPopup" class="modal-overlay">
+        <div class="modal-card" style="position: relative;" onclick="event.stopPropagation()">
             <span id="closePopupBtn" style="position: absolute; top: 10px; right: 15px; font-size: 20px; color: var(--neon-red); cursor: pointer; font-weight: bold;">✕</span>
-            <div style="font-size: 40px; margin-bottom: 10px;">⚡</div>
-            <h3 style="color: #fff; margin-bottom: 8px; font-weight: 800;">Download RRR ESPORTS</h3>
-            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">আমাদের অফিসিয়াল অ্যান্ড্রয়েড অ্যাপটি ডাউনলোড করুন এবং সহজে ম্যাচ খেলুন!</p>
+            <div style="font-size: 40px; margin-bottom: 10px; text-align: center;">⚡</div>
+            <h3 style="color: #fff; margin-bottom: 8px; font-weight: 800; text-align: center;">Download RRR ESPORTS</h3>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px; text-align: center;">আমাদের অফিসিয়াল অ্যান্ড্রয়েড অ্যাপটি ডাউনলোড করুন এবং সহজে ম্যাচ খেলুন!</p>
             <a href="https://appsgeyser.io/20258646/RRR ESPORTS" target="_blank" 
-               style="background: linear-gradient(135deg, var(--neon-red), var(--neon-orange)); color: #fff; padding: 12px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: block; box-shadow: 0 4px 15px rgba(255,30,66,0.3);">
+               style="background: linear-gradient(135deg, var(--neon-red), var(--neon-orange)); color: #fff; padding: 12px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: block; text-align: center; box-shadow: 0 4px 15px rgba(255,30,66,0.3);">
                 📥 Download APK Now
             </a>
         </div>
@@ -148,6 +133,7 @@
         </div>
     </header>
 
+    <!-- Notice Bar -->
     <div class="notice-bar" id="noticeBarContainer" style="display: none;">
         <div class="notice-title">Notice</div>
         <div class="notice-content" id="noticeTextDisplay">Loading notice...</div>
@@ -168,6 +154,7 @@
         <div id="matchSection" class="section active">
             <h3 style="margin-bottom: 15px; color: var(--neon-cyan); text-align: center; font-weight: 800;">🔥 FREE FIRE MATCHES</h3>
             
+            <!-- Category Cards Layout -->
             <div id="categoryCardsContainer" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
                 <div onclick="filterMatchesByCategory('BR MATCH')" style="background: linear-gradient(135deg, #1f1115, #0d121f); border: 2px solid var(--neon-red); border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 4px 15px rgba(255,30,66,0.2);">
                     <div>
@@ -202,6 +189,7 @@
                 </div>
             </div>
 
+            <!-- Back Button for Filter View -->
             <button id="backToCategoriesBtn" style="display: none; background: var(--neon-red); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; margin-bottom: 12px; cursor: pointer;" onclick="showAllCategoriesView()">← Back to Categories</button>
 
             <h3 id="currentCategoryTitle" style="margin-bottom: 10px; color: var(--neon-cyan); display: none;"></h3>
@@ -284,8 +272,8 @@
         powered by <span>RRR ESPORTS</span>
     </div>
 
-    <div class="modal-overlay" id="joinModal" style="display: none;">
-        <div class="modal-card">
+    <div class="modal-overlay" id="joinModal">
+        <div class="modal-card" onclick="event.stopPropagation()">
             <h3>Join Match</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;" id="joinMatchInfo"></p>
             <div id="modalMatchNoticeBox" style="background: rgba(255,119,0,0.1); border-left: 3px solid var(--neon-orange); padding: 8px; font-size: 12px; margin-bottom: 12px; border-radius: 0 4px 4px 0; display: none;"></div>
@@ -296,7 +284,7 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="playersListModal" style="display: none;">
+    <div class="modal-overlay" id="playersListModal">
         <div class="modal-card" style="max-width: 400px;" onclick="event.stopPropagation()">
             <h3 style="color: var(--neon-cyan);" id="playersModalTitle">Joined Players</h3>
             <div id="playersListContainer" style="max-height: 250px; overflow-y: auto; margin: 10px 0; font-size: 13px;">
@@ -306,7 +294,7 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="profileModal" style="display: none;">
+    <div class="modal-overlay" id="profileModal">
         <div class="modal-card" onclick="event.stopPropagation()">
             <h3 style="color: var(--neon-orange);">👤 User Profile</h3>
             <div style="font-size: 13px; margin-bottom: 12px; line-height: 1.6; color: var(--text-muted);">
@@ -342,6 +330,7 @@
         <div class="drawer-close" id="drawerCloseBtn">✕</div>
         <ul class="drawer-links">
             <li id="menuProfile" style="color: var(--neon-orange); font-weight: bold;">👤 Profile</li>
+            <li id="menuAppInstall" style="color: var(--neon-cyan); font-weight: bold;">📱 App Install</li>
             <li id="menuMatch">Match</li>
             <li id="menuMyMatch">My Match</li>
             <li id="menuAddBal">Add Balance</li>
@@ -388,39 +377,21 @@
         let selectedMatchForJoin = null;
         let userJoinedMatchCodes = [];
         let allMatchesCache = [];
-        let deferredPrompt;
 
+        // Prevent automatic browser popup on site load
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('installBanner').style.display = 'block';
         });
 
-        setTimeout(() => {
-            document.getElementById('installBanner').style.display = 'block';
-            
-            if (!localStorage.getItem('popupClosed')) {
-                document.getElementById('appDownloadPopup').style.display = 'flex';
-            }
-        }, 1500);
+        // App Install Popup handlers from 3-line menu
+        document.getElementById('menuAppInstall').onclick = () => {
+            document.getElementById('appDownloadPopup').style.display = 'flex';
+            toggleDrawer();
+        };
 
-        document.getElementById('installAppBtn').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                deferredPrompt = null;
-            }
-            document.getElementById('installBanner').style.display = 'none';
-        });
-
-        document.getElementById('closeInstallBtn').addEventListener('click', () => {
-            document.getElementById('installBanner').style.display = 'none';
-        });
-
-        document.getElementById('closePopupBtn').addEventListener('click', () => {
+        document.getElementById('closePopupBtn').onclick = () => {
             document.getElementById('appDownloadPopup').style.display = 'none';
-            localStorage.setItem('popupClosed', 'true');
-        });
+        };
 
         function switchTab(tabId) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
