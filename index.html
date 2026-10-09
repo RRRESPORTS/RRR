@@ -371,7 +371,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, deleteDoc, query, where, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
@@ -733,7 +733,7 @@
             }
         });
 
-        // Updated Countdown with 5 Minutes Auto-Restart Feature
+        // 5 Minutes Match Running, then Reset Slots & Restart Countdown automatically
         function startCountdown(matchTimeStr, joinedCount, totalSlots, elementId, matchId) {
             const countDownDate = new Date(matchTimeStr).getTime();
             if(isNaN(countDownDate)) { document.getElementById(elementId).innerText = "Time Expired"; return; }
@@ -746,24 +746,38 @@
                 if(!el) { clearInterval(x); return; }
 
                 if (distance < 0) {
-                    clearInterval(x);
-                    
-                    // Match sesh howar 5 minute pore auto next match time set korar logic
-                    const nextTime = new Date(now + (5 * 60 * 1000)).toISOString();
-                    
-                    el.innerHTML = `<span style="color: var(--neon-orange);">Restarting in 5m...</span>`;
-                    
-                    try {
-                        if(matchId) {
-                            await updateDoc(doc(db, "matches", matchId), { 
-                                matchTime: nextTime,
-                                joinedCount: 0,
-                                roomId: "",
-                                roomPass: ""
-                            });
-                        }
-                    } catch(err) {}
+                    const elapsedAfterMatch = Math.abs(distance);
+                    const fiveMinutes = 5 * 60 * 1000;
 
+                    if (elapsedAfterMatch < fiveMinutes) {
+                        el.innerHTML = `<span style="color: var(--neon-orange); font-weight: bold;">🔥 Match Running...</span>`;
+                    } else {
+                        clearInterval(x);
+                        
+                        // 5 min running sesh, ebar notun countdown time set hobe ebong ager registration clear hobe
+                        const nextTime = new Date(now + (10 * 60 * 1000)).toISOString(); // 10 minutes from now for next cycle
+                        
+                        try {
+                            if(matchId) {
+                                // Delete previous registrations for this match so users can join again
+                                const regQuery = query(collection(db, "matchRegistrations"), where("matchDocId", "==", matchId));
+                                const regSnap = await getDocs(regQuery);
+                                const batch = writeBatch(db);
+                                regSnap.forEach((regDoc) => {
+                                    batch.delete(regDoc.ref);
+                                });
+                                await batch.commit();
+
+                                // Update match time and reset joinedCount
+                                await updateDoc(doc(db, "matches", matchId), { 
+                                    matchTime: nextTime,
+                                    joinedCount: 0,
+                                    roomId: "",
+                                    roomPass: ""
+                                });
+                            }
+                        } catch(err) {}
+                    }
                     return;
                 }
 
@@ -913,10 +927,9 @@
                 const countDownDate = new Date(m.matchTime).getTime();
                 const now = new Date().getTime();
                 if (countDownDate - now < 0 && joined < total) {
-                    document.getElementById(timerId).innerHTML = `<span style="color: var(--neon-red); font-size: 11px;">⚠️ ম্যাচ রিস্টার্ট হচ্ছে...</span>`;
-                } else {
-                    startCountdown(m.matchTime, joined, total, timerId, m.id);
+                    document.getElementById(timerId).innerHTML = `<span style="color: var(--neon-orange); font-weight: bold;">🔥 Match Running...</span>`;
                 }
+                startCountdown(m.matchTime, joined, total, timerId, m.id);
             }
 
             setTimeout(() => {
