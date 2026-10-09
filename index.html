@@ -733,9 +733,9 @@
             }
         });
 
-        // 2 Minutes "Match Running", then set to exact same time next day (24h Cycle) and reset slots/registrations
+        // 2 Minutes "Match Running", then set to exact same time next day (24h Cycle) and restart countdown automatically
         function startCountdown(matchTimeStr, joinedCount, totalSlots, elementId, matchId) {
-            const countDownDate = new Date(matchTimeStr).getTime();
+            let countDownDate = new Date(matchTimeStr).getTime();
             if(isNaN(countDownDate)) { document.getElementById(elementId).innerText = "Time Expired"; return; }
 
             const x = setInterval(async function() {
@@ -755,7 +755,8 @@
                         clearInterval(x);
                         
                         // মূল ম্যাচের সময়ের সাথে ঠিক ২৪ ঘণ্টা (24 Hours) যোগ করে পরবর্তী দিনের একই সময় টার্গেট করা
-                        const nextDayTime = new Date(countDownDate + (24 * 60 * 60 * 1000)).toISOString();
+                        const nextTimeMs = countDownDate + (24 * 60 * 60 * 1000);
+                        const nextDayTime = new Date(nextTimeMs).toISOString();
                         
                         try {
                             if(matchId) {
@@ -775,6 +776,9 @@
                                     roomId: "",
                                     roomPass: ""
                                 });
+
+                                // সফলভাবে আপডেট হওয়ার পর নতুন সময় নিয়ে কাউন্টডাউন ফাংশনটি আবার চালু করা
+                                startCountdown(nextDayTime, 0, totalSlots, elementId, matchId);
                             }
                         } catch(err) {}
                     }
