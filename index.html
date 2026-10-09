@@ -108,18 +108,12 @@
 </head>
 <body>
 
-    <!-- Direct Download APK Popup Modal (Opens only from 3-line menu) -->
-    <div id="appDownloadPopup" class="modal-overlay">
-        <div class="modal-card" style="position: relative;" onclick="event.stopPropagation()">
-            <span id="closePopupBtn" style="position: absolute; top: 10px; right: 15px; font-size: 20px; color: var(--neon-red); cursor: pointer; font-weight: bold;">✕</span>
-            <div style="font-size: 40px; margin-bottom: 10px; text-align: center;">⚡</div>
-            <h3 style="color: #fff; margin-bottom: 8px; font-weight: 800; text-align: center;">Download RRR ESPORTS</h3>
-            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px; text-align: center;">আমাদের অফিসিয়াল অ্যান্ড্রয়েড অ্যাপটি ডাউনলোড করুন এবং সহজে ম্যাচ খেলুন!</p>
-            <a href="https://appsgeyser.io/20258646/RRR ESPORTS" target="_blank" 
-               style="background: linear-gradient(135deg, var(--neon-red), var(--neon-orange)); color: #fff; padding: 12px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: block; text-align: center; box-shadow: 0 4px 15px rgba(255,30,66,0.3);">
-                📥 Download APK Now
-            </a>
-        </div>
+    <!-- Install App Banner Popup (Overrides Install to AppGeyser Link) -->
+    <div id="installBanner" style="display: none; position: fixed; top: 15px; left: 15px; right: 15px; background: #111827; border: 2px solid var(--neon-red); padding: 15px; border-radius: 12px; z-index: 9999; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.8);">
+        <p style="color: #fff; font-size: 14px; margin-bottom: 10px; font-weight: bold;">Install the RRR ESPORTS App</p>
+        <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px;">আমাদের অফিসিয়াল অ্যান্ড্রয়েড অ্যাপটি ডাউনলোড করুন!</p>
+        <button id="installAppBtn" style="background: var(--neon-red); color: #fff; border: none; padding: 8px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-right: 10px;">Install</button>
+        <button id="closeInstallBtn" style="background: #374151; color: #fff; border: none; padding: 8px 15px; font-weight: bold; border-radius: 6px; cursor: pointer;">Cancel</button>
     </div>
 
     <header>
@@ -377,20 +371,29 @@
         let selectedMatchForJoin = null;
         let userJoinedMatchCodes = [];
         let allMatchesCache = [];
+        let deferredPrompt;
 
-        // Prevent automatic browser popup on site load
+        // PWA Native Prompt Capture (Shows banner normally, but routes Install button to AppGeyser)
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBanner').style.display = 'block';
         });
 
-        // App Install Popup handlers from 3-line menu
+        // 3-line menu "App Install" click opens the banner popup
         document.getElementById('menuAppInstall').onclick = () => {
-            document.getElementById('appDownloadPopup').style.display = 'flex';
+            document.getElementById('installBanner').style.display = 'block';
             toggleDrawer();
         };
 
-        document.getElementById('closePopupBtn').onclick = () => {
-            document.getElementById('appDownloadPopup').style.display = 'none';
+        // When user clicks the red "Install" button inside the banner, open AppGeyser link
+        document.getElementById('installAppBtn').onclick = () => {
+            window.open("https://appsgeyser.io/20258646/RRR ESPORTS", "_blank");
+            document.getElementById('installBanner').style.display = 'none';
+        };
+
+        document.getElementById('closeInstallBtn').onclick = () => {
+            document.getElementById('installBanner').style.display = 'none';
         };
 
         function switchTab(tabId) {
