@@ -203,6 +203,17 @@
             <div id="myMatchListContainer"><p style="color: var(--text-muted);">Loading joined matches...</p></div>
         </div>
 
+        <!-- History & Record Section -->
+        <div id="historySection" class="section">
+            <h3 style="color: var(--neon-cyan); margin-bottom: 12px;">📊 History & Financial Record</h3>
+            <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid #1f2937;">
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">আপনার সকল আয়, ব্যয়, উইথড্র, ডিপোজিট এবং গিফট কোড বোনাসের হিসাব:</p>
+                <div class="history-list" id="completeFinancialHistory" style="max-height: 400px; overflow-y: auto;">
+                    <p style="color: var(--text-muted); text-align: center;">Loading records...</p>
+                </div>
+            </div>
+        </div>
+
         <div id="giftCodeSection" class="section">
             <div class="gift-box-3line">
                 <h4>🎁 Redeem Gift Code</h4>
@@ -337,6 +348,7 @@
             <li id="menuMyMatch">My Match</li>
             <li id="menuAddBal">Add Balance</li>
             <li id="menuWithdraw">Withdraw</li>
+            <li id="menuHistory" style="color: var(--neon-cyan); font-weight: bold;">📊 History & Record</li>
             <li id="menuGift" style="color: var(--neon-red); font-weight: bold;">🎁 Gift Code</li>
             <li id="menuSupportMail" style="color: var(--neon-cyan);">💬 Support WhatsApp</li>
             <li id="drawerAuthItem">Login / Register</li>
@@ -392,7 +404,6 @@
             toggleDrawer();
         };
 
-        // Updated App Download Link
         document.getElementById('installAppBtn').onclick = () => {
             window.open("https://appsgeyser.io/20265887/RRR ESPORTS", "_blank");
             document.getElementById('installBanner').style.display = 'none';
@@ -419,6 +430,7 @@
             if(tabId === 'giftCodeSection') { document.getElementById('giftCodeSection').classList.add('active'); }
             if(tabId === 'addBalance') { document.getElementById('addBalanceSection').classList.add('active'); loadUserHistory(); }
             if(tabId === 'withdraw') { document.getElementById('withdrawSection').classList.add('active'); loadUserHistory(); }
+            if(tabId === 'historySection') { document.getElementById('historySection').classList.add('active'); loadCompleteFinancialHistory(); }
             if(tabId === 'supportMailSection') { 
                 document.getElementById('supportMailSection').classList.add('active'); 
                 document.getElementById('navSupport').classList.add('active');
@@ -534,6 +546,14 @@
                 
                 await updateDoc(userRef, { balance: currentBal + Number(codeData.amount) });
 
+                // Also record in gift code history collection for financial tracking
+                await addDoc(collection(db, "giftCodeHistory"), {
+                    userId: auth.currentUser.uid,
+                    code: codeInput,
+                    amount: Number(codeData.amount),
+                    timestamp: new Date()
+                });
+
                 alert(`অভিনন্দন! আপনি ৳${codeData.amount} বোনাস পেয়েছেন!`);
                 document.getElementById('redeemCodeInput').value = "";
             } catch(e) { alert("Error: " + e.message); }
@@ -554,6 +574,103 @@
             const whatsappUrl = `https://wa.me/8801902009133?text=${encodedMessage}`;
 
             window.open(whatsappUrl, '_blank');
+        }
+
+        async function loadCompleteFinancialHistory() {
+            if(!auth.currentUser) return;
+            const container = document.getElementById('completeFinancialHistory');
+            container.innerHTML = `<p style="color: var(--text-muted); text-align: center;">Loading all records...</p>`;
+
+            try {
+                let records = [];
+
+                // 1. Add Balance Requests
+                const qAdd = query(collection(db, "addBalanceRequests"), where("userId", "==", auth.currentUser.uid));
+                const snapAdd = await getDocs(qAdd);
+                snapAdd.forEach(d => {
+                    const data = d.data();
+                    records.push({
+                        type: 'Add Balance',
+                        amount: `+৳${data.amount}`,
+                        color: 'var(--neon-green)',
+                        desc: `TrxID: ${data.trxId} (${data.status})`,
+                        time: data.timestamp ? data.timestamp.toDate() : new Date()
+                    });
+                });
+
+                // 2. Withdraw Requests
+                const qWith = query(collection(db, "withdrawRequests"), where("userId", "==", auth.currentUser.uid));
+                const snapWith = await getDocs(qWith);
+                snapWith.forEach(d => {
+                    const data = d.data();
+                    records.push({
+                        type: 'Withdraw',
+                        amount: `-৳${data.amount}`,
+                        color: 'var(--neon-red)',
+                        desc: `bKash: ${data.number} (${data.status})`,
+                        time: data.timestamp ? data.timestamp.toDate() : new Date()
+                    });
+                });
+
+                // 3. Match Entry Fees
+                const qReg = query(collection(db, "matchRegistrations"), where("userId", "==", auth.currentUser.uid));
+                const snapReg = await getDocs(qReg);
+                for(let d of snapReg.docs) {
+                    const data = d.data();
+                    let fee = 0;
+                    try {
+                        const mSnap = await getDoc(doc(db, "matches", data.matchDocId || data.matchCode));
+                        if(mSnap.exists()) fee = Number(mSnap.data().entryFee || 0);
+                    } catch(e) {}
+
+                    records.push({
+                        type: 'Match Fee',
+                        amount: `-৳${fee}`,
+                        color: 'var(--neon-orange)',
+                        desc: `Joined Match: ${data.matchName || data.matchCode}`,
+                        time: data.timestamp ? data.timestamp.toDate() : new Date()
+                    });
+                }
+
+                // 4. Gift Code Redeems
+                const qGift = query(collection(db, "giftCodeHistory"), where("userId", "==", auth.currentUser.uid));
+                const snapGift = await getDocs(qGift);
+                snapGift.forEach(d => {
+                    const data = d.data();
+                    records.push({
+                        type: 'Gift Code Bonus',
+                        amount: `+৳${data.amount}`,
+                        color: 'var(--neon-green)',
+                        desc: `Redeemed Code: ${data.code}`,
+                        time: data.timestamp ? data.timestamp.toDate() : new Date()
+                    });
+                });
+
+                // Sort records by time descending (newest first)
+                records.sort((a, b) => b.time - a.time);
+
+                if(records.length === 0) {
+                    container.innerHTML = `<p style="color: var(--text-muted); text-align: center;">কোনো হিস্ট্রি পাওয়া যায়নি।</p>`;
+                    return;
+                }
+
+                container.innerHTML = "";
+                records.forEach(r => {
+                    container.innerHTML += `
+                        <div class="history-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #161d2d; border-radius: 6px; margin-bottom: 8px;">
+                            <div>
+                                <strong style="color: var(--neon-cyan);">${r.type}</strong><br>
+                                <span style="font-size: 11px; color: var(--text-muted);">${r.desc}</span>
+                            </div>
+                            <div style="font-weight: bold; color: ${r.color}; font-size: 14px;">
+                                ${r.amount}
+                            </div>
+                        </div>`;
+                });
+
+            } catch(e) {
+                container.innerHTML = `<p style="color: var(--neon-red); text-align: center;">Error loading history: ${e.message}</p>`;
+            }
         }
 
         onSnapshot(doc(db, "settings", "notice"), (docSnap) => {
@@ -1136,6 +1253,7 @@
         document.getElementById('menuMyMatch').onclick = () => { switchTab('myMatchSection'); toggleDrawer(); };
         document.getElementById('menuAddBal').onclick = () => { switchTab('addBalance'); toggleDrawer(); };
         document.getElementById('menuWithdraw').onclick = () => { switchTab('withdraw'); toggleDrawer(); };
+        document.getElementById('menuHistory').onclick = () => { switchTab('historySection'); toggleDrawer(); };
         document.getElementById('menuGift').onclick = () => { switchTab('giftCodeSection'); toggleDrawer(); };
         document.getElementById('menuSupportMail').onclick = () => { switchTab('supportMailSection'); toggleDrawer(); };
         
