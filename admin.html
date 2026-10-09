@@ -558,11 +558,22 @@
                     if(pendingWithdrawCount === 1) withdrawContainer.innerHTML = "";
                     
                     let userUID = "N/A";
+                    let balanceBefore = "N/A";
+                    let balanceAfter = "N/A";
+
                     try {
                         if(data.userId) {
                             const userSnap = await getDoc(doc(db, "users", data.userId));
                             if(userSnap.exists()) {
-                                userUID = userSnap.data().playerUID || "N/A";
+                                const userData = userSnap.data();
+                                userUID = userData.playerUID || "N/A";
+                                const currentBal = Number(userData.balance || 0);
+                                const reqAmount = Number(data.amount || 0);
+                                
+                                // উইথড্র করার আগের ব্যালেন্স = বর্তমান ব্যালেন্স + উইথড্র রিকুয়েষ্টের অ্যামাউন্ট
+                                balanceBefore = currentBal + reqAmount;
+                                // উইথড্র করার পরের ব্যালেন্স = বর্তমান ব্যালেন্স
+                                balanceAfter = currentBal;
                             }
                         }
                     } catch(err) {}
@@ -573,7 +584,9 @@
                                 <div>
                                     <strong style="color: var(--neon-cyan);">Number:</strong> <span style="color: #fff;">${data.number}</span><br>
                                     <strong style="color: var(--neon-cyan);">Amount:</strong> <span style="color: var(--neon-orange);">৳${data.amount}</span><br>
-                                    <strong style="color: var(--neon-cyan);">UID:</strong> <span style="color: var(--neon-green);">${userUID}</span>
+                                    <strong style="color: var(--neon-cyan);">UID:</strong> <span style="color: var(--neon-green);">${userUID}</span><br>
+                                    <strong style="color: var(--neon-cyan);">Before Bal:</strong> <span style="color: #ffaa00;">৳${balanceBefore}</span> | 
+                                    <strong style="color: var(--neon-cyan);">After Bal:</strong> <span style="color: #00ffcc;">৳${balanceAfter}</span>
                                 </div>
                                 <div class="btn-group">
                                     <button class="btn-approve" onclick="processWithdraw('${d.id}', '${data.userId}', ${data.amount}, 'Approved')">Approve</button>
