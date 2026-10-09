@@ -546,7 +546,6 @@
                 
                 await updateDoc(userRef, { balance: currentBal + Number(codeData.amount) });
 
-                // Also record in gift code history collection for financial tracking
                 await addDoc(collection(db, "giftCodeHistory"), {
                     userId: auth.currentUser.uid,
                     code: codeInput,
@@ -584,7 +583,6 @@
             try {
                 let records = [];
 
-                // 1. Add Balance Requests
                 const qAdd = query(collection(db, "addBalanceRequests"), where("userId", "==", auth.currentUser.uid));
                 const snapAdd = await getDocs(qAdd);
                 snapAdd.forEach(d => {
@@ -598,7 +596,6 @@
                     });
                 });
 
-                // 2. Withdraw Requests
                 const qWith = query(collection(db, "withdrawRequests"), where("userId", "==", auth.currentUser.uid));
                 const snapWith = await getDocs(qWith);
                 snapWith.forEach(d => {
@@ -612,7 +609,6 @@
                     });
                 });
 
-                // 3. Match Entry Fees
                 const qReg = query(collection(db, "matchRegistrations"), where("userId", "==", auth.currentUser.uid));
                 const snapReg = await getDocs(qReg);
                 for(let d of snapReg.docs) {
@@ -632,7 +628,6 @@
                     });
                 }
 
-                // 4. Gift Code Redeems
                 const qGift = query(collection(db, "giftCodeHistory"), where("userId", "==", auth.currentUser.uid));
                 const snapGift = await getDocs(qGift);
                 snapGift.forEach(d => {
@@ -646,7 +641,6 @@
                     });
                 });
 
-                // Sort records by time descending (newest first)
                 records.sort((a, b) => b.time - a.time);
 
                 if(records.length === 0) {
@@ -739,11 +733,12 @@
             }
         });
 
-        function startCountdown(matchTimeStr, joinedCount, totalSlots, elementId) {
+        // Updated Countdown with 5 Minutes Auto-Restart Feature
+        function startCountdown(matchTimeStr, joinedCount, totalSlots, elementId, matchId) {
             const countDownDate = new Date(matchTimeStr).getTime();
             if(isNaN(countDownDate)) { document.getElementById(elementId).innerText = "Time Expired"; return; }
 
-            const x = setInterval(function() {
+            const x = setInterval(async function() {
                 const now = new Date().getTime();
                 const distance = countDownDate - now;
 
@@ -752,11 +747,23 @@
 
                 if (distance < 0) {
                     clearInterval(x);
-                    if (joinedCount >= totalSlots && totalSlots > 0) {
-                        el.innerHTML = `<span style="color: var(--neon-orange);">Match Started / Running</span>`;
-                    } else {
-                        el.innerHTML = `<span style="color: var(--neon-red); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি</span>`;
-                    }
+                    
+                    // Match sesh howar 5 minute pore auto next match time set korar logic
+                    const nextTime = new Date(now + (5 * 60 * 1000)).toISOString();
+                    
+                    el.innerHTML = `<span style="color: var(--neon-orange);">Restarting in 5m...</span>`;
+                    
+                    try {
+                        if(matchId) {
+                            await updateDoc(doc(db, "matches", matchId), { 
+                                matchTime: nextTime,
+                                joinedCount: 0,
+                                roomId: "",
+                                roomPass: ""
+                            });
+                        }
+                    } catch(err) {}
+
                     return;
                 }
 
@@ -906,9 +913,9 @@
                 const countDownDate = new Date(m.matchTime).getTime();
                 const now = new Date().getTime();
                 if (countDownDate - now < 0 && joined < total) {
-                    document.getElementById(timerId).innerHTML = `<span style="color: var(--neon-red); font-size: 11px;">⚠️ Player না থাকায় ম্যাচটি শুরু হয়নি</span>`;
+                    document.getElementById(timerId).innerHTML = `<span style="color: var(--neon-red); font-size: 11px;">⚠️ ম্যাচ রিস্টার্ট হচ্ছে...</span>`;
                 } else {
-                    startCountdown(m.matchTime, joined, total, timerId);
+                    startCountdown(m.matchTime, joined, total, timerId, m.id);
                 }
             }
 
