@@ -150,6 +150,19 @@
             </div>
             <input type="text" id="giftCodeText" class="form-control" placeholder="Gift Code (e.g., RRR50)">
             <input type="number" id="giftCodeAmount" class="form-control" placeholder="Bonus Amount (৳)">
+            <label style="font-size: 13px; color: var(--neon-cyan); display: block; margin-top: 10px;">Select Max User Limit (কতজন নিতে পারবে):</label>
+            <select id="giftCodeMaxUses" class="form-control">
+                <option value="1">1 Person</option>
+                <option value="2">2 Persons</option>
+                <option value="3">3 Persons</option>
+                <option value="4">4 Persons</option>
+                <option value="5">5 Persons</option>
+                <option value="6">6 Persons</option>
+                <option value="7">7 Persons</option>
+                <option value="8">8 Persons</option>
+                <option value="9">9 Persons</option>
+                <option value="10" selected>10 Persons</option>
+            </select>
             <button class="admin-btn" style="background: var(--neon-pink); color: #fff;" onclick="createGiftCode()">Create Code</button>
         </div>
 
@@ -178,7 +191,7 @@
             <input type="number" id="mFee" class="form-control" placeholder="Entry Fee (৳)">
             <input type="text" id="mFirstPrize" class="form-control" placeholder="Total Prize">
             <input type="datetime-local" id="mTime" class="form-control">
-            <input type="number" id="mSlots" class="form-control" placeholder="Total Slots (e.g. 48)">
+            <input type="number" id="mSlots" class="form-control" placeholder="Total Slots (e.g. 2, 12, 48)">
             <textarea id="mNotice" class="form-control" placeholder="Match Notice (Show when joining)" rows="2"></textarea>
             <button class="admin-btn" onclick="addNewMatchToDB('normal')">Create Normal Match</button>
         </div>
@@ -201,7 +214,7 @@
             <input type="text" id="pkPrizePool" class="form-control" placeholder="Total Prize (e.g. 500 BDT)">
             <input type="number" id="pkPerKill" class="form-control" placeholder="Per Kill Amount (৳)">
             <input type="datetime-local" id="pkTime" class="form-control">
-            <input type="number" id="pkSlots" class="form-control" placeholder="Total Slots (e.g. 48)">
+            <input type="number" id="pkSlots" class="form-control" placeholder="Total Slots (e.g. 2, 12, 48)">
             <textarea id="pkNotice" class="form-control" placeholder="Match Notice" rows="2"></textarea>
             <button class="admin-btn" style="background: var(--neon-cyan); color: #000;" onclick="addNewMatchToDB('perkill')">Create Per Kill Match</button>
         </div>
@@ -313,10 +326,12 @@
         window.createGiftCode = async function() {
             const code = document.getElementById("giftCodeText").value.trim();
             const amount = Number(document.getElementById("giftCodeAmount").value);
+            const maxUses = Number(document.getElementById("giftCodeMaxUses").value);
+            
             if(!code || !amount) { alert("কোড এবং অ্যামাউন্ট দিন।"); return; }
             try {
                 await setDoc(doc(db, "giftCodes", code), {
-                    code: code, amount: amount, isUsed: false, createdAt: new Date()
+                    code: code, amount: amount, maxUses: maxUses, usedCount: 0, usedByList: [], createdAt: new Date()
                 });
                 alert("গিফট কোড সফলভাবে তৈরি হয়েছে!");
                 document.getElementById("giftCodeText").value = "";
@@ -580,7 +595,7 @@
             const supportListContainer = document.getElementById("supportMailsList");
             const snapSupport = await getDocs(collection(db, "supportMails"));
             supportListContainer.innerHTML = snapSupport.empty ? `<p style="color:var(--text-muted); text-align:center;">কোনো সাপোর্ট মেইল বা মেসেজ নেই।</p>` : "";
-            snapSupport.forEach(d => {
+            supportListContainer.forEach(d => {
                 const mail = d.data();
                 supportListContainer.innerHTML += `
                     <div class="room-item-box" style="border-left-color: var(--neon-pink);">
