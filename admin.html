@@ -102,6 +102,11 @@
                 <p>টোটাল প্রাইজ ও পার কিল অ্যামাউন্ট সহ ম্যাচ যুক্ত করুন</p>
             </div>
 
+            <div class="dash-card" style="border-color: var(--neon-orange);" onclick="openCardSection('cardRepeatMatch')">
+                <h3>Repeat Match</h3>
+                <p>২৪ ঘণ্টা রিকাব সাইকেলের রিম্যাচ তৈরি ও ম্যানেজ করুন</p>
+            </div>
+
             <div class="dash-card" onclick="openCardSection('cardAddBalance')">
                 <span class="card-badge" id="badgeAddBal">0</span>
                 <h3>Add Balance Request</h3>
@@ -217,6 +222,34 @@
             <input type="number" id="pkSlots" class="form-control" placeholder="Total Slots (e.g. 2, 12, 48)">
             <textarea id="pkNotice" class="form-control" placeholder="Match Notice" rows="2"></textarea>
             <button class="admin-btn" style="background: var(--neon-cyan); color: #000;" onclick="addNewMatchToDB('perkill')">Create Per Kill Match</button>
+        </div>
+
+        <!-- Repeat Match Admin Section -->
+        <div id="cardRepeatMatch" class="admin-section">
+            <div class="section-header">
+                <h3>Repeat Match Management</h3>
+                <button class="back-btn" onclick="goBackHome()">← Back</button>
+            </div>
+            <div style="background: #161e2e; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--neon-orange);">
+                <h4 style="color: var(--neon-orange); margin-bottom: 10px;">Create New Repeat Match</h4>
+                <select id="repCategory" class="form-control">
+                    <option value="BR MATCH">BR MATCH</option>
+                    <option value="CS MATCH">CS MATCH</option>
+                    <option value="LONE WOLF">LONE WOLF</option>
+                    <option value="LOST TO WIN">LOST TO WIN</option>
+                    <option value="LUDO MATCH">LUDO MATCH</option>
+                </select>
+                <input type="text" id="repCode" class="form-control" placeholder="Match Code (e.g. REP01)">
+                <input type="text" id="repName" class="form-control" placeholder="Match Name">
+                <input type="number" id="repFee" class="form-control" placeholder="Entry Fee (৳)">
+                <input type="text" id="repFirstPrize" class="form-control" placeholder="Total Prize">
+                <input type="datetime-local" id="repTime" class="form-control">
+                <input type="number" id="repSlots" class="form-control" placeholder="Total Slots (e.g. 12)">
+                <textarea id="repNotice" class="form-control" placeholder="Match Notice" rows="2"></textarea>
+                <button class="admin-btn" style="background: var(--neon-orange); color: #000;" onclick="addNewMatchToDB('repeat')">Create Repeat Match</button>
+            </div>
+            <h4 style="color: var(--neon-cyan); margin-bottom: 10px;">Existing Repeat Matches List</h4>
+            <div class="list-container" id="repeatMatchListContainer"><p style="color: var(--text-muted); text-align: center;">Loading repeat matches...</p></div>
         </div>
 
         <div id="cardAddBalance" class="admin-section">
@@ -357,9 +390,9 @@
                     category: category, matchCode: code, matchName: name, entryFee: fee,
                     firstPrize: document.getElementById("mFirstPrize").value.trim(),
                     matchTime: time, totalSlots: slots, joinedCount: 0, 
-                    roomId: "", roomPass: "", matchNotice: notice, type: "normal"
+                    roomId: "", roomPass: "", matchNotice: notice, type: "normal", isRepeat: false
                 };
-            } else {
+            } else if(matchType === 'perkill') {
                 category = document.getElementById("pkCategory").value;
                 code = document.getElementById("pkCode").value.trim();
                 name = document.getElementById("pkName").value.trim();
@@ -374,7 +407,23 @@
                     prizePool: document.getElementById("pkPrizePool").value.trim(),
                     perKillAmount: Number(document.getElementById("pkPerKill").value),
                     matchTime: time, totalSlots: slots, joinedCount: 0, 
-                    roomId: "", roomPass: "", matchNotice: notice, type: "perkill"
+                    roomId: "", roomPass: "", matchNotice: notice, type: "perkill", isRepeat: false
+                };
+            } else if(matchType === 'repeat') {
+                category = document.getElementById("repCategory").value;
+                code = document.getElementById("repCode").value.trim();
+                name = document.getElementById("repName").value.trim();
+                fee = Number(document.getElementById("repFee").value);
+                slots = Number(document.getElementById("repSlots").value);
+                notice = document.getElementById("repNotice").value.trim();
+                time = document.getElementById("repTime").value;
+
+                if(!code || !name) { alert("কোড এবং নাম দিন।"); return; }
+                matchData = {
+                    category: category, matchCode: code, matchName: name, entryFee: fee,
+                    firstPrize: document.getElementById("repFirstPrize").value.trim(),
+                    matchTime: time, totalSlots: slots, joinedCount: 0, 
+                    roomId: "", roomPass: "", matchNotice: notice, type: "normal", isRepeat: true
                 };
             }
 
@@ -501,14 +550,20 @@
             } catch(e) {}
 
             const roomListContainer = document.getElementById("roomControlList");
+            const repeatMatchListContainer = document.getElementById("repeatMatchListContainer");
             const snapMatch = await getDocs(collection(db, "matches"));
+            
             roomListContainer.innerHTML = snapMatch.empty ? `<p style="color:var(--text-muted); text-align:center;">কোনো ম্যাচ নেই।</p>` : "";
+            repeatMatchListContainer.innerHTML = `<p style="color:var(--text-muted); text-align:center;">কোনো রিপিট ম্যাচ নেই।</p>`;
+            
+            let hasRepeat = false;
+
             snapMatch.forEach(d => {
                 const m = d.data();
-                roomListContainer.innerHTML += `
+                const matchBoxHtml = `
                     <div class="room-item-box">
                         <div class="room-item-top">
-                            <strong style="color: var(--neon-cyan); font-size:14px;">${m.matchName} (${m.matchCode}) [${m.type === 'perkill' ? 'Per Kill' : 'Normal'}]</strong>
+                            <strong style="color: var(--neon-cyan); font-size:14px;">${m.matchName} (${m.matchCode}) [${m.isRepeat ? 'Repeat Match' : (m.type === 'perkill' ? 'Per Kill' : 'Normal')}]</strong>
                         </div>
                         <div class="room-grid-inputs">
                             <input type="text" id="rid_${m.matchCode}" class="form-control" placeholder="Room ID" value="${m.roomId || ''}" style="margin:0;">
@@ -519,6 +574,14 @@
                             <button class="btn-fail" style="padding:6px;" onclick="deleteMatch('${m.matchCode}')">Delete</button>
                         </div>
                     </div>`;
+
+                roomListContainer.innerHTML += matchBoxHtml;
+
+                if(m.isRepeat) {
+                    if(!hasRepeat) repeatMatchListContainer.innerHTML = "";
+                    hasRepeat = true;
+                    repeatMatchListContainer.innerHTML += matchBoxHtml;
+                }
             });
 
             let pendingAddBalCount = 0;
@@ -570,9 +633,7 @@
                                 const currentBal = Number(userData.balance || 0);
                                 const reqAmount = Number(data.amount || 0);
                                 
-                                // উইথড্র করার আগের ব্যালেন্স = বর্তমান ব্যালেন্স + উইথড্র রিকুয়েষ্টের অ্যামাউন্ট
                                 balanceBefore = currentBal + reqAmount;
-                                // উইথড্র করার পরের ব্যালেন্স = বর্তমান ব্যালেন্স
                                 balanceAfter = currentBal;
                             }
                         }
