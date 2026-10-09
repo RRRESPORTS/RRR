@@ -371,7 +371,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, deleteDoc, query, where, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, query, where, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
@@ -733,7 +733,7 @@
             }
         });
 
-        // 5 Minutes Match Running, then Reset Slots & Restart Countdown automatically
+        // 2 Minutes "Match Running", then set to exact same time next day (24h Cycle) and reset slots/registrations
         function startCountdown(matchTimeStr, joinedCount, totalSlots, elementId, matchId) {
             const countDownDate = new Date(matchTimeStr).getTime();
             if(isNaN(countDownDate)) { document.getElementById(elementId).innerText = "Time Expired"; return; }
@@ -747,19 +747,19 @@
 
                 if (distance < 0) {
                     const elapsedAfterMatch = Math.abs(distance);
-                    const fiveMinutes = 5 * 60 * 1000;
+                    const twoMinutes = 2 * 60 * 1000; // ২ মিনিট রানিং টাইম
 
-                    if (elapsedAfterMatch < fiveMinutes) {
-                        el.innerHTML = `<span style="color: var(--neon-orange); font-weight: bold;">🔥 Match Running...</span>`;
+                    if (elapsedAfterMatch < twoMinutes) {
+                        el.innerHTML = `<span style="color: var(--neon-orange); font-weight: bold;">🔥 Match Running</span>`;
                     } else {
                         clearInterval(x);
                         
-                        // 5 min running sesh, ebar notun countdown time set hobe ebong ager registration clear hobe
-                        const nextTime = new Date(now + (10 * 60 * 1000)).toISOString(); // 10 minutes from now for next cycle
+                        // মূল ম্যাচের সময়ের সাথে ঠিক ২৪ ঘণ্টা (24 Hours) যোগ করে পরবর্তী দিনের একই সময় টার্গেট করা
+                        const nextDayTime = new Date(countDownDate + (24 * 60 * 60 * 1000)).toISOString();
                         
                         try {
                             if(matchId) {
-                                // Delete previous registrations for this match so users can join again
+                                // আগের সব রেজিস্ট্রেশন ডিলিট করে দেওয়া যাতে ইউজাররা আবার টাকা দিয়ে জয়েন করতে পারে
                                 const regQuery = query(collection(db, "matchRegistrations"), where("matchDocId", "==", matchId));
                                 const regSnap = await getDocs(regQuery);
                                 const batch = writeBatch(db);
@@ -768,9 +768,9 @@
                                 });
                                 await batch.commit();
 
-                                // Update match time and reset joinedCount
+                                // ম্যাচের সময় ২৪ ঘণ্টা বাড়িয়ে দেওয়া এবং স্লট রিসেট করা
                                 await updateDoc(doc(db, "matches", matchId), { 
-                                    matchTime: nextTime,
+                                    matchTime: nextDayTime,
                                     joinedCount: 0,
                                     roomId: "",
                                     roomPass: ""
@@ -926,8 +926,8 @@
             if(m.matchTime) {
                 const countDownDate = new Date(m.matchTime).getTime();
                 const now = new Date().getTime();
-                if (countDownDate - now < 0 && joined < total) {
-                    document.getElementById(timerId).innerHTML = `<span style="color: var(--neon-orange); font-weight: bold;">🔥 Match Running...</span>`;
+                if (countDownDate - now < 0 && (now - countDownDate) < (2 * 60 * 1000)) {
+                    document.getElementById(timerId).innerHTML = `<span style="color: var(--neon-orange); font-weight: bold;">🔥 Match Running</span>`;
                 }
                 startCountdown(m.matchTime, joined, total, timerId, m.id);
             }
