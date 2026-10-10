@@ -63,6 +63,8 @@
         .join-btn:hover { opacity: 0.9; }
         .view-players-btn { background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 6px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 6px; }
 
+        .history-item { background: #161d2d; border: 1px solid #2d3748; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+
         .contact-support-footer { margin-top: 30px; padding: 20px; background: var(--card-bg); border-top: 1px solid rgba(255,30,66,0.2); text-align: center; }
         .contact-support-footer h4 { color: var(--neon-cyan); margin-bottom: 10px; font-size: 15px; }
         .contact-info-text { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.6; }
@@ -357,7 +359,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
@@ -493,6 +495,23 @@
             }
         }
 
+        // Helper Function: Get User Doc Reference Correctly
+        async function getUserDocRef(userId) {
+            const userRefById = doc(db, "users", userId);
+            const userSnapById = await getDoc(userRefById);
+            if (userSnapById.exists()) {
+                return { ref: userRefById, data: userSnapById.data() };
+            }
+            
+            const q = query(collection(db, "users"), where("userId", "==", userId));
+            const qSnap = await getDocs(q);
+            if (!qSnap.empty) {
+                return { ref: qSnap.docs[0].ref, data: qSnap.docs[0].data() };
+            }
+
+            return { ref: userRefById, data: { balance: 0 } };
+        }
+
         async function claimGiftCode() {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
             const codeInput = document.getElementById('redeemCodeInput').value.trim();
@@ -525,9 +544,8 @@
                     usedByList: usedByList 
                 });
 
-                const userRef = doc(db, "users", auth.currentUser.uid);
-                const userSnap = await getDoc(userRef);
-                let currentBal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
+                const { ref: userRef, data: userData } = await getUserDocRef(auth.currentUser.uid);
+                let currentBal = Number(userData.balance || 0);
                 
                 await updateDoc(userRef, { balance: currentBal + Number(codeData.amount) });
 
@@ -587,7 +605,8 @@
                 drawerAuthItem.innerText = "Logout"; 
                 drawerAuthItem.onclick = () => signOut(auth);
                 
-                onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+                const { ref: userRef } = await getUserDocRef(user.uid);
+                onSnapshot(userRef, (docSnap) => {
                     if(docSnap.exists()) {
                         const data = docSnap.data();
                         document.getElementById('userBalance').innerText = `৳${data.balance || 0.00}`;
@@ -943,9 +962,8 @@
                     return;
                 }
 
-                const userRef = doc(db, "users", auth.currentUser.uid);
-                const userSnap = await getDoc(userRef);
-                const userBal = Number(userSnap.data().balance || 0);
+                const { ref: userRef, data: userData } = await getUserDocRef(auth.currentUser.uid);
+                const userBal = Number(userData.balance || 0);
 
                 if(userBal < selectedMatchForJoin.fee) {
                     alert("আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই! দয়া করে Add Balance করুন।");
@@ -955,6 +973,7 @@
                     return;
                 }
 
+                // Deduct Balance Properly from User Doc
                 await updateDoc(userRef, { balance: userBal - selectedMatchForJoin.fee });
                 await updateDoc(matchRef, { joinedCount: currentJoined + 1 });
 
@@ -1044,38 +1063,67 @@
             } catch(e) {}
         }
 
+        // Load History sorted with Newest on Top
         async function loadUserHistory() {
             if(!auth.currentUser) return;
             
             const addHistContainer = document.getElementById('addBalanceHistory');
-            const qAdd = query(collection(db, "addBalanceRequests"), where("userId", "==", auth.currentUser.uid));
-            const snapAdd = await getDocs(qAdd);
-            addHistContainer.innerHTML = snapAdd.empty ? `<p style="color: var(--text-muted); font-size: 12px;">No requests found.</p>` : "";
-            snapAdd.forEach(d => {
-                const item = d.data();
-                let statusText = item.status === 'Approved' ? 'Approved' : (item.status === 'Fail' ? 'Fail' : 'Pending');
-                let color = item.status === 'Approved' ? 'var(--neon-orange)' : (item.status === 'Fail' ? 'var(--neon-red)' : 'var(--neon-cyan)');
-                addHistContainer.innerHTML += `
-                    <div class="history-item">
-                        <div>Trx: ${item.trxId} | ৳${item.amount}</div>
-                        <div style="font-weight: bold; color: ${color};">${statusText}</div>
-                    </div>`;
-            });
+            try {
+                const qAdd = query(
+                    collection(db, "addBalanceRequests"), 
+                    where("userId", "==", auth.currentUser.uid)
+                );
+                const snapAdd = await getDocs(qAdd);
+                let addDocsList = [];
+                snapAdd.forEach(d => addDocsList.push({ id: d.id, ...d.data() }));
+
+                // Sort Newest First (Descending Order)
+                addDocsList.sort((a, b) => {
+                    let timeA = a.timestamp && a.timestamp.seconds ? a.timestamp.seconds : 0;
+                    let timeB = b.timestamp && b.timestamp.seconds ? b.timestamp.seconds : 0;
+                    return timeB - timeA;
+                });
+
+                addHistContainer.innerHTML = addDocsList.length === 0 ? `<p style="color: var(--text-muted); font-size: 12px;">No requests found.</p>` : "";
+                addDocsList.forEach(item => {
+                    let statusText = item.status === 'Approved' ? 'Approved' : (item.status === 'Fail' ? 'Fail' : 'Pending');
+                    let color = item.status === 'Approved' ? 'var(--neon-orange)' : (item.status === 'Fail' ? 'var(--neon-red)' : 'var(--neon-cyan)');
+                    addHistContainer.innerHTML += `
+                        <div class="history-item">
+                            <div>Trx: ${item.trxId} | ৳${item.amount}</div>
+                            <div style="font-weight: bold; color: ${color};">${statusText}</div>
+                        </div>`;
+                });
+            } catch(e) {}
 
             const withHistContainer = document.getElementById('withdrawHistory');
-            const qWith = query(collection(db, "withdrawRequests"), where("userId", "==", auth.currentUser.uid));
-            const snapWith = await getDocs(qWith);
-            withHistContainer.innerHTML = snapWith.empty ? `<p style="color: var(--text-muted); font-size: 12px;">No requests found.</p>` : "";
-            snapWith.forEach(d => {
-                const item = d.data();
-                let statusText = item.status === 'Approved' ? 'Approved' : (item.status === 'Fail' ? 'Fail' : 'Pending');
-                let color = item.status === 'Approved' ? 'var(--neon-orange)' : (item.status === 'Fail' ? 'var(--neon-red)' : 'var(--neon-cyan)');
-                withHistContainer.innerHTML += `
-                    <div class="history-item">
-                        <div>No: ${item.number} | ৳${item.amount}</div>
-                        <div style="font-weight: bold; color: ${color};">${statusText}</div>
-                    </div>`;
-            });
+            try {
+                const qWith = query(
+                    collection(db, "withdrawRequests"), 
+                    where("userId", "==", auth.currentUser.uid)
+                );
+                const snapWith = await getDocs(qWith);
+                let withDocsList = [];
+                snapWith.forEach(d => withDocsList.push({ id: d.id, ...d.data() }));
+
+                // Sort Newest First (Descending Order)
+                withDocsList.sort((a, b) => {
+                    let timeA = a.timestamp && a.timestamp.seconds ? a.timestamp.seconds : 0;
+                    let timeB = b.timestamp && b.timestamp.seconds ? b.timestamp.seconds : 0;
+                    return timeB - timeA;
+                });
+
+                withHistContainer.innerHTML = withDocsList.length === 0 ? `<p style="color: var(--text-muted); font-size: 12px;">No requests found.</p>` : "";
+                withDocsList.forEach(item => {
+                    let statusText = item.status === 'Approved' ? 'Approved' : (item.status === 'Fail' ? 'Fail' : 'Pending');
+                    let color = item.status === 'Approved' ? 'var(--neon-orange)' : (item.status === 'Fail' ? 'var(--neon-red)' : 'var(--neon-cyan)');
+                    withHistContainer.innerHTML += `
+                        <div class="history-item">
+                            <div>No: ${item.number} | ৳${item.amount}</div>
+                            <div style="font-weight: bold; color: ${color};">${statusText}</div>
+                        </div>`;
+                });
+            } catch(e) {}
         }
 
         async function submitAddBalance() {
@@ -1109,9 +1157,8 @@
 
                 await updateDoc(doc(db, "incomingSMS", smsDocId), { used: true });
 
-                const userRef = doc(db, "users", auth.currentUser.uid);
-                const userSnap = await getDoc(userRef);
-                let currentBal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
+                const { ref: userRef, data: userData } = await getUserDocRef(auth.currentUser.uid);
+                let currentBal = Number(userData.balance || 0);
 
                 await updateDoc(userRef, { balance: currentBal + amountInput });
 
@@ -1142,22 +1189,27 @@
             if(!number || !amount) { alert("নাম্বার এবং পরিমান দিন।"); return; }
             if(amount < 30 || amount > 200) { alert("Withdraw limit: Minimum ৳30 ebong Maximum ৳200"); return; }
 
-            const userRef = doc(db, "users", auth.currentUser.uid);
-            const userSnap = await getDoc(userRef);
-            const currentBal = Number(userSnap.data().balance || 0);
-
-            if(currentBal < amount) { alert("আপনার পর্যাপ্ত ব্যালেন্স নেই।"); return; }
-
             try {
+                const { ref: userRef, data: userData } = await getUserDocRef(auth.currentUser.uid);
+                const currentBal = Number(userData.balance || 0);
+
+                if(currentBal < amount) { alert("আপনার পর্যাপ্ত ব্যালেন্স নেই।"); return; }
+
+                // Deduct Balance Immediately
                 await updateDoc(userRef, { balance: currentBal - amount });
 
                 await addDoc(collection(db, "withdrawRequests"), {
-                    userId: auth.currentUser.uid, email: auth.currentUser.email,
-                    number: number, amount: amount, status: 'Pending', timestamp: new Date()
+                    userId: auth.currentUser.uid, 
+                    email: auth.currentUser.email,
+                    number: number, 
+                    amount: amount, 
+                    status: 'Pending', 
+                    timestamp: new Date()
                 });
 
-                alert("উইথড্র রিকুয়েষ্ট গ্রহন করা হলো।");
-                document.getElementById('withdrawNumber').value = ""; document.getElementById('withdrawAmount').value = "";
+                alert("উইথড্র রিকুয়েষ্ট সফল হয়েছে এবং ব্যালেন্স কেটে নেওয়া হয়েছে।");
+                document.getElementById('withdrawNumber').value = ""; 
+                document.getElementById('withdrawAmount').value = "";
                 loadUserHistory();
             } catch(e) { alert("Error: " + e.message); }
         }
