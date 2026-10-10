@@ -359,7 +359,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAwAMUjmLJRVN3bC_uhaA0VxvGfnel156E",
@@ -495,23 +495,6 @@
             }
         }
 
-        // Helper Function: Get User Doc Reference Correctly
-        async function getUserDocRef(userId) {
-            const userRefById = doc(db, "users", userId);
-            const userSnapById = await getDoc(userRefById);
-            if (userSnapById.exists()) {
-                return { ref: userRefById, data: userSnapById.data() };
-            }
-            
-            const q = query(collection(db, "users"), where("userId", "==", userId));
-            const qSnap = await getDocs(q);
-            if (!qSnap.empty) {
-                return { ref: qSnap.docs[0].ref, data: qSnap.docs[0].data() };
-            }
-
-            return { ref: userRefById, data: { balance: 0 } };
-        }
-
         async function claimGiftCode() {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
             const codeInput = document.getElementById('redeemCodeInput').value.trim();
@@ -544,8 +527,9 @@
                     usedByList: usedByList 
                 });
 
-                const { ref: userRef, data: userData } = await getUserDocRef(auth.currentUser.uid);
-                let currentBal = Number(userData.balance || 0);
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                const userSnap = await getDoc(userRef);
+                let currentBal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
                 
                 await updateDoc(userRef, { balance: currentBal + Number(codeData.amount) });
 
@@ -605,8 +589,7 @@
                 drawerAuthItem.innerText = "Logout"; 
                 drawerAuthItem.onclick = () => signOut(auth);
                 
-                const { ref: userRef } = await getUserDocRef(user.uid);
-                onSnapshot(userRef, (docSnap) => {
+                onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if(docSnap.exists()) {
                         const data = docSnap.data();
                         document.getElementById('userBalance').innerText = `৳${data.balance || 0.00}`;
@@ -647,7 +630,6 @@
             }
         });
 
-        // Countdown with Repeat Match Logic (Strict Slot Check First)
         function startCountdown(matchTimeStr, joinedCount, totalSlots, elementId, isRepeat) {
             const countDownDate = new Date(matchTimeStr).getTime();
             if(isNaN(countDownDate)) { document.getElementById(elementId).innerText = "Time Expired"; return; }
@@ -660,14 +642,12 @@
                 if(!el) { clearInterval(x); return; }
 
                 if (distance < 0) {
-                    // ১. স্লট ফুল না হয়ে থাকলে সরাসরি বাতিল দেখাবে
                     if (Number(joinedCount) < Number(totalSlots)) {
                         clearInterval(x);
                         el.innerHTML = `<span style="color: var(--neon-red); font-size: 11px; font-weight: bold;">⚠️ স্লট ফুল না হওয়ায় ম্যাচটি শুরু হয়নি।</span>`;
                         return;
                     }
 
-                    // ২. স্লট ফুল হলে কেবল Repeat Match লজিক কাজ করবে
                     const elapsedAfterMatch = Math.abs(distance);
                     const twoMinutes = 2 * 60 * 1000;
 
@@ -917,6 +897,7 @@
             document.getElementById('joinModal').style.display = 'flex';
         }
 
+        // Direct & Simplified Join Match
         async function confirmJoinMatch() {
             if(!auth.currentUser || !selectedMatchForJoin) return;
             
@@ -929,41 +910,16 @@
             confirmBtn.disabled = true;
 
             try {
-                const checkQuery = query(
-                    collection(db, "matchRegistrations"), 
-                    where("userId", "==", auth.currentUser.uid), 
-                    where("matchDocId", "==", selectedMatchForJoin.docId)
-                );
-                const checkSnap = await getDocs(checkQuery);
-                if(!checkSnap.empty) {
-                    alert("আপনি ইতিমধ্যে এই ম্যাচে জয়েন করেছেন!");
-                    confirmBtn.disabled = false;
-                    closeJoinModal();
-                    return;
-                }
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                const userSnap = await getDoc(userRef);
 
-                const matchRef = doc(db, "matches", selectedMatchForJoin.docId);
-                const matchSnap = await getDoc(matchRef);
-                if(!matchSnap.exists()) {
-                    alert("ম্যাচটি পাওয়া যায়নি!");
+                if(!userSnap.exists()) {
+                    alert("ইউজার ডাটাবেজ পাওয়া যায়নি!");
                     confirmBtn.disabled = false;
                     return;
                 }
 
-                const matchData = matchSnap.data();
-                const currentJoined = Number(matchData.joinedCount || 0);
-                const totalSlots = Number(matchData.totalSlots || 12);
-
-                if(currentJoined >= totalSlots) {
-                    alert("দুঃখিত! এই ম্যাচের স্লট ইতিমধ্যে ফুল হয়ে গেছে।");
-                    confirmBtn.disabled = false;
-                    closeJoinModal();
-                    loadWebMatches();
-                    return;
-                }
-
-                const { ref: userRef, data: userData } = await getUserDocRef(auth.currentUser.uid);
-                const userBal = Number(userData.balance || 0);
+                const userBal = Number(userSnap.data().balance || 0);
 
                 if(userBal < selectedMatchForJoin.fee) {
                     alert("আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই! দয়া করে Add Balance করুন।");
@@ -973,8 +929,12 @@
                     return;
                 }
 
-                // Deduct Balance Properly from User Doc
-                await updateDoc(userRef, { balance: userBal - selectedMatchForJoin.fee });
+                const matchRef = doc(db, "matches", selectedMatchForJoin.docId);
+                const matchSnap = await getDoc(matchRef);
+                const currentJoined = Number(matchSnap.data().joinedCount || 0);
+
+                // Update Balance First
+                await updateDoc(userRef, { balance: userBal - Number(selectedMatchForJoin.fee) });
                 await updateDoc(matchRef, { joinedCount: currentJoined + 1 });
 
                 await addDoc(collection(db, "matchRegistrations"), {
@@ -993,19 +953,7 @@
 
                 alert("Successfully joined the match!");
                 closeJoinModal();
-
-                const snap = await getDocs(collection(db, "matches"));
-                allMatchesCache = [];
-                snap.forEach((d) => {
-                    allMatchesCache.push({ id: d.id, ...d.data() });
-                });
-
-                const currentTitle = document.getElementById('currentCategoryTitle').innerText;
-                if(currentTitle && currentTitle.includes("Matches")) {
-                    const catName = currentTitle.replace("📁 ", "").replace(" Matches", "");
-                    filterMatchesByCategory(catName);
-                }
-
+                loadWebMatches();
                 loadMyMatches();
             } catch(e) { 
                 alert("Error: " + e.message); 
@@ -1063,21 +1011,16 @@
             } catch(e) {}
         }
 
-        // Load History sorted with Newest on Top
         async function loadUserHistory() {
             if(!auth.currentUser) return;
             
             const addHistContainer = document.getElementById('addBalanceHistory');
             try {
-                const qAdd = query(
-                    collection(db, "addBalanceRequests"), 
-                    where("userId", "==", auth.currentUser.uid)
-                );
+                const qAdd = query(collection(db, "addBalanceRequests"), where("userId", "==", auth.currentUser.uid));
                 const snapAdd = await getDocs(qAdd);
                 let addDocsList = [];
                 snapAdd.forEach(d => addDocsList.push({ id: d.id, ...d.data() }));
 
-                // Sort Newest First (Descending Order)
                 addDocsList.sort((a, b) => {
                     let timeA = a.timestamp && a.timestamp.seconds ? a.timestamp.seconds : 0;
                     let timeB = b.timestamp && b.timestamp.seconds ? b.timestamp.seconds : 0;
@@ -1098,15 +1041,11 @@
 
             const withHistContainer = document.getElementById('withdrawHistory');
             try {
-                const qWith = query(
-                    collection(db, "withdrawRequests"), 
-                    where("userId", "==", auth.currentUser.uid)
-                );
+                const qWith = query(collection(db, "withdrawRequests"), where("userId", "==", auth.currentUser.uid));
                 const snapWith = await getDocs(qWith);
                 let withDocsList = [];
                 snapWith.forEach(d => withDocsList.push({ id: d.id, ...d.data() }));
 
-                // Sort Newest First (Descending Order)
                 withDocsList.sort((a, b) => {
                     let timeA = a.timestamp && a.timestamp.seconds ? a.timestamp.seconds : 0;
                     let timeB = b.timestamp && b.timestamp.seconds ? b.timestamp.seconds : 0;
@@ -1157,8 +1096,9 @@
 
                 await updateDoc(doc(db, "incomingSMS", smsDocId), { used: true });
 
-                const { ref: userRef, data: userData } = await getUserDocRef(auth.currentUser.uid);
-                let currentBal = Number(userData.balance || 0);
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                const userSnap = await getDoc(userRef);
+                let currentBal = userSnap.exists() ? Number(userSnap.data().balance || 0) : 0;
 
                 await updateDoc(userRef, { balance: currentBal + amountInput });
 
@@ -1181,6 +1121,7 @@
             }
         }
 
+        // Direct & Simplified Withdraw
         async function submitWithdraw() {
             if(!auth.currentUser) { alert("প্রথমে লগইন করুন!"); openAuthModal(); return; }
             const number = document.getElementById('withdrawNumber').value.trim();
@@ -1190,12 +1131,19 @@
             if(amount < 30 || amount > 200) { alert("Withdraw limit: Minimum ৳30 ebong Maximum ৳200"); return; }
 
             try {
-                const { ref: userRef, data: userData } = await getUserDocRef(auth.currentUser.uid);
-                const currentBal = Number(userData.balance || 0);
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                const userSnap = await getDoc(userRef);
+
+                if(!userSnap.exists()) {
+                    alert("ইউজার ডাটাবেজ পাওয়া যায়নি!");
+                    return;
+                }
+
+                const currentBal = Number(userSnap.data().balance || 0);
 
                 if(currentBal < amount) { alert("আপনার পর্যাপ্ত ব্যালেন্স নেই।"); return; }
 
-                // Deduct Balance Immediately
+                // Deduct Balance directly from database
                 await updateDoc(userRef, { balance: currentBal - amount });
 
                 await addDoc(collection(db, "withdrawRequests"), {
@@ -1211,7 +1159,9 @@
                 document.getElementById('withdrawNumber').value = ""; 
                 document.getElementById('withdrawAmount').value = "";
                 loadUserHistory();
-            } catch(e) { alert("Error: " + e.message); }
+            } catch(e) { 
+                alert("Error: " + e.message); 
+            }
         }
 
         document.getElementById('authNavBtn').onclick = openAuthModal;
