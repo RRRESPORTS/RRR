@@ -628,7 +628,7 @@
             }
         });
 
-        // Countdown with Repeat Match Logic
+        // Countdown with Repeat Match Logic (Strict Slot Check First)
         function startCountdown(matchTimeStr, joinedCount, totalSlots, elementId, isRepeat) {
             const countDownDate = new Date(matchTimeStr).getTime();
             if(isNaN(countDownDate)) { document.getElementById(elementId).innerText = "Time Expired"; return; }
@@ -641,6 +641,14 @@
                 if(!el) { clearInterval(x); return; }
 
                 if (distance < 0) {
+                    // ১. স্লট ফুল না হয়ে থাকলে সরাসরি বাতিল দেখাবে
+                    if (Number(joinedCount) < Number(totalSlots)) {
+                        clearInterval(x);
+                        el.innerHTML = `<span style="color: var(--neon-red); font-size: 11px; font-weight: bold;">⚠️ স্লট ফুল না হওয়ায় ম্যাচটি শুরু হয়নি।</span>`;
+                        return;
+                    }
+
+                    // ২. স্লট ফুল হলে কেবল Repeat Match লজিক কাজ করবে
                     const elapsedAfterMatch = Math.abs(distance);
                     const twoMinutes = 2 * 60 * 1000;
 
@@ -668,11 +676,7 @@
                     }
 
                     clearInterval(x);
-                    if (Number(joinedCount) < Number(totalSlots)) {
-                        el.innerHTML = `<span style="color: var(--neon-red); font-size: 11px; font-weight: bold;">⚠️ স্লট ফুল না হওয়ায় ম্যাচটি শুরু হয়নি।</span>`;
-                    } else {
-                        el.innerText = "Match Time Expired";
-                    }
+                    el.innerText = "Match Time Expired";
                     return;
                 }
 
