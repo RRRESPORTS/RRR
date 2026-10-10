@@ -960,7 +960,6 @@
             }
         }
 
-        // Updated loadMyMatches with Newest on Top sorting
         async function loadMyMatches() {
             const container = document.getElementById('myMatchListContainer');
             if(!auth.currentUser) {
@@ -978,7 +977,6 @@
                         myMatchesList.push({ id: d.id, ...d.data() });
                     });
 
-                    // Sort Newest First (Descending Order)
                     myMatchesList.sort((a, b) => {
                         let timeA = a.timestamp && a.timestamp.seconds ? a.timestamp.seconds : 0;
                         let timeB = b.timestamp && b.timestamp.seconds ? b.timestamp.seconds : 0;
@@ -1084,26 +1082,35 @@
             if(amountInput < 5 || amountInput > 100) { alert("Add Balance minimum ৳5 এবং maximum ৳100 হতে হবে।"); return; }
 
             try {
-                const smsQuery = query(
-                    collection(db, "incomingSMS"), 
-                    where("trxId", "==", trxIdInput), 
-                    where("amount", "==", amountInput),
-                    where("used", "==", false)
-                );
-                
-                const smsSnapshot = await getDocs(smsQuery);
+                const smsSnapshot = await getDocs(collection(db, "incomingSMS"));
 
-                if(smsSnapshot.empty) {
+                let matchedDocId = null;
+
+                smsSnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    
+                    let smsContent = "";
+                    if (data.fields && data.fields.body && data.fields.body.stringValue) {
+                        smsContent = data.fields.body.stringValue;
+                    } else {
+                        smsContent = data.body || data.text || data.message || JSON.stringify(data);
+                    }
+
+                    const isTrxMatch = smsContent.toLowerCase().includes(trxIdInput.toLowerCase());
+                    const isAmountMatch = smsContent.includes(amountInput.toString());
+                    const isNotUsed = !data.used;
+
+                    if (isTrxMatch && isAmountMatch && isNotUsed) {
+                        matchedDocId = docSnap.id;
+                    }
+                });
+
+                if (!matchedDocId) {
                     alert("দুঃখিত! এই TrxID বা Amount এ কোনো পেমেন্ট পাওয়া যায়নি। দয়াকরে সঠিক তথ্য দিন।");
                     return;
                 }
 
-                let smsDocId = null;
-                smsSnapshot.forEach((docSnap) => {
-                    smsDocId = docSnap.id;
-                });
-
-                await updateDoc(doc(db, "incomingSMS", smsDocId), { used: true });
+                await updateDoc(doc(db, "incomingSMS", matchedDocId), { used: true });
 
                 const userRef = doc(db, "users", auth.currentUser.uid);
                 const userSnap = await getDoc(userRef);
