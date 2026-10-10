@@ -11,6 +11,7 @@
             --neon-green: #00ff66;
             --neon-cyan: #00f3ff;
             --neon-pink: #ff007f;
+            --neon-orange: #ff7700;
             --text-main: #ffffff;
             --text-muted: #9ca3af;
         }
@@ -92,19 +93,14 @@
                 <p>ম্যাচের রুম আইডি ও পাসওয়ার্ড সেট করুন</p>
             </div>
 
-            <div class="dash-card" onclick="openCardSection('cardAddMatch')">
-                <h3>Add Normal Match</h3>
-                <p>সাধারণ টুর্নামেন্ট বা ম্যাচ যুক্ত করুন</p>
+            <div class="dash-card" style="border-color: var(--neon-orange);" onclick="openCardSection('cardAddMatchContainer')">
+                <h3>➕ Add Match</h3>
+                <p>Normal, Per Kill এবং Repeat ম্যাচ ক্যাটাগরি অনুযায়ী তৈরি করুন</p>
             </div>
 
-            <div class="dash-card" style="border-color: var(--neon-cyan);" onclick="openCardSection('cardAddPerKillMatch')">
-                <h3>Add Per Kill Match</h3>
-                <p>টোটাল প্রাইজ ও পার কিল অ্যামাউন্ট সহ ম্যাচ যুক্ত করুন</p>
-            </div>
-
-            <div class="dash-card" style="border-color: var(--neon-orange);" onclick="openCardSection('cardRepeatMatch')">
-                <h3>Repeat Match</h3>
-                <p>২৪ ঘণ্টা রিকাব সাইকেলের রিম্যাচ তৈরি ও ম্যানেজ করুন</p>
+            <div class="dash-card" onclick="openCardSection('cardRepeatMatchList')">
+                <h3>Repeat Match List</h3>
+                <p>২৪ ঘণ্টা রিকাব সাইকেলের রিম্যাচ লিস্ট ম্যানেজ করুন</p>
             </div>
 
             <div class="dash-card" onclick="openCardSection('cardAddBalance')">
@@ -179,76 +175,58 @@
             <div class="list-container" id="roomControlList"><p style="color: var(--text-muted); text-align: center;">Loading matches...</p></div>
         </div>
 
-        <div id="cardAddMatch" class="admin-section">
+        <!-- Combined Add Match Section -->
+        <div id="cardAddMatchContainer" class="admin-section">
             <div class="section-header">
-                <h3>Add Normal Match</h3>
+                <h3>Add Match Categories</h3>
                 <button class="back-btn" onclick="goBackHome()">← Back</button>
             </div>
-            <select id="mCategory" class="form-control">
-                <option value="BR MATCH">BR MATCH</option>
-                <option value="CS MATCH">CS MATCH</option>
-                <option value="LONE WOLF">LONE WOLF</option>
-                <option value="LOST TO WIN">LOST TO WIN</option>
-                <option value="LUDO MATCH">LUDO MATCH</option>
-            </select>
-            <input type="text" id="mCode" class="form-control" placeholder="Match Code (e.g. M01)">
-            <input type="text" id="mName" class="form-control" placeholder="Match Name">
-            <input type="number" id="mFee" class="form-control" placeholder="Entry Fee (৳)">
-            <input type="text" id="mFirstPrize" class="form-control" placeholder="Total Prize">
-            <input type="datetime-local" id="mTime" class="form-control">
-            <input type="number" id="mSlots" class="form-control" placeholder="Total Slots (e.g. 2, 12, 48)">
-            <textarea id="mNotice" class="form-control" placeholder="Match Notice (Show when joining)" rows="2"></textarea>
-            <button class="admin-btn" onclick="addNewMatchToDB('normal')">Create Normal Match</button>
-        </div>
 
-        <div id="cardAddPerKillMatch" class="admin-section">
-            <div class="section-header">
-                <h3>Add Per Kill Match</h3>
-                <button class="back-btn" onclick="goBackHome()">← Back</button>
-            </div>
-            <select id="pkCategory" class="form-control">
-                <option value="BR MATCH">BR MATCH</option>
-                <option value="CS MATCH">CS MATCH</option>
-                <option value="LONE WOLF">LONE WOLF</option>
-                <option value="LOST TO WIN">LOST TO WIN</option>
-                <option value="LUDO MATCH">LUDO MATCH</option>
-            </select>
-            <input type="text" id="pkCode" class="form-control" placeholder="Match Code (e.g. PK01)">
-            <input type="text" id="pkName" class="form-control" placeholder="Match Name (e.g. Free Fire Per Kill)">
-            <input type="number" id="pkFee" class="form-control" placeholder="Entry Fee (৳)">
-            <input type="text" id="pkPrizePool" class="form-control" placeholder="Total Prize (e.g. 500 BDT)">
-            <input type="number" id="pkPerKill" class="form-control" placeholder="Per Kill Amount (৳)">
-            <input type="datetime-local" id="pkTime" class="form-control">
-            <input type="number" id="pkSlots" class="form-control" placeholder="Total Slots (e.g. 2, 12, 48)">
-            <textarea id="pkNotice" class="form-control" placeholder="Match Notice" rows="2"></textarea>
-            <button class="admin-btn" style="background: var(--neon-cyan); color: #000;" onclick="addNewMatchToDB('perkill')">Create Per Kill Match</button>
-        </div>
-
-        <!-- Repeat Match Admin Section -->
-        <div id="cardRepeatMatch" class="admin-section">
-            <div class="section-header">
-                <h3>Repeat Match Management</h3>
-                <button class="back-btn" onclick="goBackHome()">← Back</button>
-            </div>
-            <div style="background: #161e2e; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--neon-orange);">
-                <h4 style="color: var(--neon-orange); margin-bottom: 10px;">Create New Repeat Match</h4>
-                <select id="repCategory" class="form-control">
-                    <option value="BR MATCH">BR MATCH</option>
-                    <option value="CS MATCH">CS MATCH</option>
-                    <option value="LONE WOLF">LONE WOLF</option>
-                    <option value="LOST TO WIN">LOST TO WIN</option>
-                    <option value="LUDO MATCH">LUDO MATCH</option>
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label style="font-size: 13px; color: var(--neon-cyan); display: block; margin-bottom: 5px;">Select Match Type:</label>
+                <select id="dynamicMatchType" class="form-control" onchange="onMatchTypeChange()">
+                    <option value="normal">🎯 Manual / Normal Match</option>
+                    <option value="perkill">⚔️ Per Kill Match</option>
+                    <option value="repeat">🔄 Repeat Match (Daily Auto Reset)</option>
                 </select>
-                <input type="text" id="repCode" class="form-control" placeholder="Match Code (e.g. REP01)">
-                <input type="text" id="repName" class="form-control" placeholder="Match Name">
-                <input type="number" id="repFee" class="form-control" placeholder="Entry Fee (৳)">
-                <input type="text" id="repFirstPrize" class="form-control" placeholder="Total Prize">
-                <input type="datetime-local" id="repTime" class="form-control">
-                <input type="number" id="repSlots" class="form-control" placeholder="Total Slots (e.g. 12)">
-                <textarea id="repNotice" class="form-control" placeholder="Match Notice" rows="2"></textarea>
-                <button class="admin-btn" style="background: var(--neon-orange); color: #000;" onclick="addNewMatchToDB('repeat')">Create Repeat Match</button>
             </div>
-            <h4 style="color: var(--neon-cyan); margin-bottom: 10px;">Existing Repeat Matches List</h4>
+
+            <select id="uniCategory" class="form-control">
+                <option value="BR MATCH">BR MATCH</option>
+                <option value="CS MATCH">CS MATCH</option>
+                <option value="LONE WOLF">LONE WOLF</option>
+                <option value="LOST TO WIN">LOST TO WIN</option>
+                <option value="LUDO MATCH">LUDO MATCH</option>
+            </select>
+            
+            <input type="text" id="uniCode" class="form-control" placeholder="Match Code (e.g. M01)">
+            <input type="text" id="uniName" class="form-control" placeholder="Match Name">
+            <input type="number" id="uniFee" class="form-control" placeholder="Entry Fee (৳)">
+
+            <!-- Normal & Repeat Prize Field -->
+            <div id="uniNormalPrizeBox">
+                <input type="text" id="uniFirstPrize" class="form-control" placeholder="Total Prize (e.g. ৳500)">
+            </div>
+
+            <!-- Per Kill Specific Fields -->
+            <div id="uniPerKillFieldsBox" style="display: none;">
+                <input type="text" id="uniPrizePool" class="form-control" placeholder="Total Prize Pool (e.g. ৳1000)">
+                <input type="number" id="uniPerKillAmount" class="form-control" placeholder="Per Kill Amount (৳)">
+            </div>
+
+            <input type="datetime-local" id="uniTime" class="form-control">
+            <input type="number" id="uniSlots" class="form-control" placeholder="Total Slots (e.g. 12, 48)">
+            <textarea id="uniNotice" class="form-control" placeholder="Match Notice (Show when joining)" rows="2"></textarea>
+            
+            <button class="admin-btn" style="background: var(--neon-orange); color: #000;" onclick="submitUniversalMatch()">Create Match</button>
+        </div>
+
+        <!-- Repeat Match List Section -->
+        <div id="cardRepeatMatchList" class="admin-section">
+            <div class="section-header">
+                <h3>Repeat Matches List</h3>
+                <button class="back-btn" onclick="goBackHome()">← Back</button>
+            </div>
             <div class="list-container" id="repeatMatchListContainer"><p style="color: var(--text-muted); text-align: center;">Loading repeat matches...</p></div>
         </div>
 
@@ -345,6 +323,20 @@
             loadAdminData();
         }
 
+        window.onMatchTypeChange = function() {
+            const type = document.getElementById("dynamicMatchType").value;
+            const normalBox = document.getElementById("uniNormalPrizeBox");
+            const perkillBox = document.getElementById("uniPerKillFieldsBox");
+
+            if(type === 'perkill') {
+                normalBox.style.display = "none";
+                perkillBox.style.display = "block";
+            } else {
+                normalBox.style.display = "block";
+                perkillBox.style.display = "none";
+            }
+        }
+
         window.updateNoticeSettings = async function() {
             const text = document.getElementById("adminNoticeText").value.trim();
             const active = document.getElementById("adminNoticeActive").checked;
@@ -372,59 +364,44 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        window.addNewMatchToDB = async function(matchType) {
-            let code, name, fee, slots, notice, time, category;
-            let matchData = {};
+        window.submitUniversalMatch = async function() {
+            const matchType = document.getElementById("dynamicMatchType").value;
+            const category = document.getElementById("uniCategory").value;
+            const code = document.getElementById("uniCode").value.trim();
+            const name = document.getElementById("uniName").value.trim();
+            const fee = Number(document.getElementById("uniFee").value);
+            const slots = Number(document.getElementById("uniSlots").value);
+            const notice = document.getElementById("uniNotice").value.trim();
+            const time = document.getElementById("uniTime").value;
 
-            if(matchType === 'normal') {
-                category = document.getElementById("mCategory").value;
-                code = document.getElementById("mCode").value.trim();
-                name = document.getElementById("mName").value.trim();
-                fee = Number(document.getElementById("mFee").value);
-                slots = Number(document.getElementById("mSlots").value);
-                notice = document.getElementById("mNotice").value.trim();
-                time = document.getElementById("mTime").value;
+            if(!code || !name) { alert("কোড এবং নাম দিন।"); return; }
 
-                if(!code || !name) { alert("কোড এবং নাম দিন।"); return; }
-                matchData = {
-                    category: category, matchCode: code, matchName: name, entryFee: fee,
-                    firstPrize: document.getElementById("mFirstPrize").value.trim(),
-                    matchTime: time, totalSlots: slots, joinedCount: 0, 
-                    roomId: "", roomPass: "", matchNotice: notice, type: "normal", isRepeat: false
-                };
-            } else if(matchType === 'perkill') {
-                category = document.getElementById("pkCategory").value;
-                code = document.getElementById("pkCode").value.trim();
-                name = document.getElementById("pkName").value.trim();
-                fee = Number(document.getElementById("pkFee").value);
-                slots = Number(document.getElementById("pkSlots").value);
-                notice = document.getElementById("pkNotice").value.trim();
-                time = document.getElementById("pkTime").value;
+            let matchData = {
+                category: category,
+                matchCode: code,
+                matchName: name,
+                entryFee: fee,
+                totalSlots: slots,
+                joinedCount: 0,
+                matchTime: time,
+                matchNotice: notice,
+                roomId: "",
+                roomPass: ""
+            };
 
-                if(!code || !name) { alert("কোড এবং নাম দিন।"); return; }
-                matchData = {
-                    category: category, matchCode: code, matchName: name, entryFee: fee,
-                    prizePool: document.getElementById("pkPrizePool").value.trim(),
-                    perKillAmount: Number(document.getElementById("pkPerKill").value),
-                    matchTime: time, totalSlots: slots, joinedCount: 0, 
-                    roomId: "", roomPass: "", matchNotice: notice, type: "perkill", isRepeat: false
-                };
+            if(matchType === 'perkill') {
+                matchData.type = "perkill";
+                matchData.isRepeat = false;
+                matchData.prizePool = document.getElementById("uniPrizePool").value.trim();
+                matchData.perKillAmount = Number(document.getElementById("uniPerKillAmount").value);
             } else if(matchType === 'repeat') {
-                category = document.getElementById("repCategory").value;
-                code = document.getElementById("repCode").value.trim();
-                name = document.getElementById("repName").value.trim();
-                fee = Number(document.getElementById("repFee").value);
-                slots = Number(document.getElementById("repSlots").value);
-                notice = document.getElementById("repNotice").value.trim();
-                time = document.getElementById("repTime").value;
-
-                if(!code || !name) { alert("কোড এবং নাম দিন।"); return; }
-                matchData = {
-                    category: category, matchCode: code, matchName: name, entryFee: fee,
-                    firstPrize: document.getElementById("repFirstPrize").value.trim(),
-                    matchTime: time, totalSlots: slots, joinedCount: 0, 
-                    roomId: "", roomPass: "", matchNotice: notice, type: "normal", isRepeat: true
-                };
+                matchData.type = "normal";
+                matchData.isRepeat = true;
+                matchData.firstPrize = document.getElementById("uniFirstPrize").value.trim();
+            } else {
+                matchData.type = "normal";
+                matchData.isRepeat = false;
+                matchData.firstPrize = document.getElementById("uniFirstPrize").value.trim();
             }
 
             try {
